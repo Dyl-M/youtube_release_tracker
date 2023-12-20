@@ -1,12 +1,1 @@
-# I write here what comes to my mind and some temporary notes.
-# If I commit things below these lines, it won't be on purpose (I think?).
-# So, at first sight, this file has no fundamental interest.
-# But you never know, I might write some jokes in it. ¯\_(ツ)_/¯
-
-```
-if __name__ == '__main__':
-    import youtube_req
-
-    my_service = youtube_req.create_service_local(log=False)
-    youtube_req.sort_db(service=my_service)
-```
+# I write here what comes to my mind and... Wait, I already write something like this elsewhere, right? 🤔
