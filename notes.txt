@@ -1,1 +1,2 @@
 # I write here what comes to my mind and... Wait, I already write something like this elsewhere, right? 🤔
+# No worries, I'm testing GPG commit.
