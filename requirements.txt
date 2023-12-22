@@ -1,5 +1,4 @@
 beautifulsoup4~=4.12
-pygithub~=2.1
 google-api-python-client~=2.111
 google-auth~=2.25
 google-auth-oauthlib~=1.2
@@ -7,6 +6,8 @@ isodate~=0.6
 jupyter~=1.0
 pandas~=2.1
 plotly~=5.18
+pygithub~=2.1
+python-youtube~=0.9
 requests~=2.31
 tqdm~=4.66
 tzlocal~=5.2
