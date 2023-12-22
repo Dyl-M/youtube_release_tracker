@@ -6,7 +6,7 @@
 [![DeepSource](https://deepsource.io/gh/Dyl-M/youtube_release_tracker.svg/?label=resolved+issues&token=w_aZJJfhd5HPPLyXnDJkstmn)](https://deepsource.io/gh/Dyl-M/youtube_release_tracker/?ref=repository-badge)
 
 [![Twitter Follow](https://img.shields.io/twitter/follow/dyl_m_tweets?label=%40dyl_m_tweets&style=social)](https://twitter.com/dyl_m_tweets)
-![Twitch Status](https://img.shields.io/twitch/status/dyl_m_?logo=twitch&label=dyl_m_)
+[![Twitch Status](https://img.shields.io/twitch/status/dyl_m_?logo=twitch&label=dyl_m_)](https://www.twitch.tv/dyl_m_)
 [![Reddit User Karma](https://img.shields.io/reddit/user-karma/link/dyl_m?label=u%2Fdyl_m&style=social)](https://www.reddit.com/user/Dyl_M)
 
 A YouTube project able to track the latest video releases among my subscriptions with 3 goals:
