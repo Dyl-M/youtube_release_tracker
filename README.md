@@ -9,6 +9,8 @@
 [![Twitch Status](https://img.shields.io/twitch/status/dyl_m_?logo=twitch&label=dyl_m_)](https://www.twitch.tv/dyl_m_)
 [![Reddit User Karma](https://img.shields.io/reddit/user-karma/link/dyl_m?label=u%2Fdyl_m&style=social)](https://www.reddit.com/user/Dyl_M)
 
+![Repository illustration](media/repo_illustration.png?raw=true "Repository illustration")
+
 A YouTube project able to track the latest video releases among my subscriptions with 3 goals:
 
 - Add music to specific playlists: [📡 RELEASE RADAR](https://www.youtube.com/playlist?list=PLOMUdQFdS-XNe56Ot6KQmsR4cLT2ua9IC) & [🚨 BANGER RADAR](https://www.youtube.com/playlist?list=PLOMUdQFdS-XOI8OIWV_Gx-SRhlCS9PKLn)
