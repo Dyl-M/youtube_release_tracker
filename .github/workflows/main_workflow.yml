@@ -1,4 +1,4 @@
-name: Playlists updates
+name: YTB Tracker - Main Process
 
 on:
     workflow_dispatch:
