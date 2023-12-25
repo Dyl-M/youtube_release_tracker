@@ -11,18 +11,25 @@
 
 ![Repository illustration](media/repo_illustration.png?raw=true "Repository illustration")
 
-A YouTube project able to track the latest video releases among my subscriptions with 3 goals:
+A YouTube project able to track the latest video releases among my subscriptions. The videos will be added to 4 
+specific playlist
 
-- Add music to specific playlists: [📡 RELEASE RADAR](https://www.youtube.com/playlist?list=PLOMUdQFdS-XNe56Ot6KQmsR4cLT2ua9IC) & [🚨 BANGER RADAR](https://www.youtube.com/playlist?list=PLOMUdQFdS-XOI8OIWV_Gx-SRhlCS9PKLn)
-- Add other videos to my "Watch Later" playlist
-- And ignore shorts
+- [🚨 BANGER RADAR](https://www.youtube.com/playlist?list=PLOMUdQFdS-XOI8OIWV_Gx-SRhlCS9PKLn): music releases among a 
+  selection of music channels.
+- [📡 RELEASE RADAR](https://www.youtube.com/playlist?list=PLOMUdQFdS-XNe56Ot6KQmsR4cLT2ua9IC): regular music releases 
+  among my subscriptions.
+- [⏳ Watch Later 2K24](https://www.youtube.com/playlist?list=PLOMUdQFdS-XPfjAeBp5TuNDQmMoiJHdvB): other type of video to Watch Later (since regular Watch Later playlist can't be 
+  manipulated with the API).
+- [📱 Shorts only](https://www.youtube.com/playlist?list=PLOMUdQFdS-XOUI24FT8dNZvmeA4dyfdbc): YouTube Shorts in my subscriptions.
 
-This project follows up the developments made in the "[Automated YouTube Playlist](https://github.com/Dyl-M/auto_youtube_playlist)" project, evolving on a smaller panel of YouTube channels with fewer fluctuations.
+This project follows up the developments made in the [Automated YouTube Playlist](https://github.com/Dyl-M/auto_youtube_playlist) 
+project, evolving on a smaller panel of YouTube channels with fewer fluctuations.
 
 Repository structure
 -------------
 
-Elements followed by `(IGNORED)` are kept ignored / hidden by git for privacy purpose or for being useless for code comprehension or workflow execution.
+Elements followed by `(IGNORED)` are kept ignored / hidden by git for privacy purpose or for being useless for code 
+comprehension or workflow execution.
 
 ```
 ├── .github
@@ -30,7 +37,6 @@ Elements followed by `(IGNORED)` are kept ignored / hidden by git for privacy pu
 │   │   ├── feature_request.yml
 │   │   └── issue_report.yml
 │   ├── workflows
-│   │   ├── cron_workflow.yml
 │   │   ├── licence_workflow.yml
 │   │   └── update_workflow.yml
 │   └── dependabot.yml
@@ -45,7 +51,6 @@ Elements followed by `(IGNORED)` are kept ignored / hidden by git for privacy pu
 ├── src
 │   ├── _sandbox.py
 │   ├── analytics.py
-│   ├── cron_update.py
 │   ├── deprecated_functions.py
 │   ├── main.py
 │   └── youtube.py
