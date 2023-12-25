@@ -87,15 +87,11 @@ def dest_playlist(channel_id: str, is_shorts: bool, v_duration: int, max_duratio
         if v_duration > max_duration * 60:
             if channel_id in other:
                 return watch_later
-            else:
-                return 'none'
-
+            return 'none'
         if channel_id in favorites:
             return banger
-        else:
-            return release
-    else:
-        return watch_later
+        return release
+    return watch_later
 
 
 def update_repo_secrets(secret_name: str, new_value: str, logger: logging.Logger = None):
