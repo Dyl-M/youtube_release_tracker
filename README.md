@@ -40,12 +40,15 @@ Elements followed by `(IGNORED)` are kept ignored / hidden by git for privacy pu
 │   ├── playlists.json
 │   └── pocket_tube.json
 │
+├── media
+│
 ├── src
 │   ├── _sandbox.py
 │   ├── analytics.py
 │   ├── cron_update.py
+│   ├── deprecated_functions.py
 │   ├── main.py
-│   └── youtube_req.py
+│   └── youtube.py
 │
 ├── tokens (IGNORED)
 │
