@@ -146,11 +146,11 @@ if __name__ == '__main__':
         PROG_BAR = False  # Do not display progress bar
 
     # Search for new videos to add
-    history_main.info(f'Iterative research for {len(all_channels)} YouTube channels.')
+    history_main.info('Iterative research for %s YouTube channels.', len(all_channels))
     new_videos = youtube.iter_channels(YOUTUBE_OAUTH, all_channels, prog_bar=PROG_BAR)
 
     # Add statistics about the videos for selection
-    history_main.info(f'Add statistics for {len(new_videos)} video(s).')
+    history_main.info('Add statistics for %s video(s).', len(new_videos))
     data = youtube.add_stats(service=YOUTUBE_OAUTH, video_list=new_videos)
 
     # Define destination playlist
@@ -167,19 +167,19 @@ if __name__ == '__main__':
 
     # Addition by priority (Favorites > Music releases > Normal videos > Shorts)
     if add_banger:
-        history_main.info(f'Addition to "Banger Radar": {len(add_banger)} video(s).')
+        history_main.info('Addition to "Banger Radar": %s video(s).', len(add_banger))
         youtube.add_to_playlist(YOUTUBE_OAUTH, banger, add_banger, prog_bar=PROG_BAR)
 
     if add_release:
-        history_main.info(f'Addition to "Release Radar": {len(add_release)} video(s).')
+        history_main.info('Addition to "Release Radar": %s video(s).', len(add_release))
         youtube.add_to_playlist(YOUTUBE_OAUTH, release, add_release, prog_bar=PROG_BAR)
 
     if add_wl:
-        history_main.info(f'Addition to "Watch Later": {len(add_wl)} video(s).')
+        history_main.info('Addition to "Watch Later": %s video(s).', len(add_wl))
         youtube.add_to_playlist(YOUTUBE_OAUTH, watch_later, add_wl, prog_bar=PROG_BAR)
 
     if add_shorts:
-        history_main.info(f'Addition to "Shorts only": {len(add_shorts)} YT short(s).')
+        history_main.info('Addition to "Shorts only": %s YT short(s).', len(add_shorts))
         youtube.add_to_playlist(YOUTUBE_OAUTH, shorts, add_shorts, prog_bar=PROG_BAR)
 
     if exe_mode == 'local':  # Credentials in base64 update - Local option
