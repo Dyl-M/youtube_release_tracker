@@ -26,6 +26,7 @@
     "UClsagI94IabwMKv9LN3kgNA",
     "UCxfusAsd_n5AMFheiipyaCw",
     "UC7KbIaEOuY7H2j-cvhJ3mYA",
+    "UCzTR9iSH-TFC4-ocDS_ll4A",
     "UCseGV3amBLISlIOMQodPfVQ",
     "UC1zVvHsRsvxInUMX4dfIyAQ",
     "UC2ruguOcwnVR2_4DtiGnmLg",
@@ -79,6 +80,7 @@
     "UCK3inMNRNAVUleEbpDU1k2g",
     "UCoNRSwYHJdy-yV1b82ZdHfQ",
     "UCib8MAX3TwtAPw007zcraRg",
+    "UCzTR9iSH-TFC4-ocDS_ll4A",
     "UCCGnx-MAkE8BsFskbybAPMg",
     "UCtwSCDjbQKShJU0kIzBgTdA",
     "UCWeg2Pkate69NFdBeuRFTAw",
@@ -206,7 +208,6 @@
     "UCPZUQqtVDmcjm4NY5FkzqLA",
     "UCXGB0P-AhyZ4qYHWooiQzLA",
     "UCXLrdG_ZVt4US1iV40ytiQQ",
-    "UCzTR9iSH-TFC4-ocDS_ll4A",
     "UChAhCmcGr2sDO27t_t6ndbA",
     "UCNwFuUbJXKQpP1ot1ZEE6Yg",
     "UC_TVqp_SyG6j5hG-xVRy95A",
@@ -238,8 +239,7 @@
     "UC_FSjhzXRorZRJTLkzf3INw",
     "UC2ZsqkwvxEpw-aYAIJHTRDg",
     "UCMOgdURr7d8pOVlc-alkfRg",
-    "UCZyL_PmshsD4VQtFvhtUSXA",
-    "UCeQwCalZK1scamopwHt9UWw"
+    "UCZyL_PmshsD4VQtFvhtUSXA"
   ],
   "ysc_collection": {
     "APPRENTISSAGE": "APPRENTISSAGE",
@@ -288,6 +288,7 @@
     "namematch_2020_update_open": true,
     "namenovember_2021_update_open": true,
     "nameny23": true,
+    "nameny24": true,
     "nameny_2022": true,
     "nameo_2022": true,
     "nameo_2022_open": true,

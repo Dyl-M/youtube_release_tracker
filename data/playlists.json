@@ -23,5 +23,10 @@
     "name": "⏳ Watch Later 2K24",
     "description": "2024 videos to watch later.",
     "id": "PLOMUdQFdS-XPfjAeBp5TuNDQmMoiJHdvB"
+  },
+  "shorts": {
+    "name": "📱 Shorts only",
+    "description": "YouTube Shorts in my subscriptions.",
+    "id": "PLOMUdQFdS-XOUI24FT8dNZvmeA4dyfdbc"
   }
 }
