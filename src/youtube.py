@@ -3,7 +3,6 @@
 import ast
 import base64
 import datetime as dt
-import googleapiclient.discovery
 import googleapiclient.errors
 import isodate
 import itertools
