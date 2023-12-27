@@ -263,15 +263,16 @@ def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int = Non
             if next_page_token is None:
                 break
 
-        except googleapiclient.errors.HttpError as http_error:
-            error_reason = http_error.error_details[0]['reason']
+        except pyt.error.PyYouTubeException as error:
+            status_code = error.status_code
 
-            if error_reason == 'playlistNotFound':
-                if f'UC{playlist_id[2:]}' not in ADD_ON['playlistNotFoundPass']:
+            if status_code == 404:  # Handle channels with no upload yet
+                if f'UC{playlist_id[2:]}' not in ADD_ON['playlistNotFoundPass']:  # Ignore if channel well identified
                     history.warning('Playlist not found: %s', playlist_id)
                 break
 
-            history.error('[%s] Unknown error: %s', playlist_id, error_reason)
+            # Record a warning log otherwise
+            history.error('[%s] Unknown error: %s', playlist_id, error.message)
             sys.exit()
 
     return p_items
