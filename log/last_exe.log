@@ -1,11 +1,10 @@
-2023-12-28 01:14:05+0000 [INFO] - Process started.
-2023-12-28 01:14:05+0000 [INFO] - API credentials refreshed.
-2023-12-28 01:14:05+0000 [INFO] - YouTube service created successfully.
-2023-12-28 01:14:05+0000 [INFO] - Iterative research for 227 YouTube channels.
-2023-12-28 01:14:57+0000 [INFO] - Add statistics for 36 video(s).
-2023-12-28 01:15:06+0000 [INFO] - Addition to "Banger Radar": 1 video(s).
-2023-12-28 01:15:06+0000 [INFO] - Addition to "Release Radar": 13 video(s).
-2023-12-28 01:15:14+0000 [INFO] - Addition to "Watch Later": 4 video(s).
-2023-12-28 01:15:15+0000 [INFO] - Addition to "Shorts only": 10 YT short(s).
-2023-12-28 01:15:20+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2023-12-28 01:15:20+0000 [INFO] - Process ended.
+2023-12-29 02:09:46+0100 [INFO] - Process started.
+2023-12-29 02:09:47+0100 [INFO] - Credentials can not be refreshed. New credentials needed.
+2023-12-29 02:10:05+0100 [INFO] - YouTube service created successfully.
+2023-12-29 02:10:05+0100 [INFO] - Iterative research for 230 YouTube channels.
+2023-12-29 02:11:39+0100 [INFO] - Add statistics for 43 video(s).
+2023-12-29 02:12:04+0100 [INFO] - Addition to "Banger Radar": 1 video(s).
+2023-12-29 02:12:04+0100 [INFO] - Addition to "Release Radar": 22 video(s).
+2023-12-29 02:12:19+0100 [INFO] - Addition to "Watch Later": 6 video(s).
+2023-12-29 02:12:22+0100 [INFO] - Addition to "Shorts only": 10 YT short(s).
+2023-12-29 02:12:26+0100 [INFO] - Process ended.
