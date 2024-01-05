@@ -20,7 +20,6 @@ specific playlist
   among my subscriptions.
 - [⏳ Watch Later 2K24](https://www.youtube.com/playlist?list=PLOMUdQFdS-XPfjAeBp5TuNDQmMoiJHdvB): other type of video to Watch Later (since regular Watch Later playlist can't be 
   manipulated with the API).
-- [📱 Shorts only](https://www.youtube.com/playlist?list=PLOMUdQFdS-XOUI24FT8dNZvmeA4dyfdbc): YouTube Shorts in my subscriptions.
 
 This project follows up the developments made in the [Automated YouTube Playlist](https://github.com/Dyl-M/auto_youtube_playlist) 
 project, evolving on a smaller panel of YouTube channels with fewer fluctuations.

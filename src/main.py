@@ -161,7 +161,6 @@ if __name__ == '__main__':
     add_banger = to_add.get(banger, [])
     add_release = to_add.get(release, [])
     add_wl = to_add.get(watch_later, [])
-    add_shorts = to_add.get(shorts, [])
 
     # Addition by priority (Favorites > Music releases > Normal videos > Shorts)
     if add_banger:
@@ -175,10 +174,6 @@ if __name__ == '__main__':
     if add_wl:
         history_main.info('Addition to "Watch Later": %s video(s).', len(add_wl))
         youtube.add_to_playlist(YOUTUBE_OAUTH, watch_later, add_wl, prog_bar=PROG_BAR)
-
-    if add_shorts:
-        history_main.info('Addition to "Shorts only": %s YT short(s).', len(add_shorts))
-        youtube.add_to_playlist(YOUTUBE_OAUTH, shorts, add_shorts, prog_bar=PROG_BAR)
 
     if exe_mode == 'local':  # Credentials in base64 update - Local option
         youtube.encode_key(json_path='../tokens/credentials.json')
