@@ -11,7 +11,7 @@
 
 ![Repository illustration](media/repo_illustration.png?raw=true "Repository illustration")
 
-A YouTube project able to track the latest video releases among my subscriptions. The videos will be added to 4 
+A YouTube project able to track the latest video releases among my subscriptions. The videos will be added to 3 
 specific playlist
 
 - [🚨 BANGER RADAR](https://www.youtube.com/playlist?list=PLOMUdQFdS-XOI8OIWV_Gx-SRhlCS9PKLn): music releases among a 
@@ -43,7 +43,8 @@ comprehension or workflow execution.
 ├── data
 │   ├── add-on.json
 │   ├── playlists.json
-│   └── pocket_tube.json
+│   ├── pocket_tube.json
+│   └── stats.csv
 │
 ├── media
 │
