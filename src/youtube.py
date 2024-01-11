@@ -516,7 +516,7 @@ def weekly_stats(service: pyt.Client, histo_data: pd.DataFrame, week_delta: int,
         histo_data.drop(columns=['views', 'likes', 'comments'], axis=1, inplace=True)
 
     else:
-        history.info(f'No change to apply on historical data for following delta: {week_delta} week(s)')
+        history.info(f'No change to apply on historical data for following delta: %s week(s)', week_delta)
 
     # Apply the type Int64 for each feature (necessary for export)
     w_features = [col for col in histo_data.columns if '_w' in col]
