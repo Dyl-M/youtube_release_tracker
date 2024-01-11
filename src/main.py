@@ -176,7 +176,7 @@ if __name__ == '__main__':
                       'comments_w1', 'comments_w4', 'comments_w13', 'comments_w26']
 
         stored = new_data[to_keep]
-        stored.loc[:, stats_list] = [] * len(stats_list)
+        stored.loc[:, stats_list] = [pd.NA] * len(stats_list)
         stored = stored[to_keep[:-2] + stats_list + to_keep[-2:]]
 
         # Get stats for already retrieved videos
