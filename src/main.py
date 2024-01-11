@@ -4,6 +4,7 @@ import github
 import json
 import logging
 import os
+import pandas as pd
 import re
 import sys
 
@@ -44,15 +45,17 @@ with open('../data/playlists.json', 'r', encoding='utf8') as playlists_file:
 with open('../data/add-on.json') as add_on_file:
     favorites = json.load(add_on_file)['favorites'].values()
 
+# YouTube Channels list
 music = pocket_tube['MUSIQUE']
 other_raw = pocket_tube['APPRENTISSAGE'] + pocket_tube['DIVERTISSEMENT'] + pocket_tube['GAMING']
 other = list(set(other_raw))
 all_channels = list(set(music + other))
 
-release, banger, watch_later, shorts = (playlists['release']['id'],
-                                        playlists['banger']['id'],
-                                        playlists['watch_later']['id'],
-                                        playlists['shorts']['id'])
+# YouTube playlists
+release, banger, watch_later = (playlists['release']['id'], playlists['banger']['id'], playlists['watch_later']['id'])
+
+# Historical Data
+histo_data = pd.read_csv('../data/stats.csv', encoding='utf-8')
 
 "FUNCTIONS"
 
@@ -79,7 +82,7 @@ def dest_playlist(channel_id: str, is_shorts: bool, v_duration: int, max_duratio
     :return: appropriate YouTube playlist ID based on video information
     """
     if is_shorts:
-        return shorts
+        return 'shorts'
 
     if channel_id in music:
         if v_duration > max_duration * 60:
@@ -147,33 +150,70 @@ if __name__ == '__main__':
     history_main.info('Iterative research for %s YouTube channels.', len(all_channels))
     new_videos = youtube.iter_channels(YOUTUBE_OAUTH, all_channels, prog_bar=PROG_BAR)
 
-    # Add statistics about the videos for selection
-    history_main.info('Add statistics for %s video(s).', len(new_videos))
-    data = youtube.add_stats(service=YOUTUBE_OAUTH, video_list=new_videos)
+    if not new_videos:
+        history_main.info('No addition to perform.')
 
-    # Define destination playlist
-    data['dest_playlist'] = data.apply(lambda row: dest_playlist(row.channel_id, row.is_shorts, row.duration), axis=1)
+        # Get stats for already retrieved videos
+        histo_data = youtube.weekly_stats(service=YOUTUBE_OAUTH, histo_data=histo_data, week_delta=1)
+        histo_data = youtube.weekly_stats(service=YOUTUBE_OAUTH, histo_data=histo_data, week_delta=4)
+        histo_data = youtube.weekly_stats(service=YOUTUBE_OAUTH, histo_data=histo_data, week_delta=13)
+        histo_data = youtube.weekly_stats(service=YOUTUBE_OAUTH, histo_data=histo_data, week_delta=26)
 
-    # Reformat
-    to_add = data.groupby('dest_playlist')['video_id'].apply(list).to_dict()
+        # Store
+        histo_data.to_csv('../data/stats.csv', encoding='utf-8', index=False)
 
-    # Selection by playlist # An error could happen here!
-    add_banger = to_add.get(banger, [])
-    add_release = to_add.get(release, [])
-    add_wl = to_add.get(watch_later, [])
+    else:
+        # Add statistics about the videos for selection
+        history_main.info('Add statistics for %s video(s).', len(new_videos))
+        new_data = youtube.add_stats(service=YOUTUBE_OAUTH, video_list=new_videos)
 
-    # Addition by priority (Favorites > Music releases > Normal videos > Shorts)
-    if add_banger:
-        history_main.info('Addition to "Banger Radar": %s video(s).', len(add_banger))
-        youtube.add_to_playlist(YOUTUBE_OAUTH, banger, add_banger, prog_bar=PROG_BAR)
+        # Prepare data for storing
+        to_keep = ['video_id', 'channel_id', 'release_date', 'status', 'is_shorts', 'duration', 'channel_name',
+                   'video_title']
 
-    if add_release:
-        history_main.info('Addition to "Release Radar": %s video(s).', len(add_release))
-        youtube.add_to_playlist(YOUTUBE_OAUTH, release, add_release, prog_bar=PROG_BAR)
+        stats_list = ['views_w1', 'views_w4', 'views_w13', 'views_w26', 'likes_w1', 'likes_w4', 'likes_w13',
+                      'likes_w26',
+                      'comments_w1', 'comments_w4', 'comments_w13', 'comments_w26']
 
-    if add_wl:
-        history_main.info('Addition to "Watch Later": %s video(s).', len(add_wl))
-        youtube.add_to_playlist(YOUTUBE_OAUTH, watch_later, add_wl, prog_bar=PROG_BAR)
+        stored = new_data[to_keep]
+        stored.loc[:, stats_list] = [] * len(stats_list)
+        stored = stored[to_keep[:-2] + stats_list + to_keep[-2:]]
+
+        # Get stats for already retrieved videos
+        histo_data = youtube.weekly_stats(service=YOUTUBE_OAUTH, histo_data=histo_data, week_delta=1)
+        histo_data = youtube.weekly_stats(service=YOUTUBE_OAUTH, histo_data=histo_data, week_delta=4)
+        histo_data = youtube.weekly_stats(service=YOUTUBE_OAUTH, histo_data=histo_data, week_delta=13)
+        histo_data = youtube.weekly_stats(service=YOUTUBE_OAUTH, histo_data=histo_data, week_delta=26)
+
+        # Sort and store
+        stored = pd.concat([histo_data, stored]).sort_values(['release_date'])
+        stored.to_csv('../data/stats.csv', encoding='utf-8', index=False)
+
+        # Define destination playlist
+        new_data['dest_playlist'] = new_data.apply(lambda row: dest_playlist(row.channel_id,
+                                                                             row.is_shorts,
+                                                                             row.duration), axis=1)
+
+        # Reformat
+        to_add = new_data.groupby('dest_playlist')['video_id'].apply(list).to_dict()
+
+        # Selection by playlist # An error could happen here!
+        add_banger = to_add.get(banger, [])
+        add_release = to_add.get(release, [])
+        add_wl = to_add.get(watch_later, [])
+
+        # Addition by priority (Favorites > Music releases > Normal videos > Shorts)
+        if add_banger:
+            history_main.info('Addition to "Banger Radar": %s video(s).', len(add_banger))
+            youtube.add_to_playlist(YOUTUBE_OAUTH, banger, add_banger, prog_bar=PROG_BAR)
+
+        if add_release:
+            history_main.info('Addition to "Release Radar": %s video(s).', len(add_release))
+            youtube.add_to_playlist(YOUTUBE_OAUTH, release, add_release, prog_bar=PROG_BAR)
+
+        if add_wl:
+            history_main.info('Addition to "Watch Later": %s video(s).', len(add_wl))
+            youtube.add_to_playlist(YOUTUBE_OAUTH, watch_later, add_wl, prog_bar=PROG_BAR)
 
     if exe_mode == 'local':  # Credentials in base64 update - Local option
         youtube.encode_key(json_path='../tokens/credentials.json')

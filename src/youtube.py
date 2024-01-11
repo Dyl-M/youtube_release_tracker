@@ -483,3 +483,44 @@ def is_shorts(video_id: str):
     :return: True if video is short, False otherwise.
     """
     return requests.head(f'https://www.youtube.com/shorts/{video_id}').status_code == 200
+
+
+def weekly_stats(service: pyt.Client, histo_data: pd.DataFrame, week_delta: int,
+                 ref_date: dt.datetime = dt.datetime.now(dt.timezone.utc)):
+    """Add weekly statistics to historical data retrieved from YouTube for each run
+    :param service: a Python YouTube Client
+    :param histo_data: data with statistics retrieved throughout the weeks
+    :param week_delta: how far we should get stats for videos (1, 4, 13 or 26 weeks)
+    :param ref_date: a reference date (midnight UTC by default)
+    :return histo_data: historical data enhanced with new statistics.
+    """
+    # Get the date x week ago
+    x_week_ago = ref_date.replace(hour=0, minute=0, second=0, microsecond=0) - dt.timedelta(weeks=week_delta)
+
+    # Filter data with this new reference date
+    histo_data['release_date'] = pd.to_datetime(histo_data.release_date)
+    date_mask = (histo_data.release_date.dt.date == x_week_ago.date()) & (histo_data.views_w1.isnull())
+    selection = histo_data[date_mask]
+
+    if not selection.empty:  # If some videos are concerned
+        vid_id_list = selection.video_id.tolist()  # Get YouTube videos' ID as list
+
+        # Apply get_stats and keep only the three necessary features
+        stats = pd.DataFrame(get_stats(service, vid_id_list))[['video_id', 'views', 'likes', 'comments']]
+        histo_data = histo_data.merge(stats, how='left')  # Merge to previous dataframe
+
+        # Add values to corresponding week delta and remove redondant columns in dataframe
+        histo_data.loc[date_mask, [f'views_w{week_delta}']] = histo_data.views
+        histo_data.loc[date_mask, [f'likes_w{week_delta}']] = histo_data.likes
+        histo_data.loc[date_mask, [f'comments_w{week_delta}']] = histo_data.comments
+        histo_data.drop(columns=['views', 'likes', 'comments'], axis=1, inplace=True)
+
+    else:
+        history.info(f'No change to apply on historical data for following delta: {week_delta} week(s)')
+
+    # Apply the type Int64 for each feature (necessary for export)
+    w_features = [col for col in histo_data.columns if '_w' in col]
+    for feature in w_features:
+        histo_data[[feature]] = histo_data[[feature]].astype('Int64')
+
+    return histo_data
