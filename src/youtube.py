@@ -425,8 +425,8 @@ def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list, pr
         try:
             service.playlistItems.insert(parts='snippet', body=r_body)
 
-        except googleapiclient.errors.HttpError as http_error:  # skipcq: PYL-W0703
-            history.warning('(%s) - %s', video_id, http_error.error_details)
+        except pyt.error.PyYouTubeException as http_error:  # skipcq: PYL-W0703
+            history.warning('(%s) - %s', video_id, http_error.error_type)
 
 
 def sort_db(service: pyt.Client):
