@@ -1,5 +1,5 @@
 beautifulsoup4~=4.12
-google-api-python-client~=2.113
+google-api-python-client~=2.114
 google-auth~=2.26
 google-auth-oauthlib~=1.2
 isodate~=0.6
