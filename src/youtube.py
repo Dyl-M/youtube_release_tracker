@@ -284,7 +284,7 @@ def get_videos(service: pyt.Client, videos_list: list):
     :param videos_list: list of YouTube video IDs
     :return: request results.
     """
-    return service.videos.list(part=['snippet', 'contentDetails', 'statistics'],
+    return service.videos.list(part=['snippet', 'contentDetails', 'statistics', 'status'],
                                video_id=videos_list,
                                max_results=50).items
 
@@ -363,11 +363,24 @@ def get_stats(service: pyt.Client, videos_list: list):
                        'comments': item.statistics.commentCount,
                        'duration': isodate.parse_duration(item.contentDetails.duration).seconds,
                        'is_shorts': is_shorts(video_id=item.id),
-                       'live_status': item.snippet.liveBroadcastContent} for item in request]
+                       'live_status': item.snippet.liveBroadcastContent,
+                       'latest_status': item.status.privacyStatus} for item in request]
 
         except googleapiclient.errors.HttpError as http_error:
             history.error(http_error.error_details)
             sys.exit()
+
+    validated = [video['video_id'] for video in items]
+    missing = [vid_id for vid_id in videos_list if vid_id not in validated]
+
+    items += [{'video_id': item_id,
+               'views': None,
+               'likes': None,
+               'comments': None,
+               'duration': None,
+               'is_shorts': None,
+               'live_status': None,
+               'latest_status': 'deleted'} for item_id in missing]
 
     return items
 
@@ -501,18 +514,21 @@ def weekly_stats(service: pyt.Client, histo_data: pd.DataFrame, week_delta: int,
     histo_data['release_date'] = pd.to_datetime(histo_data.release_date)
     date_mask = (histo_data.release_date.dt.date == x_week_ago.date()) & (histo_data.views_w1.isnull())
     selection = histo_data[date_mask]
+    id_mask = selection.video_id.tolist()
 
     if not selection.empty:  # If some videos are concerned
         vid_id_list = selection.video_id.tolist()  # Get YouTube videos' ID as list
 
         # Apply get_stats and keep only the three necessary features
-        stats = pd.DataFrame(get_stats(service, vid_id_list))[['video_id', 'views', 'likes', 'comments']]
+        to_keep = ['video_id', 'views', 'likes', 'comments', 'latest_status']
+        stats = pd.DataFrame(get_stats(service, vid_id_list))[to_keep]
         histo_data = histo_data.merge(stats, how='left')  # Merge to previous dataframe
 
         # Add values to corresponding week delta and remove redondant columns in dataframe
-        histo_data.loc[date_mask, [f'views_w{week_delta}']] = histo_data.views
-        histo_data.loc[date_mask, [f'likes_w{week_delta}']] = histo_data.likes
-        histo_data.loc[date_mask, [f'comments_w{week_delta}']] = histo_data.comments
+        histo_data.loc[histo_data.video_id.isin(id_mask), [f'views_w{week_delta}']] = histo_data.views
+        histo_data.loc[histo_data.video_id.isin(id_mask), [f'likes_w{week_delta}']] = histo_data.likes
+        histo_data.loc[histo_data.video_id.isin(id_mask), [f'comments_w{week_delta}']] = histo_data.comments
+        histo_data.loc[histo_data.video_id.isin(id_mask), ['status']] = histo_data.latest_status
         histo_data.drop(columns=['views', 'likes', 'comments'], axis=1, inplace=True)
 
     else:
