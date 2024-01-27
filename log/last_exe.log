@@ -1,13 +1,16 @@
-2024-01-26 01:13:48+0000 [INFO] - Process started.
-2024-01-26 01:13:48+0000 [INFO] - API credentials refreshed.
-2024-01-26 01:13:48+0000 [INFO] - YouTube service created successfully.
-2024-01-26 01:13:48+0000 [INFO] - Iterative research for 230 YouTube channels.
-2024-01-26 01:14:52+0000 [INFO] - Add statistics for 71 video(s).
-2024-01-26 01:15:36+0000 [INFO] - No change to apply on historical data for following delta: 4 week(s)
-2024-01-26 01:15:36+0000 [INFO] - No change to apply on historical data for following delta: 13 week(s)
-2024-01-26 01:15:36+0000 [INFO] - No change to apply on historical data for following delta: 26 week(s)
-2024-01-26 01:15:36+0000 [INFO] - Addition to "Banger Radar": 4 video(s).
-2024-01-26 01:15:37+0000 [INFO] - Addition to "Release Radar": 24 video(s).
-2024-01-26 01:15:46+0000 [INFO] - Addition to "Watch Later": 9 video(s).
-2024-01-26 01:15:48+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2024-01-26 01:15:48+0000 [INFO] - Process ended.
+2024-01-27 17:08:11+0100 [INFO] - Process started.
+2024-01-27 17:08:11+0100 [INFO] - YouTube service created successfully.
+2024-01-27 17:08:11+0100 [INFO] - Iterative research for 230 YouTube channels.
+2024-01-27 17:09:30+0100 [INFO] - Add statistics for 123 video(s).
+2024-01-27 17:10:48+0100 [INFO] - No change to apply on historical data for following delta: 4 week(s)
+2024-01-27 17:10:48+0100 [INFO] - No change to apply on historical data for following delta: 13 week(s)
+2024-01-27 17:10:48+0100 [INFO] - No change to apply on historical data for following delta: 26 week(s)
+2024-01-27 17:10:48+0100 [INFO] - Addition to "Banger Radar": 11 video(s).
+2024-01-27 17:10:55+0100 [INFO] - Addition to "Release Radar": 65 video(s).
+2024-01-27 17:11:20+0100 [WARNING] - (7FqJvqIHQZs) - YouTubeException
+2024-01-27 17:11:22+0100 [WARNING] - (fydQ9jhA2nU) - YouTubeException
+2024-01-27 17:11:22+0100 [WARNING] - (Fyf57JU09i4) - YouTubeException
+2024-01-27 17:11:26+0100 [WARNING] - (gh89NaB3TSQ) - YouTubeException
+2024-01-27 17:11:34+0100 [WARNING] - (6Hlh7pBUSNY) - YouTubeException
+2024-01-27 17:11:34+0100 [INFO] - Addition to "Watch Later": 6 video(s).
+2024-01-27 17:11:37+0100 [INFO] - Process ended.
