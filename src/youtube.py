@@ -529,7 +529,7 @@ def weekly_stats(service: pyt.Client, histo_data: pd.DataFrame, week_delta: int,
         histo_data.loc[histo_data.video_id.isin(id_mask), [f'likes_w{week_delta}']] = histo_data.likes
         histo_data.loc[histo_data.video_id.isin(id_mask), [f'comments_w{week_delta}']] = histo_data.comments
         histo_data.loc[histo_data.video_id.isin(id_mask), ['status']] = histo_data.latest_status
-        histo_data.drop(columns=['views', 'likes', 'comments'], axis=1, inplace=True)
+        histo_data.drop(columns=['views', 'likes', 'comments', 'latest_status'], axis=1, inplace=True)
 
     else:
         history.info('No change to apply on historical data for following delta: %s week(s)', week_delta)
