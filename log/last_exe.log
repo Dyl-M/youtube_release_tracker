@@ -1,13 +1,15 @@
-2024-01-30 01:11:57+0000 [INFO] - Process started.
-2024-01-30 01:11:57+0000 [INFO] - API credentials refreshed.
-2024-01-30 01:11:57+0000 [INFO] - YouTube service created successfully.
-2024-01-30 01:11:57+0000 [INFO] - Iterative research for 230 YouTube channels.
-2024-01-30 01:13:05+0000 [INFO] - Add statistics for 51 video(s).
-2024-01-30 01:13:36+0000 [INFO] - No change to apply on historical data for following delta: 4 week(s)
-2024-01-30 01:13:36+0000 [INFO] - No change to apply on historical data for following delta: 13 week(s)
-2024-01-30 01:13:36+0000 [INFO] - No change to apply on historical data for following delta: 26 week(s)
-2024-01-30 01:13:36+0000 [INFO] - Addition to "Banger Radar": 4 video(s).
-2024-01-30 01:13:39+0000 [INFO] - Addition to "Release Radar": 25 video(s).
-2024-01-30 01:13:53+0000 [INFO] - Addition to "Watch Later": 8 video(s).
-2024-01-30 01:13:57+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2024-01-30 01:13:57+0000 [INFO] - Process ended.
+2024-01-31 01:12:32+0000 [INFO] - Process started.
+2024-01-31 01:12:32+0000 [INFO] - API credentials refreshed.
+2024-01-31 01:12:32+0000 [INFO] - YouTube service created successfully.
+2024-01-31 01:12:32+0000 [INFO] - Iterative research for 230 YouTube channels.
+2024-01-31 01:13:25+0000 [INFO] - Add statistics for 49 video(s).
+2024-01-31 01:13:51+0000 [INFO] - No change to apply on historical data for following delta: 4 week(s)
+2024-01-31 01:13:51+0000 [INFO] - No change to apply on historical data for following delta: 13 week(s)
+2024-01-31 01:13:51+0000 [INFO] - No change to apply on historical data for following delta: 26 week(s)
+2024-01-31 01:13:51+0000 [INFO] - Addition to "Banger Radar": 4 video(s).
+2024-01-31 01:13:53+0000 [INFO] - Addition to "Release Radar": 21 video(s).
+2024-01-31 01:13:59+0000 [WARNING] - (FV9Cuy0Lz_U) - YouTubeException
+2024-01-31 01:13:59+0000 [WARNING] - (TM0oGfvJ0CU) - YouTubeException
+2024-01-31 01:14:05+0000 [INFO] - Addition to "Watch Later": 7 video(s).
+2024-01-31 01:14:08+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2024-01-31 01:14:08+0000 [INFO] - Process ended.
