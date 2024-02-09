@@ -39,6 +39,7 @@
   "DIVERTISSEMENT": [
     "UC6UBbvEA8uh6Ulc6ax1Zs0g",
     "UCZpJLCV3gVP8R_sc8P30VpQ",
+    "UC0Lhseg2kaIGTddl5HhLUvw",
     "UCBK2DclO34h6BDqqrh-drPw",
     "UCzHWSEgF38Q_TFYhXw-_FmA",
     "UCt08KVHPt7rxSvbouUbz0sg",
@@ -77,7 +78,6 @@
     "UCA9UYeDdNMnYu06ZnvCoXNg",
     "UClsagI94IabwMKv9LN3kgNA",
     "UC-Op8pOVwbeqp6lyL2xJvqQ",
-    "UCzH3iADRIq1IJlIXjfNgTpA",
     "UCnC8KCcp2-DYfPY4_bKIc0A",
     "UCK3inMNRNAVUleEbpDU1k2g",
     "UCoNRSwYHJdy-yV1b82ZdHfQ",
@@ -257,6 +257,11 @@
     "GAMING": "GAMING",
     "MUSIQUE": "MUSIQUE"
   },
+  "ysc_deck": [
+    {
+      "g": "APPRENTISSAGE"
+    }
+  ],
   "ysc_meta": {
     "APPRENTISSAGE": {
       "img": "chrome-extension://kdmnjgijlmjgmimahnillepgcgeemffb/icon/new_pack/_12.png"
@@ -290,6 +295,8 @@
     "namef23_open": true,
     "namefebruary_2021_update_open": true,
     "nameidea_open": true,
+    "namej24": true,
+    "namej24_open": true,
     "namejan_2022_update_open": true,
     "namejul_2022": true,
     "namejul_2022_open": true,
