@@ -512,7 +512,7 @@ def weekly_stats(service: pyt.Client, histo_data: pd.DataFrame, week_delta: int,
 
     # Filter data with this new reference date
     histo_data['release_date'] = pd.to_datetime(histo_data.release_date)
-    date_mask = (histo_data.release_date.dt.date == x_week_ago.date()) & (histo_data.views_w1.isnull())
+    date_mask = (histo_data.release_date.dt.date == x_week_ago.date()) & (histo_data[f'views_w{week_delta}'].isnull())
     selection = histo_data[date_mask]
     id_mask = selection.video_id.tolist()
 
