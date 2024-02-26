@@ -156,8 +156,8 @@ if __name__ == '__main__':
         # Get stats for already retrieved videos
         histo_data = youtube.weekly_stats(service=YOUTUBE_OAUTH, histo_data=histo_data, week_delta=1)
         histo_data = youtube.weekly_stats(service=YOUTUBE_OAUTH, histo_data=histo_data, week_delta=4)
-        histo_data = youtube.weekly_stats(service=YOUTUBE_OAUTH, histo_data=histo_data, week_delta=13)
-        histo_data = youtube.weekly_stats(service=YOUTUBE_OAUTH, histo_data=histo_data, week_delta=26)
+        histo_data = youtube.weekly_stats(service=YOUTUBE_OAUTH, histo_data=histo_data, week_delta=12)
+        histo_data = youtube.weekly_stats(service=YOUTUBE_OAUTH, histo_data=histo_data, week_delta=24)
 
         # Store
         histo_data.to_csv('../data/stats.csv', encoding='utf-8', index=False)
@@ -171,9 +171,8 @@ if __name__ == '__main__':
         to_keep = ['video_id', 'channel_id', 'release_date', 'status', 'is_shorts', 'duration', 'channel_name',
                    'video_title']
 
-        stats_list = ['views_w1', 'views_w4', 'views_w13', 'views_w26', 'likes_w1', 'likes_w4', 'likes_w13',
-                      'likes_w26',
-                      'comments_w1', 'comments_w4', 'comments_w13', 'comments_w26']
+        stats_list = ['views_w1', 'views_w4', 'views_w12', 'views_w24', 'likes_w1', 'likes_w4', 'likes_w12',
+                      'likes_w24', 'comments_w1', 'comments_w4', 'comments_w12', 'comments_w24']
 
         stored = new_data[to_keep]
         stored.loc[:, stats_list] = [pd.NA] * len(stats_list)
@@ -182,8 +181,8 @@ if __name__ == '__main__':
         # Get stats for already retrieved videos
         histo_data = youtube.weekly_stats(service=YOUTUBE_OAUTH, histo_data=histo_data, week_delta=1)
         histo_data = youtube.weekly_stats(service=YOUTUBE_OAUTH, histo_data=histo_data, week_delta=4)
-        histo_data = youtube.weekly_stats(service=YOUTUBE_OAUTH, histo_data=histo_data, week_delta=13)
-        histo_data = youtube.weekly_stats(service=YOUTUBE_OAUTH, histo_data=histo_data, week_delta=26)
+        histo_data = youtube.weekly_stats(service=YOUTUBE_OAUTH, histo_data=histo_data, week_delta=12)
+        histo_data = youtube.weekly_stats(service=YOUTUBE_OAUTH, histo_data=histo_data, week_delta=24)
 
         # Sort and store
         stored = pd.concat([histo_data, stored]).sort_values(['release_date'])
