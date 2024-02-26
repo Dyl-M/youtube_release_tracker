@@ -1,14 +1,11 @@
-2024-02-25 01:15:57+0000 [INFO] - Process started.
-2024-02-25 01:15:57+0000 [INFO] - API credentials refreshed.
-2024-02-25 01:15:57+0000 [INFO] - YouTube service created successfully.
-2024-02-25 01:15:57+0000 [INFO] - Iterative research for 230 YouTube channels.
-2024-02-25 01:16:46+0000 [INFO] - Add statistics for 47 video(s).
-2024-02-25 01:17:19+0000 [INFO] - No change to apply on historical data for following delta: 13 week(s)
-2024-02-25 01:17:19+0000 [INFO] - No change to apply on historical data for following delta: 26 week(s)
-2024-02-25 01:17:19+0000 [INFO] - Addition to "Banger Radar": 1 video(s).
-2024-02-25 01:17:19+0000 [INFO] - Addition to "Release Radar": 27 video(s).
-2024-02-25 01:17:32+0000 [WARNING] - (fkapMfOhsbM) - YouTubeException
-2024-02-25 01:17:32+0000 [WARNING] - (_z9AV2dVL4E) - YouTubeException
-2024-02-25 01:17:34+0000 [INFO] - Addition to "Watch Later": 6 video(s).
-2024-02-25 01:17:37+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2024-02-25 01:17:37+0000 [INFO] - Process ended.
+2024-02-26 01:13:33+0000 [INFO] - Process started.
+2024-02-26 01:13:33+0000 [INFO] - API credentials refreshed.
+2024-02-26 01:13:33+0000 [INFO] - YouTube service created successfully.
+2024-02-26 01:13:33+0000 [INFO] - Iterative research for 230 YouTube channels.
+2024-02-26 01:14:32+0000 [INFO] - Add statistics for 32 video(s).
+2024-02-26 01:15:03+0000 [INFO] - No change to apply on historical data for following delta: 13 week(s)
+2024-02-26 01:15:03+0000 [INFO] - No change to apply on historical data for following delta: 26 week(s)
+2024-02-26 01:15:03+0000 [INFO] - Addition to "Release Radar": 15 video(s).
+2024-02-26 01:15:10+0000 [INFO] - Addition to "Watch Later": 5 video(s).
+2024-02-26 01:15:12+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2024-02-26 01:15:12+0000 [INFO] - Process ended.
