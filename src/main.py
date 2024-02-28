@@ -160,6 +160,7 @@ if __name__ == '__main__':
         histo_data = youtube.weekly_stats(service=YOUTUBE_OAUTH, histo_data=histo_data, week_delta=24)
 
         # Store
+        histo_data.sort_values(['release_date', 'video_id'], inplace=True)
         histo_data.to_csv('../data/stats.csv', encoding='utf-8', index=False)
 
     else:
@@ -185,7 +186,7 @@ if __name__ == '__main__':
         histo_data = youtube.weekly_stats(service=YOUTUBE_OAUTH, histo_data=histo_data, week_delta=24)
 
         # Sort and store
-        stored = pd.concat([histo_data, stored]).sort_values(['release_date'])
+        stored = pd.concat([histo_data, stored]).sort_values(['release_date', 'video_id'])
         stored.to_csv('../data/stats.csv', encoding='utf-8', index=False)
 
         # Define destination playlist
