@@ -20,13 +20,18 @@
     "id": "PLOMUdQFdS-XOI8OIWV_Gx-SRhlCS9PKLn"
   },
   "watch_later": {
-    "name": "⏳ Watch Later 2K24",
+    "name": "⏳ Watch Later 2K24 (Private)",
     "description": "2024 videos to watch later.",
     "id": "PLOMUdQFdS-XPfjAeBp5TuNDQmMoiJHdvB"
   },
-  "shorts": {
-    "name": "📱 Shorts only",
-    "description": "YouTube Shorts in my subscriptions.",
-    "id": "PLOMUdQFdS-XOUI24FT8dNZvmeA4dyfdbc"
+  "re_listening": {
+    "name": "🔂 Re-listening (Private)",
+    "description": "Let's give them another chance.",
+    "id": "PLOMUdQFdS-XP8fi89uBQ5P01DN_9tGJHu"
+  },
+  "legacy": {
+    "name": "[2019] BIG 5 | 😈😺💥🦁⚡ (Private)",
+    "description": "Musique uploadés par les membres du Big 5 entre 2019 et 2020 : Revealed + HEXAGON + Monstercat + STMPD + Les meilleurs artistes & chaînes indés.",
+    "id": "PLOMUdQFdS-XNY3dxJ3od6dvTVko91Q9PF"
   }
 }
