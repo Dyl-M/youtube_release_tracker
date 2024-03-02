@@ -18,7 +18,7 @@ specific playlist
   selection of music channels.
 - [📡 RELEASE RADAR](https://www.youtube.com/playlist?list=PLOMUdQFdS-XNe56Ot6KQmsR4cLT2ua9IC): regular music releases 
   among my subscriptions.
-- [⏳ Watch Later 2K24](https://www.youtube.com/playlist?list=PLOMUdQFdS-XPfjAeBp5TuNDQmMoiJHdvB): other type of video to Watch Later (since regular Watch Later playlist can't be 
+- [⏳ Watch Later 2K24](https://www.youtube.com/playlist?list=PLOMUdQFdS-XPfjAeBp5TuNDQmMoiJHdvB) (Private): other type of video to Watch Later (since regular Watch Later playlist can't be 
   manipulated with the API).
 
 This project follows up the developments made in the [Automated YouTube Playlist](https://github.com/Dyl-M/auto_youtube_playlist) 
@@ -42,6 +42,7 @@ comprehension or workflow execution.
 │
 ├── data
 │   ├── add-on.json
+│   ├── api_failure.json
 │   ├── playlists.json
 │   ├── pocket_tube.json
 │   └── stats.csv

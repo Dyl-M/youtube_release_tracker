@@ -48,7 +48,7 @@ def last_exe_date():
     return date
 
 
-with open('../data/add-on.json') as add_on_file:
+with open('../data/add-on.json', 'r', encoding='utf8') as add_on_file:
     ADD_ON = json.load(add_on_file)
 
 NOW = dt.datetime.now(tz=tzlocal.get_localzone())
@@ -415,6 +415,11 @@ def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list, pr
     :param videos_list: list of YouTube video IDs
     :param prog_bar: to use tqdm progress bar or not.
     """
+    with open('../data/api_failure.json', 'r', encoding='utf-8') as api_failure_file:
+        api_failure = json.load(api_failure_file)
+
+    api_fail = False
+
     if prog_bar:
         add_iterator = tqdm.tqdm(videos_list, desc=f'Adding videos to the playlist ({playlist_id})')
 
@@ -428,7 +433,13 @@ def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list, pr
             service.playlistItems.insert(parts='snippet', body=r_body)
 
         except pyt.error.PyYouTubeException as http_error:  # skipcq: PYL-W0703
-            history.warning('(%s) - %s', video_id, http_error.error_type)
+            history.warning('Addition Request Failure: (%s) - %s', video_id, http_error.error_type)
+            api_failure[playlist_id]['failure'].append(video_id)  # Save the video ID in dedicated file
+            api_fail = True
+
+    if api_fail:  # Save API failure
+        with open('../data/api_failure.json', 'w', encoding='utf-8') as api_failure_file:
+            json.dump(api_failure, api_failure_file, ensure_ascii=False, indent=2)
 
 
 def del_from_playlist(service: pyt.Client, playlist_id: str, items_list: list, prog_bar: bool = True):
@@ -449,7 +460,7 @@ def del_from_playlist(service: pyt.Client, playlist_id: str, items_list: list, p
             service.playlistItems.delete(playlist_item_id=item['item_id'])
 
         except pyt.error.PyYouTubeException as http_error:  # skipcq: PYL-W0703
-            history.warning('(%s) - %s', item['video_id'], http_error.error_type)
+            history.warning('Deletion Request Failure: (%s) - %s', item['video_id'], http_error.error_type)
 
 
 def sort_db(service: pyt.Client):
@@ -602,14 +613,37 @@ def fill_release_radar(service: pyt.Client, target_playlist: str, re_listening_i
 
         # Perform updates on playlist
         if addition_rel:  # If any addition from re-listening
-            history.info('%s addition from Re-listening playlist.', len(addition_rel))
+            history.info('%s addition(s) from Re-listening playlist.', len(addition_rel))
             add_to_playlist(service, target_playlist, [it['video_id'] for it in addition_rel], prog_bar)
             del_from_playlist(service, re_listening_id, addition_rel, prog_bar)
 
         if addition_leg:  # If any addition from Legacy
-            history.info('%s addition from Legacy playlist.', len(addition_leg))
+            history.info('%s addition(s) from Legacy playlist.', len(addition_leg))
             add_to_playlist(service, target_playlist, [it['video_id'] for it in addition_leg], prog_bar)
             del_from_playlist(service, legacy_id, addition_leg, prog_bar)
+
+
+def add_api_fail(service: pyt.Client, prog_bar: bool = True):
+    """Add missing videos to targeted playlist following API failure on previous run
+    :param service: a Python YouTube Client
+    :param prog_bar: to use tqdm progress bar or not.
+    """
+    with open('../data/api_failure.json', 'r', encoding='utf-8') as api_failure_file:
+        api_failure = json.load(api_failure_file)
+
+    addition = 0
+
+    for p_id, info in api_failure.items():
+        if info['failure']:
+            history.info('%s addition(s) to %s playlist from previous API failure.',
+                         len(info['failure']), info['name'])
+            add_to_playlist(service, p_id, info['failure'], prog_bar=prog_bar)
+            api_failure[p_id]['failure'] = []
+            addition += 1
+
+    if addition > 0:  # Save cleared file
+        with open('../data/api_failure.json', 'w', encoding='utf-8') as api_failure_file:
+            json.dump(api_failure, api_failure_file, ensure_ascii=False, indent=2)
 
 
 if __name__ == '__main__':
