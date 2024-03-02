@@ -150,6 +150,9 @@ if __name__ == '__main__':
         YOUTUBE_OAUTH, CREDS_B64 = youtube.create_service_workflow()
         PROG_BAR = False  # Do not display progress bar
 
+    # Add missing videos due to quota exceeded on previous run
+    youtube.add_api_fail(service=YOUTUBE_OAUTH, prog_bar=PROG_BAR)
+
     # Search for new videos to add
     history_main.info('Iterative research for %s YouTube channels.', len(all_channels))
     new_videos = youtube.iter_channels(YOUTUBE_OAUTH, all_channels, prog_bar=PROG_BAR)
