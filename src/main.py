@@ -52,7 +52,11 @@ other = list(set(other_raw))
 all_channels = list(set(music + other))
 
 # YouTube playlists
-release, banger, watch_later = (playlists['release']['id'], playlists['banger']['id'], playlists['watch_later']['id'])
+release = playlists['release']['id']
+banger = playlists['banger']['id']
+watch_later = playlists['watch_later']['id']
+re_listening = playlists['re_listening']['id']
+legacy = playlists['legacy']['id']
 
 # Historical Data
 histo_data = pd.read_csv('../data/stats.csv', encoding='utf-8')
@@ -214,6 +218,9 @@ if __name__ == '__main__':
         if add_wl:
             history_main.info('Addition to "Watch Later": %s video(s).', len(add_wl))
             youtube.add_to_playlist(YOUTUBE_OAUTH, watch_later, add_wl, prog_bar=PROG_BAR)
+
+        # Fill Release Radar playlist
+        youtube.fill_release_radar(YOUTUBE_OAUTH, release, re_listening, legacy, prog_bar=PROG_BAR)
 
     if exe_mode == 'local':  # Credentials in base64 update - Local option
         youtube.encode_key(json_path='../tokens/credentials.json')

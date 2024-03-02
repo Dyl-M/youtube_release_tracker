@@ -8,6 +8,7 @@ import isodate
 import itertools
 import json
 import logging
+import math
 import os
 import pandas as pd
 import pyyoutube as pyt
@@ -209,18 +210,6 @@ def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int = Non
     :param with_last_exe: to use last execution date extracted from log or not
     :return p_items: playlist items (videos) as a list.
     """
-
-    def get_and_format_date(ytb_item: pyt.PlaylistItem, d_format: str):
-        """Get and form a video release date
-        :param ytb_item: YouTube playlist item
-        :param d_format: date format
-        :return: formatted release date or None.
-        """
-        vpa = ytb_item.contentDetails.videoPublishedAt
-        if vpa:  # Return the date if 'videoPublishedAt' field exist
-            return dt.datetime.strptime(vpa, d_format)
-        return vpa  # Return None instead
-
     p_items = []
     next_page_token = None
     date_format = '%Y-%m-%dT%H:%M:%S%z'
@@ -236,7 +225,7 @@ def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int = Non
             p_items += [{'video_id': item.contentDetails.videoId,
                          'video_title': item.snippet.title,
                          'item_id': item.id,
-                         'release_date': get_and_format_date(ytb_item=item, d_format=date_format),
+                         'release_date': dt.datetime.strptime(item.contentDetails.videoPublishedAt, date_format),
                          'status': item.status.privacyStatus,
                          'channel_id': item.snippet.videoOwnerChannelId,
                          'channel_name': item.snippet.videoOwnerChannelTitle} for item in request]
@@ -442,6 +431,27 @@ def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list, pr
             history.warning('(%s) - %s', video_id, http_error.error_type)
 
 
+def del_from_playlist(service: pyt.Client, playlist_id: str, items_list: list, prog_bar: bool = True):
+    """Delete videos inside a YouTube playlist
+    :param service: a Python YouTube Client
+    :param playlist_id: a YouTube playlist ID
+    :param items_list: list of YouTube playlist items [{"item_id": ..., "video_id": ...}]
+    :param prog_bar: to use tqdm progress bar or not.
+    """
+    if prog_bar:
+        del_iterator = tqdm.tqdm(items_list, desc=f'Deleting videos from the playlist ({playlist_id})')
+
+    else:
+        del_iterator = items_list
+
+    for item in del_iterator:
+        try:
+            service.playlistItems.delete(playlist_item_id=item['item_id'])
+
+        except pyt.error.PyYouTubeException as http_error:  # skipcq: PYL-W0703
+            history.warning('(%s) - %s', item['video_id'], http_error.error_type)
+
+
 def sort_db(service: pyt.Client):
     """Sort and save the PocketTube database file
     :param service: a Python YouTube Client
@@ -540,3 +550,68 @@ def weekly_stats(service: pyt.Client, histo_data: pd.DataFrame, week_delta: int,
         histo_data[[feature]] = histo_data[[feature]].astype('Int64')
 
     return histo_data
+
+
+def fill_release_radar(service: pyt.Client, target_playlist: str, re_listening_id: str, legacy_id: str, lmt: int = 30,
+                       prog_bar: bool = True):
+    """Fill the Release Radar playlist with videos from re-listening playlists
+    :param service: a Python YouTube Client
+    :param target_playlist: YouTube playlist ID where videos need to be added
+    :param re_listening_id: YouTube playlist ID for music to re-listen to
+    :param legacy_id: older YouTube playlist to clear out
+    :param lmt: addition threshold (30 by default)
+    :param prog_bar: to use tqdm progress bar or not.
+    """
+    week_ago = NOW - dt.timedelta(weeks=1)
+
+    # Compute how much videos are necessary to fill the target playlist
+    n_add = lmt - len(service.playlistItems.list(part=['snippet'], max_results=lmt, playlist_id=target_playlist).items)
+
+    if n_add == 0:  # Release Radar has too much content already
+        history.info('No addition necessary for Release Radar')
+
+    else:
+        n_add_rel, n_add_leg = math.ceil(n_add / 2), math.floor(n_add / 2)  # Initial addition values
+
+        # Get videos from both playlists
+        to_re_listen_items = service.playlistItems.list(part=['snippet', 'contentDetails'],
+                                                        playlist_id=re_listening_id,
+                                                        max_results=lmt).items
+
+        legacy_items = service.playlistItems.list(part=['contentDetails'], playlist_id=legacy_id, max_results=lmt).items
+
+        # Format list for treatment
+        to_re_listen_raw = [{'video_id': item.contentDetails.videoId,
+                             'add_date': dt.datetime.strptime(item.snippet.publishedAt, '%Y-%m-%dT%H:%M:%S%z'),
+                             'item_id': item.id} for item in to_re_listen_items]
+
+        legacy_raw = [{'video_id': item.contentDetails.videoId, 'item_id': item.id} for item in legacy_items]
+
+        # Filter re-listening: keep videos added at least a week ago
+        to_re_listen_fil = [item for item in to_re_listen_raw if item['add_date'] < week_ago]
+
+        # Pre-selection
+        addition_rel = to_re_listen_fil[:n_add_rel]
+        addition_leg = legacy_raw[:n_add_leg]
+
+        if len(addition_leg) < n_add_leg:  # If not enough content in Legacy playlist
+            addition_rel = to_re_listen_fil[:lmt - len(addition_leg)]
+
+        if len(addition_rel) < n_add_rel:  # If not enough content in Re-listening playlist
+            addition_leg = legacy_raw[:lmt - len(addition_rel)]
+
+        # Perform updates on playlist
+        if addition_rel:  # If any addition from re-listening
+            history.info('%s addition from Re-listening playlist.', len(addition_rel))
+            add_to_playlist(service, target_playlist, [it['video_id'] for it in addition_rel], prog_bar)
+            del_from_playlist(service, re_listening_id, addition_rel, prog_bar)
+
+        if addition_leg:  # If any addition from Legacy
+            history.info('%s addition from Legacy playlist.', len(addition_leg))
+            add_to_playlist(service, target_playlist, [it['video_id'] for it in addition_leg], prog_bar)
+            del_from_playlist(service, legacy_id, addition_leg, prog_bar)
+
+
+if __name__ == '__main__':
+    serv = create_service_local(log=False)
+    sort_db(service=serv)
