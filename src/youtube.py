@@ -606,10 +606,10 @@ def fill_release_radar(service: pyt.Client, target_playlist: str, re_listening_i
         addition_leg = legacy_raw[:n_add_leg]
 
         if len(addition_leg) < n_add_leg:  # If not enough content in Legacy playlist
-            addition_rel = to_re_listen_fil[:lmt - len(addition_leg)]
+            addition_rel = to_re_listen_fil[:n_add - len(addition_leg)]
 
         if len(addition_rel) < n_add_rel:  # If not enough content in Re-listening playlist
-            addition_leg = legacy_raw[:lmt - len(addition_rel)]
+            addition_leg = legacy_raw[:n_add - len(addition_rel)]
 
         # Perform updates on playlist
         if addition_rel:  # If any addition from re-listening
