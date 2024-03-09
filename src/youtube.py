@@ -210,11 +210,28 @@ def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int = Non
     :param with_last_exe: to use last execution date extracted from log or not
     :return p_items: playlist items (videos) as a list.
     """
+
+    def filter_items_by_date_range(_p_items: dict, _latest_d: dt.datetime, _oldest_d: dt.datetime = None,
+                                   _day_ago: int = None):
+        """Filter videos by date range
+        :param _p_items: playlist items as dictionary
+        :param _latest_d: the latest reference date
+        :param _oldest_d: latest execution date
+        :param _day_ago: day difference with a reference date, delimits items' collection field
+        :return _p_items: filtered items.
+        """
+        if _oldest_d:
+            return [item for item in _p_items if _oldest_d < item['release_date'] < _latest_d]
+        elif _day_ago:
+            date_delta = _latest_d - dt.timedelta(days=_day_ago)
+            return [item for item in _p_items if date_delta < item['release_date'] < _latest_d]
+        return _p_items
+
     p_items = []
     next_page_token = None
     date_format = '%Y-%m-%dT%H:%M:%S%z'
 
-    while 1:
+    while True:
         try:
             request = service.playlistItems.list(part=['snippet', 'contentDetails', 'status'],
                                                  playlist_id=playlist_id,
@@ -233,19 +250,14 @@ def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int = Non
             if with_last_exe:  # In case we want to keep videos published between last exe date and your latest_d
                 oldest_d = LAST_EXE.replace(minute=0, second=0, microsecond=0)  # Round hour to XX:00:00.0
                 latest_d = latest_d.replace(minute=0, second=0, microsecond=0)  # Round hour to XX:00:00.0
-                p_items = [item for item in p_items if item['release_date']]  # Filter 1 - 'release_date' exists
-                p_items = [item for item in p_items if latest_d > item['release_date'] > oldest_d]  # Filter 2 - Date
-
-                if len(p_items) <= 50:  # No need for more requests (the playlist must be ordered chronologically!)
-                    break
+                p_items = filter_items_by_date_range(p_items, latest_d, oldest_d)
 
             elif day_ago is not None:  # In case we want to keep videos published x days ago from your latest_d
                 latest_d = latest_d.replace(minute=0, second=0, microsecond=0)  # Round hour to XX:00:00.0
-                date_delta = latest_d - dt.timedelta(days=day_ago)  # Days subtraction
-                p_items = [item for item in p_items if latest_d > item['release_date'] > date_delta]  # Filtering
+                p_items = filter_items_by_date_range(p_items, latest_d, _day_ago=day_ago)
 
-                if len(p_items) <= 50:  # No need for more requests (the playlist must be ordered chronologically!)
-                    break
+            if len(p_items) <= 50:  # No need for more requests (the playlist must be ordered chronologically!)
+                break
 
             next_page_token = request.nextPageToken
 
