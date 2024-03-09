@@ -222,7 +222,7 @@ def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int = Non
         """
         if _oldest_d:
             return [item for item in _p_items if _oldest_d < item['release_date'] < _latest_d]
-        elif _day_ago:
+        if _day_ago:
             date_delta = _latest_d - dt.timedelta(days=_day_ago)
             return [item for item in _p_items if date_delta < item['release_date'] < _latest_d]
         return _p_items
