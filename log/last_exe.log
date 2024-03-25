@@ -1,14 +1,14 @@
-2024-03-24 01:18:44+0000 [INFO] - Process started.
-2024-03-24 01:18:44+0000 [INFO] - API credentials refreshed.
-2024-03-24 01:18:44+0000 [INFO] - YouTube service created successfully.
-2024-03-24 01:18:44+0000 [INFO] - Iterative research for 232 YouTube channels.
-2024-03-24 01:19:43+0000 [INFO] - Add statistics for 49 video(s).
-2024-03-24 01:20:23+0000 [INFO] - No change to apply on historical data for following delta: 12 week(s)
-2024-03-24 01:20:23+0000 [INFO] - No change to apply on historical data for following delta: 24 week(s)
-2024-03-24 01:20:23+0000 [INFO] - Addition to "Banger Radar": 1 video(s).
-2024-03-24 01:20:23+0000 [INFO] - Addition to "Release Radar": 22 video(s).
-2024-03-24 01:20:29+0000 [INFO] - Addition to "Watch Later": 5 video(s).
-2024-03-24 01:20:30+0000 [INFO] - 9 addition(s) from Re-listening playlist.
-2024-03-24 01:20:35+0000 [INFO] - 9 addition(s) from Legacy playlist.
-2024-03-24 01:20:40+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2024-03-24 01:20:40+0000 [INFO] - Process ended.
+2024-03-25 01:14:03+0000 [INFO] - Process started.
+2024-03-25 01:14:03+0000 [INFO] - API credentials refreshed.
+2024-03-25 01:14:03+0000 [INFO] - YouTube service created successfully.
+2024-03-25 01:14:03+0000 [INFO] - Iterative research for 232 YouTube channels.
+2024-03-25 01:14:49+0000 [INFO] - Add statistics for 51 video(s).
+2024-03-25 01:15:46+0000 [INFO] - No change to apply on historical data for following delta: 24 week(s)
+2024-03-25 01:15:46+0000 [INFO] - Addition to "Banger Radar": 1 video(s).
+2024-03-25 01:15:46+0000 [INFO] - Addition to "Release Radar": 19 video(s).
+2024-03-25 01:15:58+0000 [INFO] - Addition to "Watch Later": 3 video(s).
+2024-03-25 01:15:59+0000 [INFO] - 13 addition(s) from Re-listening playlist.
+2024-03-25 01:16:07+0000 [WARNING] - Addition Request Failure: (l2bcKgR8zKA) - YouTubeException
+2024-03-25 01:16:13+0000 [INFO] - 8 addition(s) from Legacy playlist.
+2024-03-25 01:16:20+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2024-03-25 01:16:20+0000 [INFO] - Process ended.
