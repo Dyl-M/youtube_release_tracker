@@ -576,7 +576,18 @@ def fill_release_radar(service: pyt.Client, target_playlist: str, re_listening_i
     week_ago = NOW - dt.timedelta(weeks=1)
 
     # Compute how much videos are necessary to fill the target playlist
-    n_add = lmt - len(service.playlistItems.list(part=['snippet'], max_results=lmt, playlist_id=target_playlist).items)
+    try:
+        n_add = lmt - len(service.playlistItems.list(part=['snippet'],
+                                                     max_results=lmt,
+                                                     playlist_id=target_playlist).items)
+    except pyt.PyYouTubeException as error:
+        if error.status_code == 403:
+            history.warning('API quota exceeded.')
+            n_add = 0
+
+        else:
+            history.warning('Unknown error: %s', error.message)
+            n_add = 0
 
     if n_add == 0:  # Release Radar has too much content already
         history.info('No addition necessary for Release Radar')
