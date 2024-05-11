@@ -1,14 +1,44 @@
-2024-05-10 01:17:16+0000 [INFO] - Process started.
-2024-05-10 01:17:16+0000 [INFO] - API credentials refreshed.
-2024-05-10 01:17:16+0000 [INFO] - YouTube service created successfully.
-2024-05-10 01:17:16+0000 [INFO] - Iterative research for 231 YouTube channels.
-2024-05-10 01:18:05+0000 [INFO] - Add statistics for 54 video(s).
-2024-05-10 01:19:28+0000 [INFO] - No change to apply on historical data for following delta: 24 week(s)
-2024-05-10 01:19:28+0000 [INFO] - Addition to "Banger Radar": 2 video(s).
-2024-05-10 01:19:28+0000 [INFO] - Addition to "Release Radar": 27 video(s).
-2024-05-10 01:19:39+0000 [INFO] - Addition to "Watch Later": 3 video(s).
-2024-05-10 01:19:41+0000 [INFO] - 7 addition(s) from Re-listening playlist.
-2024-05-10 01:19:44+0000 [INFO] - 6 addition(s) from Legacy playlist.
-2024-05-10 01:19:44+0000 [WARNING] - Addition Request Failure: (seigvUE6NNQ) - YouTubeException
-2024-05-10 01:19:48+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2024-05-10 01:19:48+0000 [INFO] - Process ended.
+2024-05-11 01:16:05+0000 [INFO] - Process started.
+2024-05-11 01:16:05+0000 [INFO] - API credentials refreshed.
+2024-05-11 01:16:05+0000 [INFO] - YouTube service created successfully.
+2024-05-11 01:16:05+0000 [INFO] - 1 addition(s) to Release Radar playlist from previous API failure.
+2024-05-11 01:16:06+0000 [INFO] - Iterative research for 231 YouTube channels.
+2024-05-11 01:17:13+0000 [INFO] - Add statistics for 161 video(s).
+2024-05-11 01:18:31+0000 [INFO] - No change to apply on historical data for following delta: 24 week(s)
+2024-05-11 01:18:32+0000 [INFO] - Addition to "Banger Radar": 11 video(s).
+2024-05-11 01:18:43+0000 [INFO] - Addition to "Release Radar": 117 video(s).
+2024-05-11 01:19:42+0000 [WARNING] - Addition Request Failure: (-wKmmoXz_l0) - YouTubeException
+2024-05-11 01:20:00+0000 [WARNING] - Addition Request Failure: (JPl9AceNMx8) - YouTubeException
+2024-05-11 01:20:00+0000 [WARNING] - Addition Request Failure: (75apekjLhsU) - YouTubeException
+2024-05-11 01:20:00+0000 [WARNING] - Addition Request Failure: (GuHgzU65bNA) - YouTubeException
+2024-05-11 01:20:00+0000 [WARNING] - Addition Request Failure: (HuF8u7TSJjI) - YouTubeException
+2024-05-11 01:20:00+0000 [WARNING] - Addition Request Failure: (m77lowXw3Dk) - YouTubeException
+2024-05-11 01:20:00+0000 [WARNING] - Addition Request Failure: (yuaKH7Cz2dA) - YouTubeException
+2024-05-11 01:20:00+0000 [WARNING] - Addition Request Failure: (v2qJaCmyeXQ) - YouTubeException
+2024-05-11 01:20:01+0000 [WARNING] - Addition Request Failure: (41Gmwd3HM7M) - YouTubeException
+2024-05-11 01:20:01+0000 [WARNING] - Addition Request Failure: (E6tEk6L8GYM) - YouTubeException
+2024-05-11 01:20:01+0000 [WARNING] - Addition Request Failure: (VcHGmOu9hg8) - YouTubeException
+2024-05-11 01:20:01+0000 [WARNING] - Addition Request Failure: (kSpMYvsJUZQ) - YouTubeException
+2024-05-11 01:20:01+0000 [WARNING] - Addition Request Failure: (cjwUZK7cOo8) - YouTubeException
+2024-05-11 01:20:01+0000 [WARNING] - Addition Request Failure: (gYvWoiaBxVs) - YouTubeException
+2024-05-11 01:20:01+0000 [WARNING] - Addition Request Failure: (OFjBsaTc_rE) - YouTubeException
+2024-05-11 01:20:01+0000 [WARNING] - Addition Request Failure: (-zpNIoL6T4g) - YouTubeException
+2024-05-11 01:20:01+0000 [WARNING] - Addition Request Failure: (DEUPtyNP_Cw) - YouTubeException
+2024-05-11 01:20:01+0000 [WARNING] - Addition Request Failure: (zeeLt6RR2RU) - YouTubeException
+2024-05-11 01:20:01+0000 [WARNING] - Addition Request Failure: (_2OcOSkGO44) - YouTubeException
+2024-05-11 01:20:01+0000 [WARNING] - Addition Request Failure: (RdCs-i8MIqU) - YouTubeException
+2024-05-11 01:20:01+0000 [WARNING] - Addition Request Failure: (mKFVWO4EKt4) - YouTubeException
+2024-05-11 01:20:01+0000 [WARNING] - Addition Request Failure: (iwe8LFF1K-0) - YouTubeException
+2024-05-11 01:20:01+0000 [WARNING] - Addition Request Failure: (fMxtMz_zAas) - YouTubeException
+2024-05-11 01:20:01+0000 [WARNING] - Addition Request Failure: (pdlgbo5P-ZE) - YouTubeException
+2024-05-11 01:20:02+0000 [WARNING] - Addition Request Failure: (E7Kj9aSSWh0) - YouTubeException
+2024-05-11 01:20:02+0000 [WARNING] - Addition Request Failure: (aTAWEaElaOw) - YouTubeException
+2024-05-11 01:20:02+0000 [WARNING] - Addition Request Failure: (7fbNAyHpZrQ) - YouTubeException
+2024-05-11 01:20:02+0000 [INFO] - Addition to "Watch Later": 4 video(s).
+2024-05-11 01:20:02+0000 [WARNING] - Addition Request Failure: (IQIPB1QstJo) - YouTubeException
+2024-05-11 01:20:02+0000 [WARNING] - Addition Request Failure: (uQxrWk-dIGk) - YouTubeException
+2024-05-11 01:20:02+0000 [WARNING] - Addition Request Failure: (qqlD29tB154) - YouTubeException
+2024-05-11 01:20:02+0000 [WARNING] - API quota exceeded.
+2024-05-11 01:20:02+0000 [INFO] - No addition necessary for Release Radar
+2024-05-11 01:20:03+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2024-05-11 01:20:03+0000 [INFO] - Process ended.
