@@ -2014,3 +2014,15 @@
 2024-05-17 01:20:50+0000 [INFO] - 10 addition(s) from Legacy playlist.
 2024-05-17 01:20:58+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
 2024-05-17 01:20:58+0000 [INFO] - Process ended.
+2024-05-18 01:17:04+0000 [INFO] - Process started.
+2024-05-18 01:17:04+0000 [INFO] - API credentials refreshed.
+2024-05-18 01:17:04+0000 [INFO] - YouTube service created successfully.
+2024-05-18 01:17:04+0000 [INFO] - Iterative research for 232 YouTube channels.
+2024-05-18 01:17:51+0000 [INFO] - Add statistics for 100 video(s).
+2024-05-18 01:18:47+0000 [INFO] - No change to apply on historical data for following delta: 24 week(s)
+2024-05-18 01:18:47+0000 [INFO] - Addition to "Banger Radar": 17 video(s).
+2024-05-18 01:18:54+0000 [INFO] - Addition to "Release Radar": 46 video(s).
+2024-05-18 01:19:13+0000 [INFO] - Addition to "Watch Later": 7 video(s).
+2024-05-18 01:19:16+0000 [INFO] - No addition necessary for Release Radar
+2024-05-18 01:19:17+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2024-05-18 01:19:17+0000 [INFO] - Process ended.
