@@ -1,12 +1,17 @@
-2024-06-03 01:20:42+0000 [INFO] - Process started.
-2024-06-03 01:20:42+0000 [INFO] - API credentials refreshed.
-2024-06-03 01:20:42+0000 [INFO] - YouTube service created successfully.
-2024-06-03 01:20:42+0000 [INFO] - Iterative research for 232 YouTube channels.
-2024-06-03 01:21:51+0000 [INFO] - Add statistics for 36 video(s).
-2024-06-03 01:22:47+0000 [INFO] - No change to apply on historical data for following delta: 24 week(s)
-2024-06-03 01:22:47+0000 [INFO] - Addition to "Release Radar": 17 video(s).
-2024-06-03 01:22:52+0000 [INFO] - Addition to "Watch Later": 3 video(s).
-2024-06-03 01:22:53+0000 [INFO] - 12 addition(s) from Re-listening playlist.
-2024-06-03 01:23:00+0000 [INFO] - 11 addition(s) from Legacy playlist.
-2024-06-03 01:23:08+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2024-06-03 01:23:08+0000 [INFO] - Process ended.
+2024-06-04 01:20:13+0000 [INFO] - Process started.
+2024-06-04 01:20:13+0000 [INFO] - API credentials refreshed.
+2024-06-04 01:20:13+0000 [INFO] - YouTube service created successfully.
+2024-06-04 01:20:13+0000 [INFO] - Iterative research for 232 YouTube channels.
+2024-06-04 01:21:33+0000 [INFO] - Add statistics for 48 video(s).
+2024-06-04 01:22:53+0000 [INFO] - No change to apply on historical data for following delta: 24 week(s)
+2024-06-04 01:22:53+0000 [INFO] - Addition to "Banger Radar": 4 video(s).
+2024-06-04 01:22:54+0000 [WARNING] - Addition Request Failure: (Gz8a0yp4W9Q) - YouTubeException
+2024-06-04 01:22:56+0000 [INFO] - Addition to "Release Radar": 21 video(s).
+2024-06-04 01:22:56+0000 [WARNING] - Addition Request Failure: (vT437eUyIYU) - YouTubeException
+2024-06-04 01:22:58+0000 [WARNING] - Addition Request Failure: (mhDSnFLKZ3Q) - YouTubeException
+2024-06-04 01:22:59+0000 [WARNING] - Addition Request Failure: (xl5I3YhIcL0) - YouTubeException
+2024-06-04 01:23:07+0000 [INFO] - Addition to "Watch Later": 7 video(s).
+2024-06-04 01:23:11+0000 [INFO] - 11 addition(s) from Re-listening playlist.
+2024-06-04 01:23:22+0000 [INFO] - 11 addition(s) from Legacy playlist.
+2024-06-04 01:23:34+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2024-06-04 01:23:34+0000 [INFO] - Process ended.
