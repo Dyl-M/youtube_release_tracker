@@ -1,15 +1,13 @@
-2024-06-07 01:22:11+0000 [INFO] - Process started.
-2024-06-07 01:22:12+0000 [INFO] - API credentials refreshed.
-2024-06-07 01:22:12+0000 [INFO] - YouTube service created successfully.
-2024-06-07 01:22:12+0000 [INFO] - Iterative research for 232 YouTube channels.
-2024-06-07 01:23:22+0000 [INFO] - Add statistics for 57 video(s).
-2024-06-07 01:25:17+0000 [INFO] - No change to apply on historical data for following delta: 24 week(s)
-2024-06-07 01:25:17+0000 [INFO] - Addition to "Banger Radar": 4 video(s).
-2024-06-07 01:25:20+0000 [INFO] - Addition to "Release Radar": 20 video(s).
-2024-06-07 01:25:21+0000 [WARNING] - Addition Request Failure: (TaZuZ29AGAo) - YouTubeException
-2024-06-07 01:25:29+0000 [WARNING] - Addition Request Failure: (SgQL7p6zgGo) - YouTubeException
-2024-06-07 01:25:33+0000 [INFO] - Addition to "Watch Later": 5 video(s).
-2024-06-07 01:25:36+0000 [INFO] - 11 addition(s) from Re-listening playlist.
-2024-06-07 01:25:48+0000 [INFO] - 11 addition(s) from Legacy playlist.
-2024-06-07 01:26:03+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2024-06-07 01:26:03+0000 [INFO] - Process ended.
+2024-06-08 01:19:55+0000 [INFO] - Process started.
+2024-06-08 01:19:55+0000 [INFO] - API credentials refreshed.
+2024-06-08 01:19:55+0000 [INFO] - YouTube service created successfully.
+2024-06-08 01:19:55+0000 [INFO] - 2 addition(s) to Release Radar playlist from previous API failure.
+2024-06-08 01:19:57+0000 [INFO] - Iterative research for 232 YouTube channels.
+2024-06-08 01:20:50+0000 [INFO] - Add statistics for 99 video(s).
+2024-06-08 01:21:56+0000 [INFO] - No change to apply on historical data for following delta: 24 week(s)
+2024-06-08 01:21:56+0000 [INFO] - Addition to "Banger Radar": 16 video(s).
+2024-06-08 01:22:06+0000 [INFO] - Addition to "Release Radar": 42 video(s).
+2024-06-08 01:22:24+0000 [INFO] - Addition to "Watch Later": 4 video(s).
+2024-06-08 01:22:26+0000 [INFO] - No addition necessary for Release Radar
+2024-06-08 01:22:27+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2024-06-08 01:22:27+0000 [INFO] - Process ended.
