@@ -350,7 +350,8 @@ def get_stats(service: pyt.Client, videos_list: list):
                        'views': item.statistics.viewCount,
                        'likes': item.statistics.likeCount,
                        'comments': item.statistics.commentCount,
-                       'duration': isodate.parse_duration(getattr(item.contentDetails, 'duration', 'PT0S')).seconds,
+                       'duration': isodate.parse_duration(getattr(item.contentDetails,
+                                                                  'duration', 'PT0S') or 'PT0S').seconds,
                        'is_shorts': is_shorts(video_id=item.id),
                        'live_status': item.snippet.liveBroadcastContent,
                        'latest_status': item.status.privacyStatus} for item in request]
