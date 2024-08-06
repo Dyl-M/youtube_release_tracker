@@ -1,11 +1,16 @@
-2024-08-05 01:26:38+0000 [INFO] - Process started.
-2024-08-05 01:26:38+0000 [INFO] - API credentials refreshed.
-2024-08-05 01:26:38+0000 [INFO] - YouTube service created successfully.
-2024-08-05 01:26:38+0000 [INFO] - Iterative research for 232 YouTube channels.
-2024-08-05 01:27:33+0000 [INFO] - Add statistics for 41 video(s).
-2024-08-05 01:28:58+0000 [INFO] - Addition to "Banger Radar": 2 video(s).
-2024-08-05 01:28:59+0000 [INFO] - Addition to "Release Radar": 17 video(s).
-2024-08-05 01:29:06+0000 [INFO] - Addition to "Watch Later": 4 video(s).
-2024-08-05 01:29:07+0000 [INFO] - No addition necessary for Release Radar
-2024-08-05 01:29:08+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2024-08-05 01:29:08+0000 [INFO] - Process ended.
+2024-08-06 01:24:42+0000 [INFO] - Process started.
+2024-08-06 01:24:42+0000 [INFO] - API credentials refreshed.
+2024-08-06 01:24:42+0000 [INFO] - YouTube service created successfully.
+2024-08-06 01:24:42+0000 [INFO] - Iterative research for 232 YouTube channels.
+2024-08-06 01:25:52+0000 [INFO] - Add statistics for 43 video(s).
+2024-08-06 01:27:37+0000 [INFO] - Addition to "Banger Radar": 4 video(s).
+2024-08-06 01:27:38+0000 [WARNING] - Addition Request Failure: (MtHtUiAP_1A) - YouTubeException
+2024-08-06 01:27:39+0000 [INFO] - Addition to "Release Radar": 15 video(s).
+2024-08-06 01:27:42+0000 [WARNING] - Addition Request Failure: (DY_73I8qmj0) - YouTubeException
+2024-08-06 01:27:42+0000 [WARNING] - Addition Request Failure: (PoM_oI6ug4A) - YouTubeException
+2024-08-06 01:27:48+0000 [INFO] - Addition to "Watch Later": 3 video(s).
+2024-08-06 01:27:51+0000 [INFO] - 14 addition(s) from Re-listening playlist.
+2024-08-06 01:27:57+0000 [WARNING] - Addition Request Failure: (DEzTxB_Pb98) - YouTubeException
+2024-08-06 01:28:09+0000 [INFO] - 13 addition(s) from Legacy playlist.
+2024-08-06 01:28:25+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2024-08-06 01:28:25+0000 [INFO] - Process ended.
