@@ -1,12 +1,16 @@
-2024-09-05 08:04:24+0000 [INFO] - Process started.
-2024-09-05 08:04:24+0000 [INFO] - API credentials refreshed.
-2024-09-05 08:04:24+0000 [INFO] - YouTube service created successfully.
-2024-09-05 08:04:24+0000 [INFO] - Iterative research for 227 YouTube channels.
-2024-09-05 08:05:18+0000 [INFO] - Add statistics for 1 video(s).
-2024-09-05 08:05:18+0000 [INFO] - No change to apply on historical data for following delta: 1 week(s)
-2024-09-05 08:05:18+0000 [INFO] - No change to apply on historical data for following delta: 12 week(s)
-2024-09-05 08:05:19+0000 [INFO] - Addition to "Release Radar": 1 video(s).
-2024-09-05 08:05:20+0000 [INFO] - 6 addition(s) from Re-listening playlist.
-2024-09-05 08:05:23+0000 [INFO] - 5 addition(s) from Legacy playlist.
-2024-09-05 08:05:26+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2024-09-05 08:05:26+0000 [INFO] - Process ended.
+2024-09-06 01:36:26+0000 [INFO] - Process started.
+2024-09-06 01:36:26+0000 [INFO] - API credentials refreshed.
+2024-09-06 01:36:26+0000 [INFO] - YouTube service created successfully.
+2024-09-06 01:36:26+0000 [INFO] - Iterative research for 227 YouTube channels.
+2024-09-06 01:37:38+0000 [INFO] - Add statistics for 49 video(s).
+2024-09-06 01:39:56+0000 [INFO] - Addition to "Banger Radar": 3 video(s).
+2024-09-06 01:39:58+0000 [INFO] - Addition to "Release Radar": 20 video(s).
+2024-09-06 01:39:59+0000 [WARNING] - Addition Request Failure: (2GMPkGHPOf0) - YouTubeException
+2024-09-06 01:39:59+0000 [WARNING] - Addition Request Failure: (0wgjY0N8YbE) - YouTubeException
+2024-09-06 01:40:00+0000 [WARNING] - Addition Request Failure: (47uV5aZ7GD0) - YouTubeException
+2024-09-06 01:40:00+0000 [WARNING] - Addition Request Failure: (TwZg9NznB_w) - YouTubeException
+2024-09-06 01:40:12+0000 [INFO] - Addition to "Watch Later": 8 video(s).
+2024-09-06 01:40:19+0000 [INFO] - 12 addition(s) from Re-listening playlist.
+2024-09-06 01:40:35+0000 [INFO] - 12 addition(s) from Legacy playlist.
+2024-09-06 01:40:53+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2024-09-06 01:40:53+0000 [INFO] - Process ended.
