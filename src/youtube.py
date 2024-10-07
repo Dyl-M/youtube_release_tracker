@@ -576,6 +576,16 @@ def weekly_stats(service: pyt.Client, histo_data: pd.DataFrame, week_delta: int,
     return histo_data
 
 
+def get_items_count(service: pyt.Client, playlist_ids: list) -> tuple:
+    """Get the number of videos in YouTube Playlists
+    :param service: a Python YouTube Client
+    :param playlist_ids: list of YouTube playlist ID
+    :return: Number of videos by playlist (ordered)
+    """
+    playlists = service.playlists.list(part=['contentDetails'], playlist_id=playlist_ids).items
+    return tuple(pl.contentDetails.itemCount for pl in playlists)
+
+
 def fill_release_radar(service: pyt.Client, target_playlist: str, re_listening_id: str, legacy_id: str, lmt: int = 30,
                        prog_bar: bool = True):
     """Fill the Release Radar playlist with videos from re-listening playlists
@@ -606,7 +616,14 @@ def fill_release_radar(service: pyt.Client, target_playlist: str, re_listening_i
         history.info('No addition necessary for Release Radar')
 
     else:
-        n_add_rel, n_add_leg = math.ceil(n_add / 2), math.floor(n_add / 2)  # Initial addition values
+        to_re_listen_count, legacy_count = get_items_count(service, [re_listening_id, legacy_id])
+        re_listen_ratio = to_re_listen_count / (to_re_listen_count + legacy_count)
+        legacy_ratio = legacy_count / (to_re_listen_count + legacy_count)
+
+        if re_listen_ratio < legacy_ratio:
+            n_add_rel, n_add_leg = math.ceil(n_add * re_listen_ratio), math.floor(n_add * legacy_ratio)
+        else:
+            n_add_rel, n_add_leg = math.floor(n_add * re_listen_ratio), math.ceil(n_add * legacy_ratio)
 
         # Get videos from both playlists
         to_re_listen_items = service.playlistItems.list(part=['snippet', 'contentDetails'],
