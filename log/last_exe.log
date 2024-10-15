@@ -1,13 +1,21 @@
-2024-10-14 08:40:11+0000 [INFO] - Process started.
-2024-10-14 08:40:11+0000 [INFO] - API credentials refreshed.
-2024-10-14 08:40:11+0000 [INFO] - YouTube service created successfully.
-2024-10-14 08:40:11+0000 [INFO] - 1 addition(s) to Release Radar playlist from previous API failure.
-2024-10-14 08:40:11+0000 [INFO] - Iterative research for 228 YouTube channels.
-2024-10-14 08:41:15+0000 [INFO] - Add statistics for 47 video(s).
-2024-10-14 08:42:31+0000 [INFO] - Addition to "Banger Radar": 3 video(s).
-2024-10-14 08:42:32+0000 [INFO] - Addition to "Release Radar": 27 video(s).
-2024-10-14 08:42:39+0000 [INFO] - Addition to "Watch Later": 3 video(s).
-2024-10-14 08:42:41+0000 [INFO] - 4 addition(s) from Re-listening playlist.
-2024-10-14 08:42:43+0000 [INFO] - 8 addition(s) from Legacy playlist.
-2024-10-14 08:42:50+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2024-10-14 08:42:50+0000 [INFO] - Process ended.
+2024-10-15 01:43:04+0000 [INFO] - Process started.
+2024-10-15 01:43:04+0000 [INFO] - API credentials refreshed.
+2024-10-15 01:43:04+0000 [INFO] - YouTube service created successfully.
+2024-10-15 01:43:04+0000 [INFO] - Iterative research for 228 YouTube channels.
+2024-10-15 01:44:10+0000 [INFO] - Add statistics for 52 video(s).
+2024-10-15 01:45:57+0000 [INFO] - Addition to "Banger Radar": 4 video(s).
+2024-10-15 01:46:00+0000 [INFO] - Addition to "Release Radar": 27 video(s).
+2024-10-15 01:46:01+0000 [WARNING] - Addition Request Failure: (G9Gm-kgRtWY) - YouTubeException
+2024-10-15 01:46:01+0000 [WARNING] - Addition Request Failure: (1_UpVdyjcCk) - YouTubeException
+2024-10-15 01:46:02+0000 [WARNING] - Addition Request Failure: (3ekd4TicanA) - YouTubeException
+2024-10-15 01:46:02+0000 [WARNING] - Addition Request Failure: (v_YXNx_n9Zk) - YouTubeException
+2024-10-15 01:46:02+0000 [WARNING] - Addition Request Failure: (EQMBA0_2YcU) - YouTubeException
+2024-10-15 01:46:04+0000 [WARNING] - Addition Request Failure: (rS4hhg_ZEZg) - YouTubeException
+2024-10-15 01:46:04+0000 [WARNING] - Addition Request Failure: (Exgn1DvNTPw) - YouTubeException
+2024-10-15 01:46:05+0000 [WARNING] - Addition Request Failure: (h8-pViQFrVw) - YouTubeException
+2024-10-15 01:46:05+0000 [WARNING] - Addition Request Failure: (XEQdJzgc0wk) - YouTubeException
+2024-10-15 01:46:12+0000 [INFO] - Addition to "Watch Later": 3 video(s).
+2024-10-15 01:46:15+0000 [INFO] - 7 addition(s) from Re-listening playlist.
+2024-10-15 01:46:21+0000 [INFO] - 15 addition(s) from Legacy playlist.
+2024-10-15 01:46:42+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2024-10-15 01:46:42+0000 [INFO] - Process ended.
