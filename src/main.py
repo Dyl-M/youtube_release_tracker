@@ -222,8 +222,8 @@ if __name__ == '__main__':
             history_main.info('Addition to "Watch Later": %s video(s).', len(add_wl))
             youtube.add_to_playlist(YOUTUBE_OAUTH, watch_later, add_wl, prog_bar=PROG_BAR)
 
-        # Fill Release Radar playlist
-        youtube.fill_release_radar(YOUTUBE_OAUTH, release, re_listening, legacy, lmt=40, prog_bar=PROG_BAR)
+    # Fill Release Radar playlist
+    youtube.fill_release_radar(YOUTUBE_OAUTH, release, re_listening, legacy, lmt=40, prog_bar=PROG_BAR)
 
     if exe_mode == 'local':  # Credentials in base64 update - Local option
         youtube.encode_key(json_path='../tokens/credentials.json')
