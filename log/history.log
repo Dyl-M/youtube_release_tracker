@@ -4234,3 +4234,10 @@
 2024-10-17 07:40:42+0000 [WARNING] - Addition Request Failure: (ekVTPQ7SwKg) - YouTubeException
 2024-10-17 07:40:49+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
 2024-10-17 07:40:49+0000 [INFO] - Process ended.
+2024-10-18 01:42:22+0000 [INFO] - Process started.
+2024-10-18 01:42:23+0000 [INFO] - API credentials refreshed.
+2024-10-18 01:42:23+0000 [INFO] - YouTube service created successfully.
+2024-10-18 01:42:23+0000 [INFO] - 1 addition(s) to Release Radar playlist from previous API failure.
+2024-10-18 01:42:23+0000 [WARNING] - Addition Request Failure: (ekVTPQ7SwKg) - YouTubeException
+2024-10-18 01:42:23+0000 [INFO] - Iterative research for 228 YouTube channels.
+2024-10-18 01:42:23+0000 [ERROR] - [UUGt553K1a2MNHfioKJFPCPA] Unknown error: The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
