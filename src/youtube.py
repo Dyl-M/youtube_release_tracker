@@ -2,6 +2,7 @@
 
 import ast
 import base64
+import copy
 import datetime as dt
 import googleapiclient.errors
 import isodate
@@ -236,7 +237,7 @@ def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int = Non
             request = service.playlistItems.list(part=['snippet', 'contentDetails', 'status'],
                                                  playlist_id=playlist_id,
                                                  max_results=50,
-                                                 pageToken=next_page_token).items  # Request playlist's items
+                                                 pageToken=next_page_token)  # Request playlist's items
 
             # Keep necessary data
             p_items += [{'video_id': item.contentDetails.videoId,
@@ -245,7 +246,7 @@ def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int = Non
                          'release_date': dt.datetime.strptime(item.contentDetails.videoPublishedAt, date_format),
                          'status': item.status.privacyStatus,
                          'channel_id': item.snippet.videoOwnerChannelId,
-                         'channel_name': item.snippet.videoOwnerChannelTitle} for item in request]
+                         'channel_name': item.snippet.videoOwnerChannelTitle} for item in request.items]
 
             if with_last_exe:  # In case we want to keep videos published between last exe date and your latest_d
                 oldest_d = LAST_EXE.replace(minute=0, second=0, microsecond=0)  # Round hour to XX:00:00.0
@@ -256,7 +257,7 @@ def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int = Non
                 latest_d = latest_d.replace(minute=0, second=0, microsecond=0)  # Round hour to XX:00:00.0
                 p_items = filter_items_by_date_range(p_items, latest_d, _day_ago=day_ago)
 
-            if len(p_items) <= 50:  # No need for more requests (the playlist must be ordered chronologically!)
+            if len(p_items) < 50:  # No need for more requests (the playlist must be ordered chronologically!)
                 break
 
             next_page_token = request.nextPageToken
@@ -428,7 +429,7 @@ def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list, pr
     :param videos_list: list of YouTube video IDs
     :param prog_bar: to use tqdm progress bar or not.
     """
-    with open('../data/api_failure.json', 'r', encoding='utf-8') as api_failure_file:
+    with open('../data/delayed_additions.json', 'r', encoding='utf-8') as api_failure_file:
         api_failure = json.load(api_failure_file)
 
     api_fail = False
@@ -450,9 +451,11 @@ def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list, pr
             api_failure[playlist_id]['failure'].append(video_id)  # Save the video ID in dedicated file
             api_fail = True
 
-    if api_fail:  # Save API failure
-        with open('../data/api_failure.json', 'w', encoding='utf-8') as api_failure_file:
-            json.dump(api_failure, api_failure_file, ensure_ascii=False, indent=2)
+    if not api_fail:  # Save API failure
+        api_failure['playlistId']['failure'] = []
+
+    with open('../data/delayed_additions.json', 'w', encoding='utf-8') as api_failure_file:
+        json.dump(api_failure, api_failure_file, ensure_ascii=False, indent=2)
 
 
 def del_from_playlist(service: pyt.Client, playlist_id: str, items_list: list, prog_bar: bool = True):
@@ -664,27 +667,21 @@ def fill_release_radar(service: pyt.Client, target_playlist: str, re_listening_i
             del_from_playlist(service, legacy_id, addition_leg, prog_bar)
 
 
-def add_api_fail(service: pyt.Client, prog_bar: bool = True):
+def add_api_fail(service: pyt.Client, prog_bar: bool = True): # TODO: rename me
     """Add missing videos to targeted playlist following API failure on previous run
     :param service: a Python YouTube Client
     :param prog_bar: to use tqdm progress bar or not.
     """
-    with open('../data/api_failure.json', 'r', encoding='utf-8') as api_failure_file:
+    with open('../data/delayed_additions.json', 'r', encoding='utf-8') as api_failure_file:
         api_failure = json.load(api_failure_file)
 
-    addition = 0
-
     for p_id, info in api_failure.items():
-        if info['failure']:
-            history.info('%s addition(s) to %s playlist from previous API failure.',
-                         len(info['failure']), info['name'])
-            add_to_playlist(service, p_id, info['failure'], prog_bar=prog_bar)
-            api_failure[p_id]['failure'] = []
-            addition += 1
+        failures = copy.deepcopy(info['failure'])  # Copy previous failures from JSON file into a new list
 
-    if addition > 0:  # Save cleared file
-        with open('../data/api_failure.json', 'w', encoding='utf-8') as api_failure_file:
-            json.dump(api_failure, api_failure_file, ensure_ascii=False, indent=2)
+        if failures:
+            history.info('%s addition(s) to %s playlist from previous API failure.',
+                         len(failures), info['name'])
+            add_to_playlist(service, p_id, failures, prog_bar=prog_bar)
 
 
 if __name__ == '__main__':

@@ -1,4 +1,4 @@
-name: YTB Tracker - Main Process
+name: [YRT] Livestreams Workflow
 
 on:
     workflow_dispatch:
@@ -10,7 +10,7 @@ on:
 
 
     schedule:
-        -   cron: "0 7 * * *"
+        -   cron: "0 0,6,12,18 * * *"
 
 jobs:
     build-linux:
@@ -54,7 +54,7 @@ jobs:
                 name: Main process execution
                 run: |
                     cd src
-                    python main.py 'action' 'all'
+                    python main.py 'action' 'live'
                     cd ../
 
             -   id: commit

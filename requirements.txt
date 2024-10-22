@@ -4,6 +4,7 @@ google-auth~=2.35
 google-auth-oauthlib~=1.2
 isodate~=0.6
 pandas~=2.2
+protobuf~=5.27
 pygithub~=2.4
 python-youtube~=0.9
 requests~=2.32

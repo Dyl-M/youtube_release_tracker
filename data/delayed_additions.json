@@ -2,20 +2,25 @@
   "PLOMUdQFdS-XNe56Ot6KQmsR4cLT2ua9IC": {
     "name": "Release Radar",
     "description": "Music release radar based on my YouTube subscriptions.",
-    "failure": [
-      "r6M0APVGBAg",
-      "m8van4bEZK0",
-      "WyBSoV6Rb0A"
-    ]
+    "new_addition": [],
+    "failure": []
   },
   "PLOMUdQFdS-XOI8OIWV_Gx-SRhlCS9PKLn": {
     "name": "Banger Radar",
     "description": "Music release radar based on my YouTube subscriptions. Absolute. Priority.",
+    "new_addition": [],
     "failure": []
   },
   "PLOMUdQFdS-XPfjAeBp5TuNDQmMoiJHdvB": {
     "name": "Watch Later",
     "description": "2024 videos to watch later.",
+    "new_addition": [],
+    "failure": []
+  },
+  "PLOMUdQFdS-XNaPVSol9qCUJvQvN5hO4hJ": {
+    "name": "🎧🔴 Music Lives",
+    "description": "Music radios on YouTube.",
+    "new_addition": [],
     "failure": []
   }
 }

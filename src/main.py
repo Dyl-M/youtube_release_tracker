@@ -29,9 +29,11 @@ except KeyError:
 "SYSTEM"
 
 try:
-    exe_mode = sys.argv[1]
+    exe_mode = sys.argv[1]  # For the execution mode: 'local' or 'action'
+    add_mode = sys.argv[2]  # For the addition mode: 'all', 'live' or 'mixes'
 except IndexError:
     exe_mode = 'local'
+    add_mode = 'all'  # Default mode
 
 "PARAMETER FILES"
 
@@ -42,7 +44,7 @@ with open('../data/pocket_tube.json', 'r', encoding='utf8') as pt_file:
 with open('../data/playlists.json', 'r', encoding='utf8') as playlists_file:
     playlists = json.load(playlists_file)
 
-with open('../data/add-on.json') as add_on_file:
+with open('../data/add-on.json', encoding='utf8') as add_on_file:
     favorites = json.load(add_on_file)['favorites'].values()
 
 # YouTube Channels list
@@ -55,6 +57,7 @@ all_channels = list(set(music + other))
 release = playlists['release']['id']
 banger = playlists['banger']['id']
 watch_later = playlists['watch_later']['id']
+lives = playlists['lives']['id']
 re_listening = playlists['re_listening']['id']
 legacy = playlists['legacy']['id']
 
@@ -77,11 +80,12 @@ def copy_last_exe_log():
         last_exe_file.write(last_exe_log)
 
 
-def dest_playlist(channel_id: str, is_shorts: bool, v_duration: int, max_duration: int = 10):
+def dest_playlist(channel_id: str, is_shorts: bool, v_duration: int, status: str, max_duration: int = 10):
     """Return destination playlist for addition
     :param channel_id: YouTube channel ID
     :param is_shorts: boolean indicating whether the video is a YouTube shorts or not
     :param v_duration: YouTube video duration in seconds
+    :param status: current video Live status ('live', 'upcoming' or none).
     :param max_duration: duration threshold in minutes
     :return: appropriate YouTube playlist ID based on video information
     """
@@ -89,6 +93,8 @@ def dest_playlist(channel_id: str, is_shorts: bool, v_duration: int, max_duratio
         return 'shorts'
 
     if channel_id in music:
+        if status in ('live', 'upcoming'):
+            return lives
         if v_duration > max_duration * 60:
             if channel_id in other:
                 return watch_later
@@ -150,14 +156,18 @@ if __name__ == '__main__':
         YOUTUBE_OAUTH, CREDS_B64 = youtube.create_service_workflow()
         PROG_BAR = False  # Do not display progress bar
 
-    # Add missing videos due to quota exceeded on previous run
-    youtube.add_api_fail(service=YOUTUBE_OAUTH, prog_bar=PROG_BAR)
+    # Add missing videos due to quota exceeded on previous run or retrieved with other 'add_mode'
+    if add_mode == 'all':
+        youtube.add_api_fail(service=YOUTUBE_OAUTH, prog_bar=PROG_BAR)
+
+    elif add_mode == 'live':  # FIXME
+        youtube.add_api_fail(service=YOUTUBE_OAUTH, prog_bar=PROG_BAR)
 
     # Search for new videos to add
     history_main.info('Iterative research for %s YouTube channels.', len(all_channels))
     new_videos = youtube.iter_channels(YOUTUBE_OAUTH, all_channels, prog_bar=PROG_BAR)
 
-    if not new_videos:
+    if not new_videos and add_mode == 'all':
         history_main.info('No addition to perform.')
 
         # Get stats for already retrieved videos
@@ -208,22 +218,40 @@ if __name__ == '__main__':
         add_banger = to_add.get(banger, [])
         add_release = to_add.get(release, [])
         add_wl = to_add.get(watch_later, [])
+        add_lives = to_add.get(lives, [])
 
-        # Addition by priority (Favorites > Music releases > Normal videos > Shorts)
-        if add_banger:
-            history_main.info('Addition to "Banger Radar": %s video(s).', len(add_banger))
-            youtube.add_to_playlist(YOUTUBE_OAUTH, banger, add_banger, prog_bar=PROG_BAR)
+        # Addition by priority (Favorites > Music releases > Normal videos)
+        if add_mode == 'all':
+            if add_banger:
+                history_main.info('Addition to "Banger Radar": %s video(s).', len(add_banger))
+                youtube.add_to_playlist(YOUTUBE_OAUTH, banger, add_banger, prog_bar=PROG_BAR)
 
-        if add_release:
-            history_main.info('Addition to "Release Radar": %s video(s).', len(add_release))
-            youtube.add_to_playlist(YOUTUBE_OAUTH, release, add_release, prog_bar=PROG_BAR)
+            if add_release:
+                history_main.info('Addition to "Release Radar": %s video(s).', len(add_release))
+                youtube.add_to_playlist(YOUTUBE_OAUTH, release, add_release, prog_bar=PROG_BAR)
 
-        if add_wl:
-            history_main.info('Addition to "Watch Later": %s video(s).', len(add_wl))
-            youtube.add_to_playlist(YOUTUBE_OAUTH, watch_later, add_wl, prog_bar=PROG_BAR)
+            if add_wl:
+                history_main.info('Addition to "Watch Later": %s video(s).', len(add_wl))
+                youtube.add_to_playlist(YOUTUBE_OAUTH, watch_later, add_wl, prog_bar=PROG_BAR)
 
-    # Fill Release Radar playlist
-    youtube.fill_release_radar(YOUTUBE_OAUTH, release, re_listening, legacy, lmt=40, prog_bar=PROG_BAR)
+        # Fill Release Radar playlist
+        youtube.fill_release_radar(YOUTUBE_OAUTH, release, re_listening, legacy, lmt=40, prog_bar=PROG_BAR)
+
+        if add_mode in ('all', 'live'):
+            # Addition to be done later (Banger Radar, Release Radar and Watch Later)
+            with open('../data/delayed_additions.json', 'r', encoding='utf8') as delayed_additions_file:
+                delayed_additions = json.load(delayed_additions_file)
+
+            delayed_additions[banger]['new_addition'] += add_banger
+            delayed_additions[release]['new_addition'] += add_release
+            delayed_additions[watch_later]['new_addition'] += watch_later
+
+            with open('../data/delayed_additions.json', 'w', encoding='utf8') as delayed_additions_file:
+                json.dump(delayed_additions, delayed_additions_file, ensure_ascii=False, indent=2)
+
+            # Livestream playlist update
+            history_main.info('Addition to "Livestream": %s video(s).', len(add_lives))
+            youtube.add_to_playlist(YOUTUBE_OAUTH, lives, add_lives, prog_bar=PROG_BAR)
 
     if exe_mode == 'local':  # Credentials in base64 update - Local option
         youtube.encode_key(json_path='../tokens/credentials.json')
