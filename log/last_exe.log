@@ -1,12 +1,18 @@
-2024-11-11 07:16:33+0000 [INFO] - Process started.
-2024-11-11 07:16:33+0000 [INFO] - API credentials refreshed.
-2024-11-11 07:16:33+0000 [INFO] - YouTube service created successfully.
-2024-11-11 07:16:33+0000 [INFO] - Iterative research for 228 YouTube channels.
-2024-11-11 07:17:24+0000 [INFO] - Add statistics for 32 video(s).
-2024-11-11 07:18:38+0000 [INFO] - Addition to "Banger Radar": 2 video(s).
-2024-11-11 07:18:39+0000 [INFO] - Addition to "Release Radar": 18 video(s).
-2024-11-11 07:18:45+0000 [INFO] - Addition to "Watch Later": 3 video(s).
-2024-11-11 07:18:47+0000 [INFO] - 7 addition(s) from Re-listening playlist.
-2024-11-11 07:18:52+0000 [INFO] - 15 addition(s) from Legacy playlist.
-2024-11-11 07:19:05+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2024-11-11 07:19:05+0000 [INFO] - Process ended.
+2024-11-12 07:15:10+0000 [INFO] - Process started.
+2024-11-12 07:15:10+0000 [INFO] - API credentials refreshed.
+2024-11-12 07:15:10+0000 [INFO] - YouTube service created successfully.
+2024-11-12 07:15:10+0000 [INFO] - Iterative research for 228 YouTube channels.
+2024-11-12 07:16:11+0000 [INFO] - Add statistics for 54 video(s).
+2024-11-12 07:18:01+0000 [INFO] - Addition to "Banger Radar": 6 video(s).
+2024-11-12 07:18:15+0000 [INFO] - Addition to "Release Radar": 20 video(s).
+2024-11-12 07:18:31+0000 [WARNING] - Addition Request Failure: (YZXs3xmk0NQ) - YouTubeException
+2024-11-12 07:18:32+0000 [WARNING] - Addition Request Failure: (nARxhdJGqJo) - YouTubeException
+2024-11-12 07:18:49+0000 [WARNING] - Addition Request Failure: (HuFYqnbVbzY) - YouTubeException
+2024-11-12 07:18:54+0000 [INFO] - Addition to "Watch Later": 5 video(s).
+2024-11-12 07:18:57+0000 [INFO] - 8 addition(s) from Re-listening playlist.
+2024-11-12 07:19:01+0000 [WARNING] - Addition Request Failure: (K_brS3qhKrU) - YouTubeException
+2024-11-12 07:19:05+0000 [INFO] - 15 addition(s) from Legacy playlist.
+2024-11-12 07:19:05+0000 [WARNING] - Addition Request Failure: (-E5X6rmxwJg) - YouTubeException
+2024-11-12 07:19:11+0000 [WARNING] - Addition Request Failure: (2ZjtsR4yQME) - YouTubeException
+2024-11-12 07:19:25+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2024-11-12 07:19:25+0000 [INFO] - Process ended.
