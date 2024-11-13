@@ -1,27 +1,14 @@
-2024-11-13 07:15:14+0000 [INFO] - Process started.
-2024-11-13 07:15:14+0000 [INFO] - API credentials refreshed.
-2024-11-13 07:15:14+0000 [INFO] - YouTube service created successfully.
-2024-11-13 07:15:14+0000 [INFO] - Iterative research for 228 YouTube channels.
-2024-11-13 07:16:20+0000 [INFO] - Add statistics for 53 video(s).
-2024-11-13 07:18:09+0000 [INFO] - Addition to "Banger Radar": 3 video(s).
-2024-11-13 07:18:10+0000 [WARNING] - Addition Request Failure: (A49nvbN6ccM) - YouTubeException
-2024-11-13 07:18:10+0000 [WARNING] - Addition Request Failure: (p3lPMl6EP-Y) - YouTubeException
-2024-11-13 07:18:10+0000 [INFO] - Addition to "Release Radar": 21 video(s).
-2024-11-13 07:18:11+0000 [WARNING] - Addition Request Failure: (2xGeRY0QiI8) - YouTubeException
-2024-11-13 07:18:22+0000 [INFO] - Addition to "Watch Later": 2 video(s).
-2024-11-13 07:18:24+0000 [INFO] - 7 addition(s) from Re-listening playlist.
-2024-11-13 07:18:31+0000 [INFO] - 13 addition(s) from Legacy playlist.
-2024-11-13 07:18:38+0000 [WARNING] - Addition Request Failure: (y9FNG63_VmQ) - YouTubeException
-2024-11-13 07:18:38+0000 [WARNING] - Deletion Request Failure: (26OeOAddNjk) - YouTubeException
-2024-11-13 07:18:39+0000 [WARNING] - Deletion Request Failure: (zOMDAmE5ths) - YouTubeException
-2024-11-13 07:18:39+0000 [WARNING] - Deletion Request Failure: (rpbKr0w32Uw) - YouTubeException
-2024-11-13 07:18:39+0000 [WARNING] - Deletion Request Failure: (SYaaImKvAYs) - YouTubeException
-2024-11-13 07:18:39+0000 [WARNING] - Deletion Request Failure: (QYj8PSdjRDU) - YouTubeException
-2024-11-13 07:18:39+0000 [WARNING] - Deletion Request Failure: (_PoXgJztviI) - YouTubeException
-2024-11-13 07:18:39+0000 [WARNING] - Deletion Request Failure: (MtOBbt9smt0) - YouTubeException
-2024-11-13 07:18:39+0000 [WARNING] - Deletion Request Failure: (YtgKPPD6Coc) - YouTubeException
-2024-11-13 07:18:39+0000 [WARNING] - Deletion Request Failure: (mRhywHqjx1I) - YouTubeException
-2024-11-13 07:18:40+0000 [WARNING] - Deletion Request Failure: (0WMyLSMEf5c) - YouTubeException
-2024-11-13 07:18:40+0000 [WARNING] - Deletion Request Failure: (y9FNG63_VmQ) - YouTubeException
-2024-11-13 07:18:41+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2024-11-13 07:18:41+0000 [INFO] - Process ended.
+2024-11-13 10:02:56+0000 [INFO] - Process started.
+2024-11-13 10:02:56+0000 [INFO] - API credentials refreshed.
+2024-11-13 10:02:56+0000 [INFO] - YouTube service created successfully.
+2024-11-13 10:02:56+0000 [INFO] - 2 addition(s) to Release Radar playlist from previous API failure.
+2024-11-13 10:02:56+0000 [INFO] - 2 addition(s) to Banger Radar playlist from previous API failure.
+2024-11-13 10:02:58+0000 [INFO] - Iterative research for 228 YouTube channels.
+2024-11-13 10:03:49+0000 [INFO] - Add statistics for 3 video(s).
+2024-11-13 10:03:50+0000 [INFO] - No change to apply on historical data for following delta: 1 week(s)
+2024-11-13 10:03:50+0000 [INFO] - No change to apply on historical data for following delta: 12 week(s)
+2024-11-13 10:03:52+0000 [INFO] - Addition to "Banger Radar": 1 video(s).
+2024-11-13 10:03:52+0000 [INFO] - Addition to "Release Radar": 1 video(s).
+2024-11-13 10:03:53+0000 [INFO] - No addition necessary for Release Radar
+2024-11-13 10:03:53+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2024-11-13 10:03:53+0000 [INFO] - Process ended.
