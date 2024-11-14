@@ -26,7 +26,7 @@ jobs:
             PAT: '${{ secrets.PAT }}'
 
         steps:
-            -   id: check event
+            -   id: check-event
                 name: Check Trigger Event
                 run: |
                     # Check if the event is 'schedule' or 'workflow_dispatch'
@@ -37,7 +37,7 @@ jobs:
                       echo "This is a manual run. Skipping the midnight PST check."
                       echo "proceed_with_check=false" >> $GITHUB_ENV
 
-            -   id: set up tz
+            -   id: set-up-tz
                 name: Set Up Timezone
                 if: env.proceed_with_check == 'true'
                 run: |
@@ -46,7 +46,7 @@ jobs:
                     export TZ="America/Los_Angeles"
                     echo "Timezone set to America/Los_Angeles" 
 
-            -   id: wait 0000 pst
+            -   id: wait-0000-pst
                 name: Wait Until Midnight PST
                 if: env.proceed_with_check == 'true'
                 run: |
@@ -68,14 +68,14 @@ jobs:
                       fi
                     done
 
-            -   id: tz reset
+            -   id: tz-reset
                 name: Reset Timezone to UTC
                 if: env.proceed_with_check == 'true'
                 run: |
                     export TZ="UTC"
                     echo "Timezone reset to UTC"
 
-            -   id: git checkout
+            -   id: git-checkout
                 name: Checkout repository
                 uses: actions/checkout@v4
 
