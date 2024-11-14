@@ -36,6 +36,7 @@ jobs:
                     else
                       echo "This is a manual run. Skipping the midnight PST check."
                       echo "proceed_with_check=false" >> $GITHUB_ENV
+                    fi
 
             -   id: set-up-tz
                 name: Set Up Timezone
