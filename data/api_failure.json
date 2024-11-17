@@ -2,7 +2,10 @@
   "PLOMUdQFdS-XNe56Ot6KQmsR4cLT2ua9IC": {
     "name": "Release Radar",
     "description": "Music release radar based on my YouTube subscriptions.",
-    "failure": []
+    "failure": [
+      "cdkeIik81PE",
+      "UAc2HD8i1A0"
+    ]
   },
   "PLOMUdQFdS-XOI8OIWV_Gx-SRhlCS9PKLn": {
     "name": "Banger Radar",
