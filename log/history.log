@@ -4888,3 +4888,15 @@
 2024-11-25 08:18:03+0000 [INFO] - 7 addition(s) from Re-listening playlist.
 2024-11-25 08:18:08+0000 [INFO] - 13 addition(s) from Legacy playlist.
 2024-11-25 08:18:22+0000 [ERROR] - Failed to update Repository Secret 'CREDS_B64' : HTTPSConnectionPool(host='api.github.com', port=443): Max retries exceeded with url: /repos/Dyl-M/youtube_release_tracker/actions/secrets/CREDS_B64 (Caused by ResponseError('too many 503 error responses'))
+2024-11-25 08:40:07+0000 [INFO] - Process started.
+2024-11-25 08:40:07+0000 [INFO] - API credentials refreshed.
+2024-11-25 08:40:07+0000 [INFO] - YouTube service created successfully.
+2024-11-25 08:40:07+0000 [INFO] - Iterative research for 229 YouTube channels.
+2024-11-25 08:40:58+0000 [INFO] - Add statistics for 35 video(s).
+2024-11-25 08:41:08+0000 [INFO] - No change to apply on historical data for following delta: 1 week(s)
+2024-11-25 08:41:08+0000 [INFO] - Addition to "Banger Radar": 1 video(s).
+2024-11-25 08:41:09+0000 [INFO] - Addition to "Release Radar": 18 video(s).
+2024-11-25 08:41:15+0000 [INFO] - Addition to "Watch Later": 6 video(s).
+2024-11-25 08:41:19+0000 [INFO] - No addition necessary for Release Radar
+2024-11-25 08:41:20+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2024-11-25 08:41:20+0000 [INFO] - Process ended.
