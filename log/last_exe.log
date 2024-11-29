@@ -1,14 +1,12 @@
-2024-11-29 08:15:21+0000 [INFO] - Process started.
-2024-11-29 08:15:21+0000 [INFO] - API credentials refreshed.
-2024-11-29 08:15:21+0000 [INFO] - YouTube service created successfully.
-2024-11-29 08:15:21+0000 [INFO] - 1 addition(s) to Release Radar playlist from previous API failure.
-2024-11-29 08:15:21+0000 [INFO] - Iterative research for 229 YouTube channels.
-2024-11-29 08:16:11+0000 [INFO] - Add statistics for 49 video(s).
-2024-11-29 08:17:47+0000 [INFO] - Addition to "Banger Radar": 3 video(s).
-2024-11-29 08:17:48+0000 [INFO] - Addition to "Release Radar": 17 video(s).
-2024-11-29 08:17:55+0000 [INFO] - Addition to "Watch Later": 6 video(s).
-2024-11-29 08:17:58+0000 [INFO] - 8 addition(s) from Re-listening playlist.
-2024-11-29 08:18:03+0000 [INFO] - 14 addition(s) from Legacy playlist.
-2024-11-29 08:18:05+0000 [WARNING] - Addition Request Failure: (6cK7DBGHwOc) - YouTubeException
-2024-11-29 08:18:17+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2024-11-29 08:18:17+0000 [INFO] - Process ended.
+2024-11-29 09:19:50+0000 [INFO] - Process started.
+2024-11-29 09:19:50+0000 [INFO] - API credentials refreshed.
+2024-11-29 09:19:50+0000 [INFO] - YouTube service created successfully.
+2024-11-29 09:19:50+0000 [INFO] - 1 addition(s) to Release Radar playlist from previous API failure.
+2024-11-29 09:19:50+0000 [INFO] - Iterative research for 229 YouTube channels.
+2024-11-29 09:20:54+0000 [INFO] - Add statistics for 1 video(s).
+2024-11-29 09:20:54+0000 [INFO] - No change to apply on historical data for following delta: 12 week(s)
+2024-11-29 09:20:55+0000 [INFO] - Addition to "Release Radar": 1 video(s).
+2024-11-29 09:20:56+0000 [INFO] - 2 addition(s) from Re-listening playlist.
+2024-11-29 09:20:57+0000 [INFO] - 2 addition(s) from Legacy playlist.
+2024-11-29 09:20:59+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2024-11-29 09:20:59+0000 [INFO] - Process ended.
