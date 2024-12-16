@@ -236,7 +236,7 @@ def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int = Non
             request = service.playlistItems.list(part=['snippet', 'contentDetails', 'status'],
                                                  playlist_id=playlist_id,
                                                  max_results=50,
-                                                 pageToken=next_page_token).items  # Request playlist's items
+                                                 pageToken=next_page_token)  # Request playlist's items
 
             # Keep necessary data
             p_items += [{'video_id': item.contentDetails.videoId,
@@ -245,7 +245,7 @@ def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int = Non
                          'release_date': dt.datetime.strptime(item.contentDetails.videoPublishedAt, date_format),
                          'status': item.status.privacyStatus,
                          'channel_id': item.snippet.videoOwnerChannelId,
-                         'channel_name': item.snippet.videoOwnerChannelTitle} for item in request]
+                         'channel_name': item.snippet.videoOwnerChannelTitle} for item in request.items]
 
             if with_last_exe:  # In case we want to keep videos published between last exe date and your latest_d
                 oldest_d = LAST_EXE.replace(minute=0, second=0, microsecond=0)  # Round hour to XX:00:00.0
