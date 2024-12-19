@@ -1,15 +1,14 @@
-2024-12-18 08:15:14+0000 [INFO] - Process started.
-2024-12-18 08:15:14+0000 [INFO] - API credentials refreshed.
-2024-12-18 08:15:14+0000 [INFO] - YouTube service created successfully.
-2024-12-18 08:15:14+0000 [INFO] - Iterative research for 229 YouTube channels.
-2024-12-18 08:16:09+0000 [INFO] - Add statistics for 52 video(s).
-2024-12-18 08:17:49+0000 [INFO] - Addition to "Banger Radar": 3 video(s).
-2024-12-18 08:17:50+0000 [INFO] - Addition to "Release Radar": 21 video(s).
-2024-12-18 08:17:58+0000 [INFO] - Addition to "Watch Later": 6 video(s).
-2024-12-18 08:18:02+0000 [INFO] - 7 addition(s) from Re-listening playlist.
-2024-12-18 08:18:07+0000 [INFO] - 12 addition(s) from Legacy playlist.
-2024-12-18 08:18:09+0000 [WARNING] - Addition Request Failure: (zmTw8GEkRxs) - YouTubeException
-2024-12-18 08:18:09+0000 [WARNING] - Addition Request Failure: (Grt2uPEg9fY) - YouTubeException
-2024-12-18 08:18:12+0000 [WARNING] - Addition Request Failure: (R05tqw-DOeA) - YouTubeException
-2024-12-18 08:18:21+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2024-12-18 08:18:21+0000 [INFO] - Process ended.
+2024-12-19 08:14:46+0000 [INFO] - Process started.
+2024-12-19 08:14:46+0000 [INFO] - API credentials refreshed.
+2024-12-19 08:14:46+0000 [INFO] - YouTube service created successfully.
+2024-12-19 08:14:46+0000 [INFO] - 3 addition(s) to Release Radar playlist from previous API failure.
+2024-12-19 08:14:47+0000 [INFO] - Iterative research for 229 YouTube channels.
+2024-12-19 08:15:54+0000 [INFO] - Add statistics for 47 video(s).
+2024-12-19 08:17:38+0000 [INFO] - Addition to "Banger Radar": 3 video(s).
+2024-12-19 08:17:38+0000 [INFO] - Addition to "Release Radar": 17 video(s).
+2024-12-19 08:17:40+0000 [WARNING] - Addition Request Failure: (D6ChWCLyyqg) - YouTubeException
+2024-12-19 08:17:44+0000 [INFO] - Addition to "Watch Later": 3 video(s).
+2024-12-19 08:17:45+0000 [INFO] - 8 addition(s) from Re-listening playlist.
+2024-12-19 08:17:49+0000 [INFO] - 13 addition(s) from Legacy playlist.
+2024-12-19 08:17:58+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2024-12-19 08:17:58+0000 [INFO] - Process ended.
