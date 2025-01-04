@@ -1,11 +1,14 @@
-2025-01-03 08:14:14+0000 [INFO] - Process started.
-2025-01-03 08:14:14+0000 [INFO] - API credentials refreshed.
-2025-01-03 08:14:14+0000 [INFO] - YouTube service created successfully.
-2025-01-03 08:14:14+0000 [INFO] - Iterative research for 229 YouTube channels.
-2025-01-03 08:15:08+0000 [INFO] - Add statistics for 42 video(s).
-2025-01-03 08:16:45+0000 [INFO] - Addition to "Banger Radar": 3 video(s).
-2025-01-03 08:16:46+0000 [INFO] - Addition to "Release Radar": 22 video(s).
-2025-01-03 08:16:52+0000 [INFO] - Addition to "Watch Later": 2 video(s).
-2025-01-03 08:16:53+0000 [INFO] - No addition necessary for Release Radar
-2025-01-03 08:16:54+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2025-01-03 08:16:54+0000 [INFO] - Process ended.
+2025-01-04 08:12:41+0000 [INFO] - Process started.
+2025-01-04 08:12:41+0000 [INFO] - API credentials refreshed.
+2025-01-04 08:12:41+0000 [INFO] - YouTube service created successfully.
+2025-01-04 08:12:41+0000 [INFO] - Iterative research for 229 YouTube channels.
+2025-01-04 08:13:50+0000 [INFO] - Add statistics for 51 video(s).
+2025-01-04 08:14:45+0000 [INFO] - Addition to "Banger Radar": 11 video(s).
+2025-01-04 08:14:48+0000 [INFO] - Addition to "Release Radar": 24 video(s).
+2025-01-04 08:14:49+0000 [WARNING] - Addition Request Failure: (r97SUGtfiE0) - YouTubeException
+2025-01-04 08:14:55+0000 [INFO] - Addition to "Watch Later": 2 video(s).
+2025-01-04 08:14:57+0000 [INFO] - 7 addition(s) from Re-listening playlist.
+2025-01-04 08:15:01+0000 [INFO] - 10 addition(s) from Legacy playlist.
+2025-01-04 08:15:02+0000 [WARNING] - Addition Request Failure: (AqqkmdnHZ6k) - YouTubeException
+2025-01-04 08:15:10+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2025-01-04 08:15:10+0000 [INFO] - Process ended.
