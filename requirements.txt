@@ -10,7 +10,7 @@ protobuf~=5.27
 pygithub~=2.5
 python-youtube~=0.9
 requests~=2.32
-scikit-learn~=1.5
+scikit-learn~=1.6
 tqdm~=4.67
 tzlocal~=5.2
 
