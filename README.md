@@ -40,6 +40,8 @@ comprehension or workflow execution.
 │   │   └── update_workflow.yml
 │   └── dependabot.yml
 │
+├── archive (IGNORED)
+│
 ├── data
 │   ├── add-on.json
 │   ├── api_failure.json
@@ -48,6 +50,9 @@ comprehension or workflow execution.
 │   └── stats.csv
 │
 ├── media
+│
+├── notebooks
+│   └── channel_reporting.ipynb
 │
 ├── src
 │   ├── _sandbox.py
