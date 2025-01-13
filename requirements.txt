@@ -3,10 +3,14 @@ google-api-python-client~=2.158
 google-auth~=2.37
 google-auth-oauthlib~=1.2
 isodate~=0.7
+numpy~=2.1
 pandas~=2.2
+plotly~=5.24
+protobuf~=5.27
 pygithub~=2.5
 python-youtube~=0.9
 requests~=2.32
+scikit-learn~=1.5
 tqdm~=4.67
 tzlocal~=5.2
 
