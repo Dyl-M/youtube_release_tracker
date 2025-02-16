@@ -11,7 +11,7 @@ python-youtube~=0.9
 requests~=2.32
 scikit-learn~=1.6
 tqdm~=4.67
-tzlocal~=5.2
+tzlocal~=5.3
 
 protobuf
 pyarrow
