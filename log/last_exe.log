@@ -1,17 +1,16 @@
-2025-02-16 08:12:33+0000 [INFO] - Process started.
-2025-02-16 08:12:33+0000 [INFO] - API credentials refreshed.
-2025-02-16 08:12:33+0000 [INFO] - YouTube service created successfully.
-2025-02-16 08:12:33+0000 [INFO] - Iterative research for 216 YouTube channels.
-2025-02-16 08:13:40+0000 [INFO] - Add statistics for 39 video(s).
-2025-02-16 08:14:27+0000 [INFO] - Addition to "Banger Radar": 2 video(s).
-2025-02-16 08:14:28+0000 [INFO] - Addition to "Release Radar": 20 video(s).
-2025-02-16 08:14:29+0000 [WARNING] - Addition Request Failure: (jMDnXyYgrHE) - YouTubeException
-2025-02-16 08:14:35+0000 [WARNING] - Addition Request Failure: (krE-hkPQubg) - YouTubeException
-2025-02-16 08:14:35+0000 [WARNING] - Addition Request Failure: (Xm62kve2EUk) - YouTubeException
-2025-02-16 08:14:35+0000 [WARNING] - Addition Request Failure: (agJewji7msY) - YouTubeException
-2025-02-16 08:14:36+0000 [WARNING] - Addition Request Failure: (PNYjouBHRX8) - YouTubeException
-2025-02-16 08:14:41+0000 [INFO] - Addition to "Watch Later": 6 video(s).
-2025-02-16 08:14:46+0000 [INFO] - 11 addition(s) from Re-listening playlist.
-2025-02-16 08:14:59+0000 [INFO] - 14 addition(s) from Legacy playlist.
-2025-02-16 08:15:14+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2025-02-16 08:15:14+0000 [INFO] - Process ended.
+2025-02-17 08:15:16+0000 [INFO] - Process started.
+2025-02-17 08:15:16+0000 [INFO] - API credentials refreshed.
+2025-02-17 08:15:16+0000 [INFO] - YouTube service created successfully.
+2025-02-17 08:15:16+0000 [INFO] - 5 addition(s) to Release Radar playlist from previous API failure.
+2025-02-17 08:15:17+0000 [WARNING] - Addition Request Failure: (krE-hkPQubg) - YouTubeException
+2025-02-17 08:15:17+0000 [WARNING] - Addition Request Failure: (Xm62kve2EUk) - YouTubeException
+2025-02-17 08:15:17+0000 [INFO] - Iterative research for 216 YouTube channels.
+2025-02-17 08:16:06+0000 [INFO] - Add statistics for 41 video(s).
+2025-02-17 08:17:04+0000 [INFO] - Addition to "Banger Radar": 3 video(s).
+2025-02-17 08:17:05+0000 [WARNING] - Addition Request Failure: (rMwwRSzugNE) - YouTubeException
+2025-02-17 08:17:06+0000 [INFO] - Addition to "Release Radar": 22 video(s).
+2025-02-17 08:17:11+0000 [INFO] - Addition to "Watch Later": 5 video(s).
+2025-02-17 08:17:14+0000 [INFO] - 7 addition(s) from Re-listening playlist.
+2025-02-17 08:17:18+0000 [INFO] - 8 addition(s) from Legacy playlist.
+2025-02-17 08:17:24+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2025-02-17 08:17:24+0000 [INFO] - Process ended.
