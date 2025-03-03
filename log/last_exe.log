@@ -1,13 +1,15 @@
-2025-03-02 08:13:08+0000 [INFO] - Process started.
-2025-03-02 08:13:08+0000 [INFO] - API credentials refreshed.
-2025-03-02 08:13:08+0000 [INFO] - YouTube service created successfully.
-2025-03-02 08:13:08+0000 [INFO] - Iterative research for 217 YouTube channels.
-2025-03-02 08:13:30+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
-2025-03-02 08:14:17+0000 [INFO] - Add statistics for 44 video(s).
-2025-03-02 08:15:03+0000 [INFO] - Addition to "Banger Radar": 4 video(s).
-2025-03-02 08:15:05+0000 [INFO] - Addition to "Release Radar": 26 video(s).
-2025-03-02 08:15:18+0000 [INFO] - Addition to "Watch Later": 6 video(s).
-2025-03-02 08:15:25+0000 [INFO] - 7 addition(s) from Re-listening playlist.
-2025-03-02 08:15:33+0000 [INFO] - 7 addition(s) from Legacy playlist.
-2025-03-02 08:15:42+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2025-03-02 08:15:42+0000 [INFO] - Process ended.
+2025-03-03 08:15:58+0000 [INFO] - Process started.
+2025-03-03 08:15:58+0000 [INFO] - API credentials refreshed.
+2025-03-03 08:15:58+0000 [INFO] - YouTube service created successfully.
+2025-03-03 08:15:58+0000 [INFO] - Iterative research for 217 YouTube channels.
+2025-03-03 08:16:43+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
+2025-03-03 08:17:04+0000 [INFO] - Add statistics for 35 video(s).
+2025-03-03 08:18:18+0000 [INFO] - Addition to "Banger Radar": 2 video(s).
+2025-03-03 08:18:19+0000 [INFO] - Addition to "Release Radar": 19 video(s).
+2025-03-03 08:18:23+0000 [INFO] - Addition to "Watch Later": 7 video(s).
+2025-03-03 08:18:27+0000 [INFO] - 10 addition(s) from Re-listening playlist.
+2025-03-03 08:18:27+0000 [WARNING] - Addition Request Failure: (AoiCfKJyqbI) - YouTubeException
+2025-03-03 08:18:28+0000 [WARNING] - Addition Request Failure: (4rvOuWxOrp0) - YouTubeException
+2025-03-03 08:18:33+0000 [INFO] - 11 addition(s) from Legacy playlist.
+2025-03-03 08:18:40+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2025-03-03 08:18:40+0000 [INFO] - Process ended.
