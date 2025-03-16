@@ -139,6 +139,7 @@ def create_service_local(log: bool = True):
             cred = flow.run_local_server()
 
         with open('../tokens/credentials.json', 'w') as cred_file:  # Save credentials as a JSON file
+            # noinspection PyTypeChecker
             json.dump(ast.literal_eval(cred.to_json()), cred_file, ensure_ascii=False, indent=4)
 
     try:
@@ -446,12 +447,13 @@ def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list, pr
             service.playlistItems.insert(parts='snippet', body=r_body)
 
         except pyt.error.PyYouTubeException as http_error:  # skipcq: PYL-W0703
-            history.warning('Addition Request Failure: (%s) - %s', video_id, http_error.error_type)
+            history.warning('Addition Request Failure: (%s) - %s', video_id, http_error.message)
             api_failure[playlist_id]['failure'].append(video_id)  # Save the video ID in dedicated file
             api_fail = True
 
     if api_fail:  # Save API failure
         with open('../data/api_failure.json', 'w', encoding='utf-8') as api_failure_file:
+            # noinspection PyTypeChecker
             json.dump(api_failure, api_failure_file, ensure_ascii=False, indent=2)
 
 
@@ -473,7 +475,7 @@ def del_from_playlist(service: pyt.Client, playlist_id: str, items_list: list, p
             service.playlistItems.delete(playlist_item_id=item['item_id'])
 
         except pyt.error.PyYouTubeException as http_error:  # skipcq: PYL-W0703
-            history.warning('Deletion Request Failure: (%s) - %s', item['video_id'], http_error.error_type)
+            history.warning('Deletion Request Failure: (%s) - %s', item['video_id'], http_error.message)
 
 
 def sort_db(service: pyt.Client):
@@ -521,6 +523,7 @@ def sort_db(service: pyt.Client):
         channels_db[category] = db_sorted[category]
 
     with open('../data/pocket_tube.json', 'w', encoding='utf-8') as pt_save:  # Export as JSON file
+        # noinspection PyTypeChecker
         json.dump(channels_db, pt_save, indent=2, ensure_ascii=False)
 
 
@@ -684,6 +687,7 @@ def add_api_fail(service: pyt.Client, prog_bar: bool = True):
 
     if addition > 0:  # Save cleared file
         with open('../data/api_failure.json', 'w', encoding='utf-8') as api_failure_file:
+            # noinspection PyTypeChecker
             json.dump(api_failure, api_failure_file, ensure_ascii=False, indent=2)
 
 
