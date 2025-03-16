@@ -1,27 +1,16 @@
-2025-03-16 08:13:25+0000 [INFO] - Process started.
-2025-03-16 08:13:25+0000 [INFO] - API credentials refreshed.
-2025-03-16 08:13:25+0000 [INFO] - YouTube service created successfully.
-2025-03-16 08:13:25+0000 [INFO] - Iterative research for 217 YouTube channels.
-2025-03-16 08:14:22+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
-2025-03-16 08:14:32+0000 [INFO] - Add statistics for 34 video(s).
-2025-03-16 08:15:25+0000 [INFO] - Addition to "Banger Radar": 5 video(s).
-2025-03-16 08:15:28+0000 [INFO] - Addition to "Release Radar": 19 video(s).
-2025-03-16 08:15:29+0000 [WARNING] - Addition Request Failure: (9RMaV95aXTY) - YouTubeException
-2025-03-16 08:15:29+0000 [WARNING] - Addition Request Failure: (w2OBKBgPaKE) - YouTubeException
-2025-03-16 08:15:29+0000 [WARNING] - Addition Request Failure: (3H6anHmHXlM) - YouTubeException
-2025-03-16 08:15:30+0000 [WARNING] - Addition Request Failure: (_Xj8Q6tENg0) - YouTubeException
-2025-03-16 08:15:31+0000 [WARNING] - Addition Request Failure: (TosA-VrAyvY) - YouTubeException
-2025-03-16 08:15:32+0000 [WARNING] - Addition Request Failure: (AdSlUuBUMAs) - YouTubeException
-2025-03-16 08:15:33+0000 [WARNING] - Addition Request Failure: (gv2YUEPyUtQ) - YouTubeException
-2025-03-16 08:15:34+0000 [WARNING] - Addition Request Failure: (LJelMR8YtF8) - YouTubeException
-2025-03-16 08:15:34+0000 [WARNING] - Addition Request Failure: (kb84_k9804g) - YouTubeException
-2025-03-16 08:15:35+0000 [WARNING] - Addition Request Failure: (2NnUSBgazzM) - YouTubeException
-2025-03-16 08:15:36+0000 [WARNING] - Addition Request Failure: (NfCXbDTrOpE) - YouTubeException
-2025-03-16 08:15:37+0000 [WARNING] - Addition Request Failure: (vcedqslDpiA) - YouTubeException
-2025-03-16 08:15:37+0000 [WARNING] - Addition Request Failure: (xWlBVkh59D4) - YouTubeException
-2025-03-16 08:15:37+0000 [WARNING] - Addition Request Failure: (waBjKyFyhoY) - YouTubeException
-2025-03-16 08:15:38+0000 [INFO] - Addition to "Watch Later": 2 video(s).
-2025-03-16 08:15:42+0000 [INFO] - 16 addition(s) from Re-listening playlist.
-2025-03-16 08:15:58+0000 [INFO] - 19 addition(s) from Legacy playlist.
-2025-03-16 08:16:18+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2025-03-16 08:16:18+0000 [INFO] - Process ended.
+2025-03-16 11:14:16+0000 [INFO] - Process started.
+2025-03-16 11:14:16+0000 [INFO] - API credentials refreshed.
+2025-03-16 11:14:16+0000 [INFO] - YouTube service created successfully.
+2025-03-16 11:14:16+0000 [INFO] - 14 addition(s) to Release Radar playlist from previous API failure.
+2025-03-16 11:14:18+0000 [WARNING] - Addition Request Failure: (3H6anHmHXlM) - The operation was aborted.
+2025-03-16 11:14:23+0000 [INFO] - Iterative research for 217 YouTube channels.
+2025-03-16 11:14:49+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
+2025-03-16 11:15:32+0000 [INFO] - Add statistics for 4 video(s).
+2025-03-16 11:15:34+0000 [INFO] - No change to apply on historical data for following delta: 1 week(s)
+2025-03-16 11:15:34+0000 [INFO] - No change to apply on historical data for following delta: 4 week(s)
+2025-03-16 11:15:34+0000 [INFO] - No change to apply on historical data for following delta: 12 week(s)
+2025-03-16 11:15:34+0000 [INFO] - Addition to "Release Radar": 2 video(s).
+2025-03-16 11:15:35+0000 [INFO] - Addition to "Watch Later": 1 video(s).
+2025-03-16 11:15:36+0000 [INFO] - No addition necessary for Release Radar
+2025-03-16 11:15:37+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2025-03-16 11:15:37+0000 [INFO] - Process ended.
