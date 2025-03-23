@@ -447,7 +447,9 @@ def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list, pr
             service.playlistItems.insert(parts='snippet', body=r_body)
 
         except pyt.error.PyYouTubeException as http_error:  # skipcq: PYL-W0703
-            history.warning('Addition Request Failure: (%s) - %s', video_id, http_error.message)
+            error_reason = http_error.response.json()["error"]['error_reason'][0]
+            history.warning('Addition Request Failure: (%s) - %s - %s',
+                            video_id, error_reason, http_error.message)
             api_failure[playlist_id]['failure'].append(video_id)  # Save the video ID in dedicated file
             api_fail = True
 
