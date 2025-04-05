@@ -1,13 +1,13 @@
-2025-04-04 08:15:22+0000 [INFO] - Process started.
-2025-04-04 08:15:22+0000 [INFO] - API credentials refreshed.
-2025-04-04 08:15:22+0000 [INFO] - YouTube service created successfully.
-2025-04-04 08:15:22+0000 [INFO] - 1 addition(s) to Release Radar playlist from previous API failure.
-2025-04-04 08:15:23+0000 [INFO] - Iterative research for 217 YouTube channels.
-2025-04-04 08:15:38+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
-2025-04-04 08:16:13+0000 [INFO] - Add statistics for 63 video(s).
-2025-04-04 08:17:47+0000 [INFO] - Addition to "Banger Radar": 8 video(s).
-2025-04-04 08:17:50+0000 [INFO] - Addition to "Release Radar": 28 video(s).
-2025-04-04 08:18:02+0000 [INFO] - Addition to "Watch Later": 8 video(s).
-2025-04-04 08:18:09+0000 [INFO] - No addition necessary for Release Radar
-2025-04-04 08:18:10+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2025-04-04 08:18:10+0000 [INFO] - Process ended.
+2025-04-05 08:13:36+0000 [INFO] - Process started.
+2025-04-05 08:13:36+0000 [INFO] - API credentials refreshed.
+2025-04-05 08:13:36+0000 [INFO] - YouTube service created successfully.
+2025-04-05 08:13:36+0000 [INFO] - Iterative research for 217 YouTube channels.
+2025-04-05 08:14:30+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
+2025-04-05 08:14:43+0000 [INFO] - Add statistics for 79 video(s).
+2025-04-05 08:15:51+0000 [INFO] - Addition to "Banger Radar": 9 video(s).
+2025-04-05 08:15:51+0000 [WARNING] - Addition Request Failure: (IwHmDCCTstM) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-04-05 08:15:55+0000 [INFO] - Addition to "Release Radar": 43 video(s).
+2025-04-05 08:16:16+0000 [INFO] - Addition to "Watch Later": 8 video(s).
+2025-04-05 08:16:22+0000 [INFO] - No addition necessary for Release Radar
+2025-04-05 08:16:24+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2025-04-05 08:16:24+0000 [INFO] - Process ended.
