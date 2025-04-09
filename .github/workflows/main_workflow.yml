@@ -9,7 +9,7 @@ on:
                 default: 'warning'
 
     schedule:
-        -   cron: "0 8 * * *"  # Runs at 8:00 AM UTC, which aligns with midnight PST outside of daylight saving time
+        -   cron: "0 7 * * *"  # Runs at 7:00 AM UTC, which aligns with midnight PST outside of daylight saving time
 
 jobs:
     build-linux:
