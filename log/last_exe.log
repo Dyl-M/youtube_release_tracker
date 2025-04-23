@@ -1,16 +1,11 @@
-2025-04-23 07:16:36+0000 [INFO] - Process started.
-2025-04-23 07:16:37+0000 [INFO] - API credentials refreshed.
-2025-04-23 07:16:37+0000 [INFO] - YouTube service created successfully.
-2025-04-23 07:16:37+0000 [INFO] - Iterative research for 218 YouTube channels.
-2025-04-23 07:17:12+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
-2025-04-23 07:17:25+0000 [INFO] - Add statistics for 48 video(s).
-2025-04-23 07:18:41+0000 [INFO] - Addition to "Banger Radar": 7 video(s).
-2025-04-23 07:18:43+0000 [INFO] - Addition to "Release Radar": 25 video(s).
-2025-04-23 07:18:53+0000 [INFO] - Addition to "Watch Later": 5 video(s).
-2025-04-23 07:18:57+0000 [INFO] - 8 addition(s) from Re-listening playlist.
-2025-04-23 07:19:04+0000 [INFO] - 7 addition(s) from Legacy playlist.
-2025-04-23 07:19:05+0000 [WARNING] - Addition Request Failure: (KcJdwP3_CN4) - SERVICE_UNAVAILABLE - The operation was aborted.
-2025-04-23 07:19:06+0000 [WARNING] - Addition Request Failure: (XTx-i__UA_M) - SERVICE_UNAVAILABLE - The operation was aborted.
-2025-04-23 07:19:07+0000 [WARNING] - Addition Request Failure: (OrJUk2NnZ-8) - SERVICE_UNAVAILABLE - The operation was aborted.
-2025-04-23 07:19:13+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2025-04-23 07:19:13+0000 [INFO] - Process ended.
+2025-04-23 07:34:30+0000 [INFO] - Process started.
+2025-04-23 07:34:30+0000 [INFO] - YouTube service created successfully.
+2025-04-23 07:34:30+0000 [INFO] - 3 addition(s) to Release Radar playlist from previous API failure.
+2025-04-23 07:34:31+0000 [INFO] - Iterative research for 218 YouTube channels.
+2025-04-23 07:34:45+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
+2025-04-23 07:35:36+0000 [INFO] - No addition to perform.
+2025-04-23 07:35:36+0000 [INFO] - No change to apply on historical data for following delta: 1 week(s)
+2025-04-23 07:35:36+0000 [INFO] - No change to apply on historical data for following delta: 4 week(s)
+2025-04-23 07:35:36+0000 [INFO] - No addition necessary for Release Radar
+2025-04-23 07:35:37+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2025-04-23 07:35:37+0000 [INFO] - Process ended.
