@@ -1,14 +1,13 @@
-2025-04-24 07:13:34+0000 [INFO] - Process started.
-2025-04-24 07:13:34+0000 [INFO] - API credentials refreshed.
-2025-04-24 07:13:34+0000 [INFO] - YouTube service created successfully.
-2025-04-24 07:13:34+0000 [INFO] - Iterative research for 218 YouTube channels.
-2025-04-24 07:14:34+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
-2025-04-24 07:14:37+0000 [INFO] - Add statistics for 44 video(s).
-2025-04-24 07:15:59+0000 [INFO] - Addition to "Banger Radar": 5 video(s).
-2025-04-24 07:15:59+0000 [WARNING] - Addition Request Failure: (ZPOI4gtr7QE) - SERVICE_UNAVAILABLE - The operation was aborted.
-2025-04-24 07:16:00+0000 [INFO] - Addition to "Release Radar": 20 video(s).
-2025-04-24 07:16:06+0000 [INFO] - Addition to "Watch Later": 6 video(s).
-2025-04-24 07:16:11+0000 [INFO] - 10 addition(s) from Re-listening playlist.
-2025-04-24 07:16:15+0000 [INFO] - 10 addition(s) from Legacy playlist.
-2025-04-24 07:16:22+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2025-04-24 07:16:22+0000 [INFO] - Process ended.
+2025-04-25 07:12:54+0000 [INFO] - Process started.
+2025-04-25 07:12:54+0000 [INFO] - API credentials refreshed.
+2025-04-25 07:12:54+0000 [INFO] - YouTube service created successfully.
+2025-04-25 07:12:54+0000 [INFO] - 1 addition(s) to Banger Radar playlist from previous API failure.
+2025-04-25 07:12:55+0000 [INFO] - Iterative research for 218 YouTube channels.
+2025-04-25 07:13:45+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
+2025-04-25 07:13:58+0000 [INFO] - Add statistics for 52 video(s).
+2025-04-25 07:15:38+0000 [INFO] - Addition to "Banger Radar": 4 video(s).
+2025-04-25 07:15:39+0000 [INFO] - Addition to "Release Radar": 30 video(s).
+2025-04-25 07:15:46+0000 [INFO] - Addition to "Watch Later": 3 video(s).
+2025-04-25 07:15:47+0000 [INFO] - No addition necessary for Release Radar
+2025-04-25 07:15:49+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2025-04-25 07:15:49+0000 [INFO] - Process ended.
