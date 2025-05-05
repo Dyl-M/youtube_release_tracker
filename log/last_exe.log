@@ -1,19 +1,15 @@
-2025-05-04 07:11:49+0000 [INFO] - Process started.
-2025-05-04 07:11:49+0000 [INFO] - API credentials refreshed.
-2025-05-04 07:11:49+0000 [INFO] - YouTube service created successfully.
-2025-05-04 07:11:49+0000 [INFO] - Iterative research for 219 YouTube channels.
-2025-05-04 07:12:14+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
-2025-05-04 07:12:39+0000 [INFO] - Add statistics for 34 video(s).
-2025-05-04 07:13:26+0000 [INFO] - Addition to "Banger Radar": 3 video(s).
-2025-05-04 07:13:27+0000 [INFO] - Addition to "Release Radar": 18 video(s).
-2025-05-04 07:13:31+0000 [WARNING] - Addition Request Failure: (qZ33qIyFoJ4) - SERVICE_UNAVAILABLE - The operation was aborted.
-2025-05-04 07:13:34+0000 [INFO] - Addition to "Watch Later": 5 video(s).
-2025-05-04 07:13:38+0000 [INFO] - 13 addition(s) from Re-listening playlist.
-2025-05-04 07:13:38+0000 [WARNING] - Addition Request Failure: (FDBV_jvMN_4) - SERVICE_UNAVAILABLE - The operation was aborted.
-2025-05-04 07:13:39+0000 [WARNING] - Addition Request Failure: (eogNgkdAhgw) - SERVICE_UNAVAILABLE - The operation was aborted.
-2025-05-04 07:13:40+0000 [WARNING] - Addition Request Failure: (sl1n118tKAA) - SERVICE_UNAVAILABLE - The operation was aborted.
-2025-05-04 07:13:42+0000 [WARNING] - Addition Request Failure: (ObMpI9d8ZFY) - SERVICE_UNAVAILABLE - The operation was aborted.
-2025-05-04 07:13:42+0000 [WARNING] - Addition Request Failure: (q4AHJ22hz-E) - SERVICE_UNAVAILABLE - The operation was aborted.
-2025-05-04 07:13:50+0000 [INFO] - 10 addition(s) from Legacy playlist.
-2025-05-04 07:13:59+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2025-05-04 07:13:59+0000 [INFO] - Process ended.
+2025-05-05 07:14:00+0000 [INFO] - Process started.
+2025-05-05 07:14:00+0000 [INFO] - API credentials refreshed.
+2025-05-05 07:14:00+0000 [INFO] - YouTube service created successfully.
+2025-05-05 07:14:00+0000 [INFO] - 6 addition(s) to Release Radar playlist from previous API failure.
+2025-05-05 07:14:03+0000 [INFO] - Iterative research for 219 YouTube channels.
+2025-05-05 07:14:30+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
+2025-05-05 07:14:50+0000 [INFO] - Add statistics for 38 video(s).
+2025-05-05 07:15:56+0000 [INFO] - Addition to "Banger Radar": 1 video(s).
+2025-05-05 07:15:57+0000 [INFO] - Addition to "Release Radar": 24 video(s).
+2025-05-05 07:16:01+0000 [WARNING] - Addition Request Failure: (BAlZL0wR1yU) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-05-05 07:16:06+0000 [INFO] - Addition to "Watch Later": 8 video(s).
+2025-05-05 07:16:14+0000 [INFO] - 6 addition(s) from Re-listening playlist.
+2025-05-05 07:16:18+0000 [INFO] - 5 addition(s) from Legacy playlist.
+2025-05-05 07:16:23+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2025-05-05 07:16:23+0000 [INFO] - Process ended.
