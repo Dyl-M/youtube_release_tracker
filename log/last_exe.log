@@ -1,18 +1,11 @@
-2025-05-14 07:13:13+0000 [INFO] - Process started.
-2025-05-14 07:13:13+0000 [INFO] - API credentials refreshed.
-2025-05-14 07:13:13+0000 [INFO] - YouTube service created successfully.
-2025-05-14 07:13:13+0000 [INFO] - Iterative research for 219 YouTube channels.
-2025-05-14 07:13:40+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
-2025-05-14 07:14:03+0000 [INFO] - Add statistics for 42 video(s).
-2025-05-14 07:15:16+0000 [INFO] - Addition to "Banger Radar": 6 video(s).
-2025-05-14 07:15:18+0000 [INFO] - Addition to "Release Radar": 19 video(s).
-2025-05-14 07:15:21+0000 [WARNING] - Addition Request Failure: (xnEZv74SF3E) - SERVICE_UNAVAILABLE - The operation was aborted.
-2025-05-14 07:15:21+0000 [WARNING] - Addition Request Failure: (7j1_tE7sRCY) - SERVICE_UNAVAILABLE - The operation was aborted.
-2025-05-14 07:15:25+0000 [INFO] - Addition to "Watch Later": 1 video(s).
-2025-05-14 07:15:27+0000 [INFO] - 14 addition(s) from Re-listening playlist.
-2025-05-14 07:15:36+0000 [INFO] - 9 addition(s) from Legacy playlist.
-2025-05-14 07:15:36+0000 [WARNING] - Addition Request Failure: (exU4F6C9O14) - SERVICE_UNAVAILABLE - The operation was aborted.
-2025-05-14 07:15:37+0000 [WARNING] - Addition Request Failure: (M9VmjyUfS4Q) - SERVICE_UNAVAILABLE - The operation was aborted.
-2025-05-14 07:15:38+0000 [WARNING] - Addition Request Failure: (fLVuwgjtMMY) - SERVICE_UNAVAILABLE - The operation was aborted.
-2025-05-14 07:15:43+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2025-05-14 07:15:43+0000 [INFO] - Process ended.
+2025-05-14 07:36:42+0000 [INFO] - Process started.
+2025-05-14 07:36:42+0000 [INFO] - YouTube service created successfully.
+2025-05-14 07:36:42+0000 [INFO] - 5 addition(s) to Release Radar playlist from previous API failure.
+2025-05-14 07:36:44+0000 [INFO] - Iterative research for 219 YouTube channels.
+2025-05-14 07:36:56+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
+2025-05-14 07:37:51+0000 [INFO] - No addition to perform.
+2025-05-14 07:37:51+0000 [INFO] - No change to apply on historical data for following delta: 1 week(s)
+2025-05-14 07:37:52+0000 [INFO] - No change to apply on historical data for following delta: 12 week(s)
+2025-05-14 07:37:52+0000 [INFO] - No addition necessary for Release Radar
+2025-05-14 07:37:53+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2025-05-14 07:37:53+0000 [INFO] - Process ended.
