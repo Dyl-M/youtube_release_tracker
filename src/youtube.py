@@ -251,21 +251,19 @@ def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int = Non
                          'channel_id': item.snippet.videoOwnerChannelId,
                          'channel_name': item.snippet.videoOwnerChannelTitle} for item in request.items]
 
+            latest_d = latest_d.replace(minute=0, second=0, microsecond=0)  # Round hour to XX:00:00.0
+
             if with_last_exe:  # In case we want to keep videos published between last exe date and your latest_d
                 oldest_d = LAST_EXE.replace(minute=0, second=0, microsecond=0)  # Round hour to XX:00:00.0
-                latest_d = latest_d.replace(minute=0, second=0, microsecond=0)  # Round hour to XX:00:00.0
                 p_items = filter_items_by_date_range(p_items, latest_d, oldest_d)
 
-            elif day_ago is not None:  # In case we want to keep videos published x days ago from your latest_d
-                latest_d = latest_d.replace(minute=0, second=0, microsecond=0)  # Round hour to XX:00:00.0
+            if day_ago:  # In case we want to keep videos published x days ago from your latest_d
                 p_items = filter_items_by_date_range(p_items, latest_d, _day_ago=day_ago)
-
-            if len(p_items) <= 50:  # No need for more requests (the playlist must be ordered chronologically!)
-                break
 
             next_page_token = request.nextPageToken
 
-            if next_page_token is None:
+            # No need for more requests (the playlist must be ordered chronologically!)
+            if len(p_items) <= 50 or next_page_token is None:
                 break
 
         except pyt.error.PyYouTubeException as error:
