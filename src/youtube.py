@@ -204,21 +204,19 @@ def create_service_workflow():
         sys.exit()
 
 
-def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int = None,
-                       with_last_exe: bool = False, latest_d: dt.datetime = NOW):
+def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int = None, latest_d: dt.datetime = NOW):
     """Get the videos in a YouTube playlist.
     :param service: A Python YouTube Client.
     :param playlist_id: A YouTube playlist ID.
     :param day_ago: Day difference with a reference date, delimits items' collection field.
     :param latest_d: The latest reference date.
-    :param with_last_exe: To use the last execution date extracted from the log or not.
     :return p_items: Playlist items (videos) as a list.
     """
 
-    def filter_items_by_date_range(_p_items: dict, _latest_d: dt.datetime, _oldest_d: dt.datetime = None,
+    def filter_items_by_date_range(_p_items: list, _latest_d: dt.datetime, _oldest_d: dt.datetime = None,
                                    _day_ago: int = None):
-        """Filter videos by date range
-        :param _p_items: playlist items as dictionary
+        """Filter videos on a date range
+        :param _p_items: playlist items as a list
         :param _latest_d: the latest reference date
         :param _oldest_d: latest execution date
         :param _day_ago: day difference with a reference date, delimits items' collection field
@@ -234,6 +232,12 @@ def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int = Non
     p_items = []
     next_page_token = None
     date_format = '%Y-%m-%dT%H:%M:%S%z'
+
+    latest_d = latest_d.replace(minute=0, second=0, microsecond=0)  # Round hour to XX:00:00.0
+    oldest_d = LAST_EXE.replace(minute=0, second=0, microsecond=0)  # Round hour to XX:00:00.0
+
+    if day_ago:  # To use a day range over the default value (previous execution date)
+        oldest_d = None
 
     while True:
         try:
@@ -251,15 +255,7 @@ def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int = Non
                          'channel_id': item.snippet.videoOwnerChannelId,
                          'channel_name': item.snippet.videoOwnerChannelTitle} for item in request.items]
 
-            latest_d = latest_d.replace(minute=0, second=0, microsecond=0)  # Round hour to XX:00:00.0
-
-            if with_last_exe:  # In case we want to keep videos published between last exe date and your latest_d
-                oldest_d = LAST_EXE.replace(minute=0, second=0, microsecond=0)  # Round hour to XX:00:00.0
-                p_items = filter_items_by_date_range(p_items, latest_d, oldest_d)
-
-            if day_ago:  # In case we want to keep videos published x days ago from your latest_d
-                p_items = filter_items_by_date_range(p_items, latest_d, _day_ago=day_ago)
-
+            p_items = filter_items_by_date_range(p_items, latest_d, _oldest_d=oldest_d, _day_ago=day_ago)
             next_page_token = request.nextPageToken
 
             # No need for more requests (the playlist must be ordered chronologically!)
@@ -400,26 +396,24 @@ def add_stats(service: pyt.Client, video_list: list):
     return video_first_data.merge(additional_data)
 
 
-def iter_channels(service: pyt.Client, channels: list, day_ago: int = None, with_last_exe: bool = True,
-                  latest_d: dt.datetime = NOW, prog_bar: bool = True):
+def iter_channels(service: pyt.Client, channels: list, day_ago: int = None, latest_d: dt.datetime = NOW,
+                  prog_bar: bool = True):
     """Apply 'get_playlist_items' for a collection of YouTube playlists.
     :param channels: List of YouTube channel IDs.
     :param service: A Python YouTube Client.
     :param day_ago: Day difference with a reference date, delimits items' collection field.
     :param latest_d: The latest reference date.
-    :param with_last_exe: To use the last execution date extracted from the log or not.
     :param prog_bar: To use tqdm progress bar or not.
     :return: Videos retrieved in playlists.
     """
     playlists = [f'UU{channel_id[2:]}' for channel_id in channels if channel_id not in ADD_ON['toPass']]
 
     if prog_bar:
-        item_it = [get_playlist_items(service=service, playlist_id=playlist_id, day_ago=day_ago, latest_d=latest_d,
-                                      with_last_exe=with_last_exe)
+        item_it = [get_playlist_items(service=service, playlist_id=playlist_id, day_ago=day_ago, latest_d=latest_d)
                    for playlist_id in tqdm.tqdm(playlists, desc='Looking for videos to add')]
     else:
-        item_it = [get_playlist_items(service=service, playlist_id=playlist_id, day_ago=day_ago, latest_d=latest_d,
-                                      with_last_exe=with_last_exe) for playlist_id in playlists]
+        item_it = [get_playlist_items(service=service, playlist_id=playlist_id, day_ago=day_ago, latest_d=latest_d)
+                   for playlist_id in playlists]
     return list(itertools.chain.from_iterable(item_it))
 
 
