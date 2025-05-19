@@ -65,7 +65,7 @@ histo_data = pd.read_csv('../data/stats.csv', encoding='utf-8')
 
 
 def copy_last_exe_log():
-    """Copy last execution logging from main history file."""
+    """Copy the last execution logging from the main history file."""
     with open('../log/history.log', 'r', encoding='utf8') as history_file:
         history = history_file.read()
 
@@ -80,7 +80,7 @@ def copy_last_exe_log():
 def dest_playlist(channel_id: str, is_shorts: bool, v_duration: int, max_duration: int = 10):
     """Return destination playlist for addition
     :param channel_id: YouTube channel ID
-    :param is_shorts: boolean indicating whether the video is a YouTube shorts or not
+    :param is_shorts: boolean indicating whether the video is a YouTube Short or not
     :param v_duration: YouTube video duration in seconds
     :param max_duration: duration threshold in minutes
     :return: appropriate YouTube playlist ID based on video information
@@ -102,7 +102,7 @@ def dest_playlist(channel_id: str, is_shorts: bool, v_duration: int, max_duratio
 def update_repo_secrets(secret_name: str, new_value: str, logger: logging.Logger = None):
     """Update a GitHub repository Secret value
     :param secret_name: GH repository Secret name
-    :param new_value: new value for selected Secret
+    :param new_value: new value for the selected Secret
     :param logger: object for logging
     """
     repo = github.Github(PAT).get_repo(github_repo)
@@ -146,9 +146,9 @@ if __name__ == '__main__':
         PROG_BAR = True  # Display progress bar
 
     else:
-        # YouTube service with GitHub workflow + Credentials
+        # YouTube service with GitHub workflow and Credentials
         YOUTUBE_OAUTH, CREDS_B64 = youtube.create_service_workflow()
-        PROG_BAR = False  # Do not display progress bar
+        PROG_BAR = False  # Do not display the progress bar
 
     # Add missing videos due to quota exceeded on previous run
     youtube.add_api_fail(service=YOUTUBE_OAUTH, prog_bar=PROG_BAR)
@@ -204,7 +204,7 @@ if __name__ == '__main__':
         # Reformat
         to_add = new_data.groupby('dest_playlist')['video_id'].apply(list).to_dict()
 
-        # Selection by playlist # An error could happen here!
+        # Selection by playlist. An error could happen here!
         add_banger = to_add.get(banger, [])
         add_release = to_add.get(release, [])
         add_wl = to_add.get(watch_later, [])
@@ -222,7 +222,7 @@ if __name__ == '__main__':
             history_main.info('Addition to "Watch Later": %s video(s).', len(add_wl))
             youtube.add_to_playlist(YOUTUBE_OAUTH, watch_later, add_wl, prog_bar=PROG_BAR)
 
-    # Fill Release Radar playlist
+    # Fill the Release Radar playlist
     youtube.fill_release_radar(YOUTUBE_OAUTH, release, re_listening, legacy, lmt=40, prog_bar=PROG_BAR)
 
     if exe_mode == 'local':  # Credentials in base64 update - Local option

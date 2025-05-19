@@ -18,8 +18,11 @@ import sys
 import tqdm
 import tzlocal
 
+# noinspection PyPackageRequirements
 from google.auth.exceptions import RefreshError
+# noinspection PyPackageRequirements
 from google.auth.transport.requests import Request
+# noinspection PyPackageRequirements
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 
@@ -37,8 +40,8 @@ pd.set_option('display.max_columns', None)  # pd.set_option('display.max_rows', 
 
 
 def last_exe_date():
-    """Extract last execution datetime from a log file (supposing first line is containing the right datetime).
-    :return date: last execution date.
+    """Get the last execution datetime from a log file (supposing the first line is containing the right datetime).
+    :return date: Last execution date.
     """
     with open('../log/last_exe.log', 'r', encoding='utf8') as log_file:
         first_log = log_file.readlines()[0]  # Get first log
@@ -77,7 +80,7 @@ history.addHandler(history_file)
 
 def encode_key(json_path: str, export_dir: str = None, export_name: str = None):
     """Encode a JSON authentication file to base64
-    :param json_path: file path to authentication JSON file
+    :param json_path: file's path to authentication JSON file
     :param export_dir: export directory
     :param export_name: export file name.
     """
@@ -131,10 +134,10 @@ def create_service_local(log: bool = True):
             except RefreshError:
                 history.info('Credentials can not be refreshed. New credentials needed.')
                 flow = InstalledAppFlow.from_client_secrets_file(oauth_file, scopes)  # Create a Flow from 'oauth_file'
-                cred = flow.run_local_server()  # Run authentication process
+                cred = flow.run_local_server()  # Run the authentication process
 
         else:
-            # Create the authentification Flow from 'oauth_file' and then run authentication process
+            # Create the authentification Flow from 'oauth_file' and then run the authentication process
             flow = InstalledAppFlow.from_client_secrets_file(oauth_file, scopes)
             cred = flow.run_local_server()
 
@@ -158,7 +161,7 @@ def create_service_local(log: bool = True):
 
 def create_service_workflow():
     """Create a GCP service for YouTube API V3, for usage in GitHub Actions workflow
-    :return service: a Google API service object build with 'googleapiclient.discovery.build'.
+    :return service: a Google's API service object build with 'googleapiclient.discovery.build'.
     """
 
     def import_env_var(var_name: str):
@@ -171,9 +174,9 @@ def create_service_workflow():
         value = ast.literal_eval(v_str)  # Eval
         return value
 
-    creds_b64 = os.environ.get('CREDS_B64')  # Initialisation of Base64 version of Credentials object
+    creds_b64 = os.environ.get('CREDS_B64')  # Initiate the Base64 version of the Credentials object
     creds_dict = import_env_var(var_name='CREDS_B64')  # Import pre-registered credentials
-    creds = Credentials.from_authorized_user_info(creds_dict)  # Conversion to suitable object
+    creds = Credentials.from_authorized_user_info(creds_dict)  # Conversion to a suitable object
     instance_fail_message = 'Failed to create service instance for YouTube'
 
     if not creds.valid:  # Cover outdated credentials
@@ -203,13 +206,13 @@ def create_service_workflow():
 
 def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int = None,
                        with_last_exe: bool = False, latest_d: dt.datetime = NOW):
-    """Get the videos in a YouTube playlist
-    :param service: a Python YouTube Client
-    :param playlist_id: a YouTube playlist ID
-    :param day_ago: day difference with a reference date, delimits items' collection field
-    :param latest_d: the latest reference date
-    :param with_last_exe: to use last execution date extracted from log or not
-    :return p_items: playlist items (videos) as a list.
+    """Get the videos in a YouTube playlist.
+    :param service: A Python YouTube Client.
+    :param playlist_id: A YouTube playlist ID.
+    :param day_ago: Day difference with a reference date, delimits items' collection field.
+    :param latest_d: The latest reference date.
+    :param with_last_exe: To use the last execution date extracted from the log or not.
+    :return p_items: Playlist items (videos) as a list.
     """
 
     def filter_items_by_date_range(_p_items: dict, _latest_d: dt.datetime, _oldest_d: dt.datetime = None,
@@ -248,21 +251,19 @@ def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int = Non
                          'channel_id': item.snippet.videoOwnerChannelId,
                          'channel_name': item.snippet.videoOwnerChannelTitle} for item in request.items]
 
+            latest_d = latest_d.replace(minute=0, second=0, microsecond=0)  # Round hour to XX:00:00.0
+
             if with_last_exe:  # In case we want to keep videos published between last exe date and your latest_d
                 oldest_d = LAST_EXE.replace(minute=0, second=0, microsecond=0)  # Round hour to XX:00:00.0
-                latest_d = latest_d.replace(minute=0, second=0, microsecond=0)  # Round hour to XX:00:00.0
                 p_items = filter_items_by_date_range(p_items, latest_d, oldest_d)
 
-            elif day_ago is not None:  # In case we want to keep videos published x days ago from your latest_d
-                latest_d = latest_d.replace(minute=0, second=0, microsecond=0)  # Round hour to XX:00:00.0
+            if day_ago:  # In case we want to keep videos published x days ago from your latest_d
                 p_items = filter_items_by_date_range(p_items, latest_d, _day_ago=day_ago)
-
-            if len(p_items) <= 50:  # No need for more requests (the playlist must be ordered chronologically!)
-                break
 
             next_page_token = request.nextPageToken
 
-            if next_page_token is None:
+            # No need for more requests (the playlist must be ordered chronologically!)
+            if len(p_items) <= 50 or next_page_token is None:
                 break
 
         except pyt.error.PyYouTubeException as error:
@@ -292,7 +293,7 @@ def get_videos(service: pyt.Client, videos_list: list):
 
 
 def get_subs(service: pyt.Client, channel_list: list):
-    """Get number of subscribers for several YouTube channels
+    """Get the number of subscribers for several YouTube channels
     :param service: a Python YouTube Client
     :param channel_list: list of YouTube channel IDs
     :return: playlist items (channels' information) as a list.
@@ -320,7 +321,7 @@ def check_if_live(service: pyt.Client, videos_list: list):
     """
     items = []
 
-    # Split task in chunks of size 50 to request on a maximum of 50 videos at each iteration.
+    # Split tasks in chunks of size 50 to request a maximum of 50 videos at each iteration.
     videos_chunks = [videos_list[i:i + min(50, len(videos_list))] for i in range(0, len(videos_list), 50)]
 
     for chunk in videos_chunks:
@@ -351,7 +352,7 @@ def get_stats(service: pyt.Client, videos_list: list):
     except TypeError:
         videos_ids = videos_list
 
-    # Split task in chunks of size 50 to request on a maximum of 50 videos at each iteration.
+    # Split tasks in chunks of size 50 to request a maximum of 50 videos at each iteration.
     videos_chunks = [videos_ids[i:i + min(50, len(videos_ids))] for i in range(0, len(videos_ids), 50)]
 
     for chunk in videos_chunks:
@@ -401,14 +402,14 @@ def add_stats(service: pyt.Client, video_list: list):
 
 def iter_channels(service: pyt.Client, channels: list, day_ago: int = None, with_last_exe: bool = True,
                   latest_d: dt.datetime = NOW, prog_bar: bool = True):
-    """Apply 'get_playlist_items' for a collection of YouTube playlists
-    :param channels: list of YouTube channel IDs
-    :param service: a Python YouTube Client
-    :param day_ago: day difference with a reference date, delimits items' collection field
-    :param latest_d: the latest reference date
-    :param with_last_exe: to use last execution date extracted from log or not
-    :param prog_bar: to use tqdm progress bar or not
-    :return: videos retrieved in playlists.
+    """Apply 'get_playlist_items' for a collection of YouTube playlists.
+    :param channels: List of YouTube channel IDs.
+    :param service: A Python YouTube Client.
+    :param day_ago: Day difference with a reference date, delimits items' collection field.
+    :param latest_d: The latest reference date.
+    :param with_last_exe: To use the last execution date extracted from the log or not.
+    :param prog_bar: To use tqdm progress bar or not.
+    :return: Videos retrieved in playlists.
     """
     playlists = [f'UU{channel_id[2:]}' for channel_id in channels if channel_id not in ADD_ON['toPass']]
 
@@ -450,7 +451,7 @@ def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list, pr
             error_reason = http_error.response.json()['error']['errors'][0]['reason']
             history.warning('Addition Request Failure: (%s) - %s - %s',
                             video_id, error_reason, http_error.message)
-            api_failure[playlist_id]['failure'].append(video_id)  # Save the video ID in dedicated file
+            api_failure[playlist_id]['failure'].append(video_id)  # Save the video ID in a dedicated file
             api_fail = True
 
     if api_fail:  # Save API failure
@@ -487,7 +488,7 @@ def sort_db(service: pyt.Client):
 
     def get_channels(_service: pyt.Client, _channel_list: list):
         """Get YouTube channels basic information
-        :param _service: a YouTube service build with 'googleapiclient.discovery'
+        :param _service: a YouTube's service build with 'googleapiclient.discovery'
         :param _channel_list: list of YouTube channel ID
         :return information: a dictionary with channels names, IDs and uploads playlist IDs.
         """
@@ -508,7 +509,7 @@ def sort_db(service: pyt.Client):
                 print(http_error.error_details)
                 sys.exit()
 
-        # Sort by channel name alphabetical order
+        # Sort channels' name by alphabetical order
         information = sorted(information, key=lambda dic: dic['title'].lower())
         ids_only = [info['id'] for info in information]  # Get channel IDs only
 
@@ -521,7 +522,7 @@ def sort_db(service: pyt.Client):
     db_sorted = {category: get_channels(_service=service, _channel_list=channels_db[category])
                  for category in categories}  # Get sorted categories
 
-    for category in categories:  # Rewrite categories in the dict object associated to the PT JSON file
+    for category in categories:  # Rewrite categories in the dict object associated with the PT JSON file
         channels_db[category] = db_sorted[category]
 
     with open('../data/pocket_tube.json', 'w', encoding='utf-8') as pt_save:  # Export as JSON file
@@ -532,21 +533,21 @@ def sort_db(service: pyt.Client):
 def is_shorts(video_id: str):
     """Check if a YouTube video is a short or not
     :param video_id: YouTube video ID
-    :return: True if video is short, False otherwise.
+    :return: True if the video is short, False otherwise.
     """
     return requests.head(f'https://www.youtube.com/shorts/{video_id}').status_code == 200
 
 
 def weekly_stats(service: pyt.Client, histo_data: pd.DataFrame, week_delta: int,
                  ref_date: dt.datetime = dt.datetime.now(dt.timezone.utc)):
-    """Add weekly statistics to historical data retrieved from YouTube for each run
-    :param service: a Python YouTube Client
-    :param histo_data: data with statistics retrieved throughout the weeks
-    :param week_delta: how far we should get stats for videos (1, 4, 13 or 26 weeks)
-    :param ref_date: a reference date (midnight UTC by default)
-    :return histo_data: historical data enhanced with new statistics.
+    """Add weekly statistics to historical data retrieved from YouTube for each run.
+    :param service: A Python YouTube Client.
+    :param histo_data: Data with statistics retrieved throughout the weeks.
+    :param week_delta: How far we should get stats for videos (1, 4, 13 or 26 weeks).
+    :param ref_date: A reference date (midnight UTC by default).
+    :return histo_data: Historical data enhanced with new statistics.
     """
-    # Get the date x week ago
+    # Get the date from "x week ago"
     x_week_ago = ref_date.replace(hour=0, minute=0, second=0, microsecond=0) - dt.timedelta(weeks=week_delta)
 
     # Filter data with this new reference date
@@ -556,7 +557,7 @@ def weekly_stats(service: pyt.Client, histo_data: pd.DataFrame, week_delta: int,
     id_mask = selection.video_id.tolist()
 
     if not selection.empty:  # If some videos are concerned
-        vid_id_list = selection.video_id.tolist()  # Get YouTube videos' ID as list
+        vid_id_list = selection.video_id.tolist()  # Get YouTube videos' ID as a list
 
         # Apply get_stats and keep only the three necessary features
         to_keep = ['video_id', 'views', 'likes', 'comments', 'latest_status']
@@ -593,17 +594,17 @@ def get_items_count(service: pyt.Client, playlist_ids: list) -> tuple:
 
 def fill_release_radar(service: pyt.Client, target_playlist: str, re_listening_id: str, legacy_id: str, lmt: int = 30,
                        prog_bar: bool = True):
-    """Fill the Release Radar playlist with videos from re-listening playlists
-    :param service: a Python YouTube Client
-    :param target_playlist: YouTube playlist ID where videos need to be added
-    :param re_listening_id: YouTube playlist ID for music to re-listen to
-    :param legacy_id: older YouTube playlist to clear out
-    :param lmt: addition threshold (30 by default)
-    :param prog_bar: to use tqdm progress bar or not.
+    """Fill the Release Radar playlist with videos from re-listening playlists.
+    :param service: A Python YouTube Client.
+    :param target_playlist: YouTube playlist ID where videos need to be added.
+    :param re_listening_id: YouTube playlist ID for music to re-listen to.
+    :param legacy_id: An older YouTube playlist to clear out.
+    :param lmt: The addition threshold (30 by default).
+    :param prog_bar: To use tqdm progress bar or not.
     """
     week_ago = NOW - dt.timedelta(weeks=1)
 
-    # Compute how much videos are necessary to fill the target playlist
+    # Compute how many videos are necessary to fill the target playlist
     try:
         n_add = lmt - len(service.playlistItems.list(part=['snippet'],
                                                      max_results=lmt,
@@ -670,7 +671,7 @@ def fill_release_radar(service: pyt.Client, target_playlist: str, re_listening_i
 
 
 def add_api_fail(service: pyt.Client, prog_bar: bool = True):
-    """Add missing videos to targeted playlist following API failure on previous run
+    """Add missing videos to a targeted playlist following API failure on a previous run
     :param service: a Python YouTube Client
     :param prog_bar: to use tqdm progress bar or not.
     """
@@ -687,7 +688,7 @@ def add_api_fail(service: pyt.Client, prog_bar: bool = True):
             api_failure[p_id]['failure'] = []
             addition += 1
 
-    if addition > 0:  # Save cleared file
+    if addition > 0:  # Save the cleared file
         with open('../data/api_failure.json', 'w', encoding='utf-8') as api_failure_file:
             # noinspection PyTypeChecker
             json.dump(api_failure, api_failure_file, ensure_ascii=False, indent=2)
