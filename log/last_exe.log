@@ -1,13 +1,15 @@
-2025-05-18 07:11:37+0000 [INFO] - Process started.
-2025-05-18 07:11:37+0000 [INFO] - API credentials refreshed.
-2025-05-18 07:11:37+0000 [INFO] - YouTube service created successfully.
-2025-05-18 07:11:37+0000 [INFO] - Iterative research for 219 YouTube channels.
-2025-05-18 07:11:57+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
-2025-05-18 07:12:44+0000 [INFO] - Add statistics for 26 video(s).
-2025-05-18 07:13:28+0000 [INFO] - Addition to "Banger Radar": 4 video(s).
-2025-05-18 07:13:30+0000 [INFO] - Addition to "Release Radar": 15 video(s).
-2025-05-18 07:13:37+0000 [INFO] - Addition to "Watch Later": 3 video(s).
-2025-05-18 07:13:40+0000 [INFO] - 15 addition(s) from Re-listening playlist.
-2025-05-18 07:13:53+0000 [INFO] - 10 addition(s) from Legacy playlist.
-2025-05-18 07:14:03+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2025-05-18 07:14:03+0000 [INFO] - Process ended.
+2025-05-19 07:13:50+0000 [INFO] - Process started.
+2025-05-19 07:13:51+0000 [INFO] - API credentials refreshed.
+2025-05-19 07:13:51+0000 [INFO] - YouTube service created successfully.
+2025-05-19 07:13:51+0000 [INFO] - Iterative research for 221 YouTube channels.
+2025-05-19 07:14:16+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
+2025-05-19 07:14:40+0000 [INFO] - Add statistics for 32 video(s).
+2025-05-19 07:15:41+0000 [INFO] - Addition to "Banger Radar": 2 video(s).
+2025-05-19 07:15:41+0000 [WARNING] - Addition Request Failure: (O1-eWs1v9zo) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-05-19 07:15:41+0000 [INFO] - Addition to "Release Radar": 18 video(s).
+2025-05-19 07:15:48+0000 [WARNING] - Addition Request Failure: (LmcEiPMUL5k) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-05-19 07:15:50+0000 [INFO] - Addition to "Watch Later": 4 video(s).
+2025-05-19 07:15:55+0000 [INFO] - 14 addition(s) from Re-listening playlist.
+2025-05-19 07:16:04+0000 [INFO] - 9 addition(s) from Legacy playlist.
+2025-05-19 07:16:12+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2025-05-19 07:16:12+0000 [INFO] - Process ended.
