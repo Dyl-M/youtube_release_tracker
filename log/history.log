@@ -2250,3 +2250,27 @@
 2025-05-27 07:16:13+0000 [INFO] - 7 addition(s) from Legacy playlist.
 2025-05-27 07:16:18+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
 2025-05-27 07:16:18+0000 [INFO] - Process ended.
+2025-05-28 07:13:24+0000 [INFO] - Process started.
+2025-05-28 07:13:25+0000 [INFO] - API credentials refreshed.
+2025-05-28 07:13:25+0000 [INFO] - YouTube service created successfully.
+2025-05-28 07:13:25+0000 [INFO] - Iterative research for 221 YouTube channels.
+2025-05-28 07:13:48+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
+2025-05-28 07:14:39+0000 [INFO] - Add statistics for 50 video(s).
+2025-05-28 07:16:11+0000 [INFO] - Addition to "Banger Radar": 9 video(s).
+2025-05-28 07:16:13+0000 [WARNING] - Addition Request Failure: (tIJT3WkvDsw) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-05-28 07:16:19+0000 [INFO] - Addition to "Release Radar": 19 video(s).
+2025-05-28 07:16:21+0000 [WARNING] - Addition Request Failure: (oq6cZV5s04o) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-05-28 07:16:21+0000 [WARNING] - Addition Request Failure: (ia0Fc1RHlgo) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-05-28 07:16:21+0000 [WARNING] - Addition Request Failure: (UExqwCwcx_I) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-05-28 07:16:23+0000 [WARNING] - Addition Request Failure: (vi0_ijZpegg) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-05-28 07:16:23+0000 [WARNING] - Addition Request Failure: (Ol-CplIUI-g) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-05-28 07:16:26+0000 [WARNING] - Addition Request Failure: (VJSLjEccTWg) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-05-28 07:16:29+0000 [WARNING] - Addition Request Failure: (vuO9bR9DXJs) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-05-28 07:16:29+0000 [WARNING] - Addition Request Failure: (0UeZ6OMmcPE) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-05-28 07:16:30+0000 [WARNING] - Addition Request Failure: (ptslYDVqtzk) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-05-28 07:16:30+0000 [WARNING] - Addition Request Failure: (S7VkKhbpNPk) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-05-28 07:16:31+0000 [INFO] - Addition to "Watch Later": 7 video(s).
+2025-05-28 07:16:37+0000 [INFO] - 20 addition(s) from Re-listening playlist.
+2025-05-28 07:16:55+0000 [INFO] - 11 addition(s) from Legacy playlist.
+2025-05-28 07:17:06+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2025-05-28 07:17:06+0000 [INFO] - Process ended.
