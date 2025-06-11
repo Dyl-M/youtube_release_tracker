@@ -1,12 +1,14 @@
-2025-06-10 07:13:26+0000 [INFO] - Process started.
-2025-06-10 07:13:27+0000 [INFO] - API credentials refreshed.
-2025-06-10 07:13:27+0000 [INFO] - YouTube service created successfully.
-2025-06-10 07:13:27+0000 [INFO] - Iterative research for 222 YouTube channels.
-2025-06-10 07:13:39+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
-2025-06-10 07:14:31+0000 [INFO] - Add statistics for 42 video(s).
-2025-06-10 07:15:54+0000 [INFO] - Addition to "Banger Radar": 3 video(s).
-2025-06-10 07:15:54+0000 [INFO] - Addition to "Release Radar": 18 video(s).
-2025-06-10 07:15:59+0000 [INFO] - Addition to "Watch Later": 7 video(s).
-2025-06-10 07:16:04+0000 [INFO] - No addition necessary for Release Radar
-2025-06-10 07:16:05+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2025-06-10 07:16:05+0000 [INFO] - Process ended.
+2025-06-11 07:13:25+0000 [INFO] - Process started.
+2025-06-11 07:13:25+0000 [INFO] - API credentials refreshed.
+2025-06-11 07:13:25+0000 [INFO] - YouTube service created successfully.
+2025-06-11 07:13:25+0000 [INFO] - Iterative research for 222 YouTube channels.
+2025-06-11 07:14:17+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
+2025-06-11 07:14:33+0000 [INFO] - Add statistics for 50 video(s).
+2025-06-11 07:15:47+0000 [INFO] - Addition to "Banger Radar": 7 video(s).
+2025-06-11 07:15:51+0000 [WARNING] - Addition Request Failure: (cf82iev3Bbs) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-06-11 07:15:52+0000 [WARNING] - Addition Request Failure: (UrsKNf_CtSE) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-06-11 07:15:53+0000 [INFO] - Addition to "Release Radar": 19 video(s).
+2025-06-11 07:16:02+0000 [INFO] - Addition to "Watch Later": 7 video(s).
+2025-06-11 07:16:08+0000 [INFO] - No addition necessary for Release Radar
+2025-06-11 07:16:10+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2025-06-11 07:16:10+0000 [INFO] - Process ended.
