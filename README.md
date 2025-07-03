@@ -16,7 +16,7 @@ specific playlist
 
 - [🚨 BANGER RADAR](https://www.youtube.com/playlist?list=PLOMUdQFdS-XOI8OIWV_Gx-SRhlCS9PKLn): music releases among a 
   selection of music channels.
-- [📡 RELEASE RADAR](https://www.youtube.com/playlist?list=PLOMUdQFdS-XNe56Ot6KQmsR4cLT2ua9IC): regular music releases 
+- [📡 RELEASE RADAR](https://www.youtube.com/playlist?list=PLOMUdQFdS-XNpAVOwJ52c_U94kd0rannK): regular music releases 
   among my subscriptions.
 - [⏳ Watch Later 2K24](https://www.youtube.com/playlist?list=PLOMUdQFdS-XPfjAeBp5TuNDQmMoiJHdvB) (Private): other type of video to Watch Later (since regular Watch Later playlist can't be 
   manipulated with the API).
