@@ -2913,3 +2913,32 @@
 2025-07-15 07:19:55+0000 [INFO] - 4 addition(s) from Legacy playlist.
 2025-07-15 07:20:00+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
 2025-07-15 07:20:00+0000 [INFO] - Process ended.
+2025-07-16 07:16:30+0000 [INFO] - Process started.
+2025-07-16 07:16:30+0000 [INFO] - API credentials refreshed.
+2025-07-16 07:16:30+0000 [INFO] - YouTube service created successfully.
+2025-07-16 07:16:30+0000 [INFO] - Iterative research for 223 YouTube channels.
+2025-07-16 07:17:34+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
+2025-07-16 07:17:42+0000 [INFO] - Add statistics for 51 video(s).
+2025-07-16 07:19:37+0000 [INFO] - Addition to "Banger Radar": 5 video(s).
+2025-07-16 07:19:39+0000 [WARNING] - Addition Request Failure: (9nJEBaES1Gc) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-07-16 07:19:40+0000 [INFO] - Addition to "Release Radar": 24 video(s).
+2025-07-16 07:19:41+0000 [WARNING] - Addition Request Failure: (V-EN9yDpsmY) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-07-16 07:19:46+0000 [WARNING] - Addition Request Failure: (4P4yzgjLeRU) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-07-16 07:19:47+0000 [WARNING] - Addition Request Failure: (JaxQWJW07xQ) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-07-16 07:19:47+0000 [WARNING] - Addition Request Failure: (KgIMtO8ND0M) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-07-16 07:19:47+0000 [WARNING] - Addition Request Failure: (5w0IDuI6ktk) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-07-16 07:19:47+0000 [WARNING] - Addition Request Failure: (yzJVgJpP-sg) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-07-16 07:19:48+0000 [WARNING] - Addition Request Failure: (cud-jBnKOkk) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-07-16 07:19:51+0000 [WARNING] - Addition Request Failure: (x6tYXSL-RYU) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-07-16 07:19:52+0000 [WARNING] - Addition Request Failure: (HT2TKav5WnU) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-07-16 07:19:52+0000 [WARNING] - Addition Request Failure: (ucG4tn_L4LQ) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-07-16 07:19:54+0000 [WARNING] - Addition Request Failure: (IpOSAKRE1xs) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-07-16 07:19:54+0000 [WARNING] - Addition Request Failure: (QBTXlmyW-o4) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-07-16 07:19:55+0000 [WARNING] - Addition Request Failure: (ATjQwReE62E) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-07-16 07:19:57+0000 [WARNING] - Addition Request Failure: (nGr_txMTtzU) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-07-16 07:19:57+0000 [WARNING] - Addition Request Failure: (Sb8vqXwBVQw) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-07-16 07:19:57+0000 [INFO] - Addition to "Watch Later": 5 video(s).
+2025-07-16 07:20:02+0000 [INFO] - 24 addition(s) from Re-listening playlist.
+2025-07-16 07:20:24+0000 [INFO] - 7 addition(s) from Legacy playlist.
+2025-07-16 07:20:32+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2025-07-16 07:20:32+0000 [INFO] - Process ended.
