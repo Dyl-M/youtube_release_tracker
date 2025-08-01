@@ -1,12 +1,12 @@
 beautifulsoup4~=4.13.4
-google-api-python-client~=2.174.0
+google-api-python-client~=2.177.0
 google-auth~=2.40.3
 google-auth-oauthlib~=1.2.2
 isodate~=0.7.2
 numpy~=2.0.2
-pandas~=2.3.0
+pandas~=2.3.1
 plotly~=6.2.0
-pygithub~=2.6.1
+pygithub~=2.7.0
 python-youtube~=0.9.7
 requests~=2.32.4
 scikit-learn~=1.6.1
