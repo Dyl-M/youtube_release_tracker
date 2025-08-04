@@ -1,15 +1,16 @@
-2025-08-03 14:13:02+0000 [INFO] - Process started.
-2025-08-03 14:13:02+0000 [INFO] - API credentials refreshed.
-2025-08-03 14:13:02+0000 [INFO] - YouTube service created successfully.
-2025-08-03 14:13:02+0000 [INFO] - 11 addition(s) to Release Radar playlist from previous API failure.
-2025-08-03 14:13:07+0000 [INFO] - Iterative research for 226 YouTube channels.
-2025-08-03 14:14:19+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
-2025-08-03 14:14:24+0000 [INFO] - Add statistics for 11 video(s).
-2025-08-03 14:14:29+0000 [INFO] - No change to apply on historical data for following delta: 1 week(s)
-2025-08-03 14:14:29+0000 [INFO] - No change to apply on historical data for following delta: 4 week(s)
-2025-08-03 14:14:29+0000 [INFO] - No change to apply on historical data for following delta: 12 week(s)
-2025-08-03 14:14:29+0000 [INFO] - Addition to "Release Radar": 4 video(s).
-2025-08-03 14:14:31+0000 [INFO] - Addition to "Watch Later": 4 video(s).
-2025-08-03 14:14:36+0000 [INFO] - No addition necessary for Release Radar
-2025-08-03 14:14:37+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2025-08-03 14:14:37+0000 [INFO] - Process ended.
+2025-08-04 07:23:26+0000 [INFO] - Process started.
+2025-08-04 07:23:26+0000 [INFO] - API credentials refreshed.
+2025-08-04 07:23:26+0000 [INFO] - YouTube service created successfully.
+2025-08-04 07:23:26+0000 [INFO] - Iterative research for 226 YouTube channels.
+2025-08-04 07:24:24+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
+2025-08-04 07:24:27+0000 [INFO] - Add statistics for 19 video(s).
+2025-08-04 07:25:34+0000 [INFO] - Addition to "Banger Radar": 3 video(s).
+2025-08-04 07:25:35+0000 [INFO] - Addition to "Release Radar": 10 video(s).
+2025-08-04 07:25:37+0000 [WARNING] - Addition Request Failure: (zxHO_7fXDlg) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-08-04 07:25:38+0000 [WARNING] - Addition Request Failure: (ovoT6fehTJQ) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-08-04 07:25:41+0000 [INFO] - Addition to "Watch Later": 3 video(s).
+2025-08-04 07:25:45+0000 [INFO] - 28 addition(s) from Re-listening playlist.
+2025-08-04 07:25:46+0000 [WARNING] - Addition Request Failure: (qT20RUYSLow) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-08-04 07:26:09+0000 [INFO] - 4 addition(s) from Legacy playlist.
+2025-08-04 07:26:13+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2025-08-04 07:26:13+0000 [INFO] - Process ended.
