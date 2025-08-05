@@ -1,26 +1,17 @@
-2025-08-04 18:31:55+0000 [INFO] - Process started.
-2025-08-04 18:31:55+0000 [INFO] - API credentials refreshed.
-2025-08-04 18:31:55+0000 [INFO] - YouTube service created successfully.
-2025-08-04 18:31:55+0000 [INFO] - 3 addition(s) to Release Radar playlist from previous API failure.
-2025-08-04 18:31:57+0000 [INFO] - Iterative research for 226 YouTube channels.
-2025-08-04 18:32:10+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
-2025-08-04 18:33:02+0000 [INFO] - Add statistics for 48 video(s).
-2025-08-04 18:33:29+0000 [INFO] - No change to apply on historical data for following delta: 1 week(s)
-2025-08-04 18:33:29+0000 [INFO] - No change to apply on historical data for following delta: 4 week(s)
-2025-08-04 18:33:29+0000 [INFO] - No change to apply on historical data for following delta: 12 week(s)
-2025-08-04 18:33:29+0000 [INFO] - No change to apply on historical data for following delta: 24 week(s)
-2025-08-04 18:33:29+0000 [INFO] - Addition to "Banger Radar": 4 video(s).
-2025-08-04 18:33:31+0000 [INFO] - Addition to "Release Radar": 24 video(s).
-2025-08-04 18:33:39+0000 [WARNING] - Addition Request Failure: (aFNVcllE3FY) - quotaExceeded - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
-2025-08-04 18:33:39+0000 [WARNING] - Addition Request Failure: (mx2ec4Depus) - quotaExceeded - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
-2025-08-04 18:33:39+0000 [WARNING] - Addition Request Failure: (sIxAFWJdH7Q) - quotaExceeded - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
-2025-08-04 18:33:39+0000 [WARNING] - Addition Request Failure: (JgTiBwbnHN4) - quotaExceeded - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
-2025-08-04 18:33:39+0000 [WARNING] - Addition Request Failure: (ta1zs5p1DGA) - quotaExceeded - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
-2025-08-04 18:33:39+0000 [WARNING] - Addition Request Failure: (6Frd5GwjB6Q) - quotaExceeded - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
-2025-08-04 18:33:39+0000 [INFO] - Addition to "Watch Later": 4 video(s).
-2025-08-04 18:33:39+0000 [WARNING] - Addition Request Failure: (k-lqn05jRQE) - quotaExceeded - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
-2025-08-04 18:33:41+0000 [WARNING] - Addition Request Failure: (Vc2AH9oMStM) - quotaExceeded - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
-2025-08-04 18:33:41+0000 [WARNING] - API quota exceeded.
-2025-08-04 18:33:41+0000 [INFO] - No addition necessary for Release Radar
-2025-08-04 18:33:42+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2025-08-04 18:33:42+0000 [INFO] - Process ended.
+2025-08-05 07:20:45+0000 [INFO] - Process started.
+2025-08-05 07:20:46+0000 [INFO] - API credentials refreshed.
+2025-08-05 07:20:46+0000 [INFO] - YouTube service created successfully.
+2025-08-05 07:20:46+0000 [INFO] - 6 addition(s) to Release Radar playlist from previous API failure.
+2025-08-05 07:20:47+0000 [WARNING] - Addition Request Failure: (mx2ec4Depus) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-08-05 07:20:48+0000 [WARNING] - Addition Request Failure: (sIxAFWJdH7Q) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-08-05 07:20:49+0000 [WARNING] - Addition Request Failure: (JgTiBwbnHN4) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-08-05 07:20:50+0000 [INFO] - 2 addition(s) to Watch Later playlist from previous API failure.
+2025-08-05 07:20:51+0000 [INFO] - Iterative research for 226 YouTube channels.
+2025-08-05 07:21:01+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
+2025-08-05 07:21:58+0000 [INFO] - Add statistics for 7 video(s).
+2025-08-05 07:23:27+0000 [INFO] - Addition to "Release Radar": 1 video(s).
+2025-08-05 07:23:27+0000 [INFO] - Addition to "Watch Later": 1 video(s).
+2025-08-05 07:23:29+0000 [INFO] - 32 addition(s) from Re-listening playlist.
+2025-08-05 07:23:49+0000 [INFO] - 4 addition(s) from Legacy playlist.
+2025-08-05 07:23:52+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2025-08-05 07:23:52+0000 [INFO] - Process ended.
