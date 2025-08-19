@@ -1,14 +1,14 @@
-2025-08-18 07:17:37+0000 [INFO] - Process started.
-2025-08-18 07:17:37+0000 [INFO] - API credentials refreshed.
-2025-08-18 07:17:37+0000 [INFO] - YouTube service created successfully.
-2025-08-18 07:17:37+0000 [INFO] - Iterative research for 226 YouTube channels.
-2025-08-18 07:17:54+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
-2025-08-18 07:18:47+0000 [INFO] - Add statistics for 32 video(s).
-2025-08-18 07:20:24+0000 [INFO] - Addition to "Banger Radar": 3 video(s).
-2025-08-18 07:20:26+0000 [INFO] - Addition to "Release Radar": 17 video(s).
-2025-08-18 07:20:27+0000 [WARNING] - Addition Request Failure: (Ku5YCIjnmac) - SERVICE_UNAVAILABLE - The operation was aborted.
-2025-08-18 07:20:38+0000 [INFO] - Addition to "Watch Later": 3 video(s).
-2025-08-18 07:20:44+0000 [INFO] - 22 addition(s) from Re-listening playlist.
-2025-08-18 07:21:08+0000 [INFO] - 2 addition(s) from Legacy playlist.
-2025-08-18 07:21:12+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2025-08-18 07:21:12+0000 [INFO] - Process ended.
+2025-08-19 07:13:00+0000 [INFO] - Process started.
+2025-08-19 07:13:01+0000 [INFO] - API credentials refreshed.
+2025-08-19 07:13:01+0000 [INFO] - YouTube service created successfully.
+2025-08-19 07:13:01+0000 [INFO] - 1 addition(s) to Release Radar playlist from previous API failure.
+2025-08-19 07:13:01+0000 [INFO] - Iterative research for 226 YouTube channels.
+2025-08-19 07:13:50+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
+2025-08-19 07:14:17+0000 [INFO] - Add statistics for 50 video(s).
+2025-08-19 07:16:14+0000 [INFO] - Addition to "Banger Radar": 3 video(s).
+2025-08-19 07:16:15+0000 [INFO] - Addition to "Release Radar": 22 video(s).
+2025-08-19 07:16:23+0000 [INFO] - Addition to "Watch Later": 7 video(s).
+2025-08-19 07:16:30+0000 [INFO] - 16 addition(s) from Re-listening playlist.
+2025-08-19 07:16:43+0000 [INFO] - 1 addition(s) from Legacy playlist.
+2025-08-19 07:16:46+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2025-08-19 07:16:46+0000 [INFO] - Process ended.
