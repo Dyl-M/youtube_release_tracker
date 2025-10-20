@@ -1,17 +1,12 @@
-2025-10-19 07:11:12+0000 [INFO] - Process started.
-2025-10-19 07:11:12+0000 [INFO] - API credentials refreshed.
-2025-10-19 07:11:12+0000 [INFO] - YouTube service created successfully.
-2025-10-19 07:11:12+0000 [INFO] - 10 addition(s) to Release Radar playlist from previous API failure.
-2025-10-19 07:11:12+0000 [WARNING] - Addition Request Failure: (app5yS1i3L4) - SERVICE_UNAVAILABLE - The operation was aborted.
-2025-10-19 07:11:13+0000 [WARNING] - Addition Request Failure: (q_4KI-ChIIs) - SERVICE_UNAVAILABLE - The operation was aborted.
-2025-10-19 07:11:14+0000 [WARNING] - Addition Request Failure: (IYJ34IeMF3Y) - SERVICE_UNAVAILABLE - The operation was aborted.
-2025-10-19 07:11:14+0000 [WARNING] - Addition Request Failure: (oa0WOyDdr1w) - SERVICE_UNAVAILABLE - The operation was aborted.
-2025-10-19 07:11:15+0000 [INFO] - Iterative research for 230 YouTube channels.
-2025-10-19 07:12:05+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
-2025-10-19 07:12:29+0000 [INFO] - Add statistics for 40 video(s).
-2025-10-19 07:13:52+0000 [INFO] - Addition to "Banger Radar": 5 video(s).
-2025-10-19 07:13:54+0000 [INFO] - Addition to "Release Radar": 18 video(s).
-2025-10-19 07:14:01+0000 [INFO] - Addition to "Watch Later": 5 video(s).
-2025-10-19 07:14:06+0000 [INFO] - 16 addition(s) from Re-listening playlist.
-2025-10-19 07:14:20+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2025-10-19 07:14:20+0000 [INFO] - Process ended.
+2025-10-20 07:14:10+0000 [INFO] - Process started.
+2025-10-20 07:14:10+0000 [INFO] - API credentials refreshed.
+2025-10-20 07:14:10+0000 [INFO] - YouTube service created successfully.
+2025-10-20 07:14:10+0000 [INFO] - Iterative research for 230 YouTube channels.
+2025-10-20 07:14:40+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
+2025-10-20 07:15:18+0000 [INFO] - Add statistics for 48 video(s).
+2025-10-20 07:16:43+0000 [INFO] - Addition to "Banger Radar": 4 video(s).
+2025-10-20 07:16:44+0000 [INFO] - Addition to "Release Radar": 23 video(s).
+2025-10-20 07:16:54+0000 [INFO] - Addition to "Watch Later": 8 video(s).
+2025-10-20 07:17:02+0000 [INFO] - 17 addition(s) from Re-listening playlist.
+2025-10-20 07:17:14+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2025-10-20 07:17:14+0000 [INFO] - Process ended.
