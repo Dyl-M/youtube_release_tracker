@@ -1,19 +1,16 @@
-2025-10-21 07:14:13+0000 [INFO] - Process started.
-2025-10-21 07:14:13+0000 [INFO] - API credentials refreshed.
-2025-10-21 07:14:13+0000 [INFO] - YouTube service created successfully.
-2025-10-21 07:14:13+0000 [INFO] - Iterative research for 230 YouTube channels.
-2025-10-21 07:15:11+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
-2025-10-21 07:15:23+0000 [INFO] - Add statistics for 50 video(s).
-2025-10-21 07:17:02+0000 [INFO] - Addition to "Banger Radar": 4 video(s).
-2025-10-21 07:17:03+0000 [INFO] - Addition to "Release Radar": 21 video(s).
-2025-10-21 07:17:04+0000 [WARNING] - Addition Request Failure: (aC2F3ngf2Qs) - SERVICE_UNAVAILABLE - The operation was aborted.
-2025-10-21 07:17:04+0000 [WARNING] - Addition Request Failure: (y1YsLOwUj5E) - SERVICE_UNAVAILABLE - The operation was aborted.
-2025-10-21 07:17:05+0000 [WARNING] - Addition Request Failure: (nOBXvIXjbS4) - SERVICE_UNAVAILABLE - The operation was aborted.
-2025-10-21 07:17:05+0000 [WARNING] - Addition Request Failure: (vO4Z5nADTqw) - SERVICE_UNAVAILABLE - The operation was aborted.
-2025-10-21 07:17:06+0000 [WARNING] - Addition Request Failure: (-4CitvtXWXI) - SERVICE_UNAVAILABLE - The operation was aborted.
-2025-10-21 07:17:06+0000 [WARNING] - Addition Request Failure: (YLcxxD1b1sU) - SERVICE_UNAVAILABLE - The operation was aborted.
-2025-10-21 07:17:06+0000 [WARNING] - Addition Request Failure: (15ac5mrHLws) - SERVICE_UNAVAILABLE - The operation was aborted.
-2025-10-21 07:17:12+0000 [INFO] - Addition to "Watch Later": 8 video(s).
-2025-10-21 07:17:20+0000 [INFO] - 26 addition(s) from Re-listening playlist.
-2025-10-21 07:17:44+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2025-10-21 07:17:44+0000 [INFO] - Process ended.
+2025-10-22 07:13:38+0000 [INFO] - Process started.
+2025-10-22 07:13:38+0000 [INFO] - API credentials refreshed.
+2025-10-22 07:13:38+0000 [INFO] - YouTube service created successfully.
+2025-10-22 07:13:38+0000 [INFO] - 7 addition(s) to Release Radar playlist from previous API failure.
+2025-10-22 07:13:40+0000 [INFO] - Iterative research for 230 YouTube channels.
+2025-10-22 07:14:34+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
+2025-10-22 07:14:42+0000 [INFO] - Add statistics for 55 video(s).
+2025-10-22 07:16:26+0000 [INFO] - Addition to "Banger Radar": 6 video(s).
+2025-10-22 07:16:26+0000 [WARNING] - Addition Request Failure: (ysb1Sosr1nU) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-10-22 07:16:28+0000 [INFO] - Addition to "Release Radar": 25 video(s).
+2025-10-22 07:16:28+0000 [WARNING] - Addition Request Failure: (jf6Mj-Pnx-M) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-10-22 07:16:33+0000 [WARNING] - Addition Request Failure: (AwAU_nJ6NS8) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-10-22 07:16:35+0000 [INFO] - Addition to "Watch Later": 6 video(s).
+2025-10-22 07:16:41+0000 [INFO] - 10 addition(s) from Re-listening playlist.
+2025-10-22 07:16:48+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2025-10-22 07:16:48+0000 [INFO] - Process ended.
