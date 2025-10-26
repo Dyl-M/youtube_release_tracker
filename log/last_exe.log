@@ -1,15 +1,12 @@
-2025-10-25 07:11:57+0000 [INFO] - Process started.
-2025-10-25 07:11:57+0000 [INFO] - API credentials refreshed.
-2025-10-25 07:11:57+0000 [INFO] - YouTube service created successfully.
-2025-10-25 07:11:57+0000 [INFO] - 5 addition(s) to Release Radar playlist from previous API failure.
-2025-10-25 07:11:59+0000 [WARNING] - Addition Request Failure: (0GqY_xhj65I) - SERVICE_UNAVAILABLE - The operation was aborted.
-2025-10-25 07:12:01+0000 [WARNING] - Addition Request Failure: (H92w1N8ukEg) - SERVICE_UNAVAILABLE - The operation was aborted.
-2025-10-25 07:12:01+0000 [INFO] - Iterative research for 230 YouTube channels.
-2025-10-25 07:13:15+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
-2025-10-25 07:13:15+0000 [INFO] - Add statistics for 79 video(s).
-2025-10-25 07:14:40+0000 [INFO] - Addition to "Banger Radar": 9 video(s).
-2025-10-25 07:14:44+0000 [INFO] - Addition to "Release Radar": 39 video(s).
-2025-10-25 07:15:04+0000 [INFO] - Addition to "Watch Later": 13 video(s).
-2025-10-25 07:15:17+0000 [INFO] - No addition necessary for Release Radar
-2025-10-25 07:15:19+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2025-10-25 07:15:19+0000 [INFO] - Process ended.
+2025-10-26 07:11:28+0000 [INFO] - Process started.
+2025-10-26 07:11:28+0000 [INFO] - API credentials refreshed.
+2025-10-26 07:11:28+0000 [INFO] - YouTube service created successfully.
+2025-10-26 07:11:28+0000 [INFO] - Iterative research for 230 YouTube channels.
+2025-10-26 07:12:24+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
+2025-10-26 07:12:37+0000 [INFO] - Add statistics for 44 video(s).
+2025-10-26 07:13:35+0000 [INFO] - Addition to "Banger Radar": 5 video(s).
+2025-10-26 07:13:37+0000 [INFO] - Addition to "Release Radar": 24 video(s).
+2025-10-26 07:13:47+0000 [INFO] - Addition to "Watch Later": 5 video(s).
+2025-10-26 07:13:51+0000 [INFO] - No addition necessary for Release Radar
+2025-10-26 07:13:52+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2025-10-26 07:13:52+0000 [INFO] - Process ended.
