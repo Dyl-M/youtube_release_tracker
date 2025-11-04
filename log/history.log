@@ -4606,3 +4606,45 @@
 2025-11-03 07:17:27+0000 [INFO] - 25 addition(s) from Re-listening playlist.
 2025-11-03 07:17:50+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
 2025-11-03 07:17:50+0000 [INFO] - Process ended.
+2025-11-04 07:13:50+0000 [INFO] - Process started.
+2025-11-04 07:13:50+0000 [INFO] - API credentials refreshed.
+2025-11-04 07:13:50+0000 [INFO] - YouTube service created successfully.
+2025-11-04 07:13:50+0000 [INFO] - Iterative research for 230 YouTube channels.
+2025-11-04 07:14:46+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
+2025-11-04 07:15:09+0000 [INFO] - Add statistics for 49 video(s).
+2025-11-04 07:17:17+0000 [INFO] - Addition to "Banger Radar": 6 video(s).
+2025-11-04 07:17:18+0000 [WARNING] - Addition Request Failure: (7o3T9S8akUw) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-11-04 07:17:18+0000 [WARNING] - Addition Request Failure: (CZmk5QynN98) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-11-04 07:17:18+0000 [WARNING] - Addition Request Failure: (o45PXAj7fCY) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-11-04 07:17:19+0000 [WARNING] - Addition Request Failure: (dJBOqG51x8o) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-11-04 07:17:19+0000 [INFO] - Addition to "Release Radar": 22 video(s).
+2025-11-04 07:17:20+0000 [WARNING] - Addition Request Failure: (U5I2XGdInEY) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-11-04 07:17:21+0000 [WARNING] - Addition Request Failure: (fVXpQOhA-KM) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-11-04 07:17:22+0000 [WARNING] - Addition Request Failure: (vau99PaOezU) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-11-04 07:17:30+0000 [INFO] - Addition to "Watch Later": 7 video(s).
+2025-11-04 07:17:38+0000 [INFO] - 21 addition(s) from Re-listening playlist.
+2025-11-04 07:17:45+0000 [WARNING] - Addition Request Failure: (KEMFbQePRv0) - quotaExceeded - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
+2025-11-04 07:17:45+0000 [WARNING] - Addition Request Failure: (1bGcMB3xFwc) - quotaExceeded - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
+2025-11-04 07:17:45+0000 [WARNING] - Addition Request Failure: (EKl0-fP6T_A) - quotaExceeded - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
+2025-11-04 07:17:46+0000 [WARNING] - Addition Request Failure: (7xpXCGBcjGc) - quotaExceeded - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
+2025-11-04 07:17:46+0000 [WARNING] - Addition Request Failure: (zBRf7zI5vVo) - quotaExceeded - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
+2025-11-04 07:17:46+0000 [WARNING] - Deletion Request Failure: (xzbAKnARwKo) - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
+2025-11-04 07:17:46+0000 [WARNING] - Deletion Request Failure: (Tza95THN3Rc) - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
+2025-11-04 07:17:46+0000 [WARNING] - Deletion Request Failure: (W_JaktPJqtY) - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
+2025-11-04 07:17:46+0000 [WARNING] - Deletion Request Failure: (v0mzcoOqH-0) - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
+2025-11-04 07:17:46+0000 [WARNING] - Deletion Request Failure: (TTQk1Hndk1U) - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
+2025-11-04 07:17:46+0000 [WARNING] - Deletion Request Failure: (gUCy3XALejM) - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
+2025-11-04 07:17:47+0000 [WARNING] - Deletion Request Failure: (neCFLg6tEQY) - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
+2025-11-04 07:17:47+0000 [WARNING] - Deletion Request Failure: (cRjnrSSE3tE) - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
+2025-11-04 07:17:47+0000 [WARNING] - Deletion Request Failure: (zVTrYN8W4MA) - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
+2025-11-04 07:17:47+0000 [WARNING] - Deletion Request Failure: (yGQhp9oP980) - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
+2025-11-04 07:17:47+0000 [WARNING] - Deletion Request Failure: (BlSHhJf8cJA) - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
+2025-11-04 07:17:47+0000 [WARNING] - Deletion Request Failure: (1Oz2GRt-I2g) - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
+2025-11-04 07:17:47+0000 [WARNING] - Deletion Request Failure: (P_8ufMwnTkg) - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
+2025-11-04 07:17:47+0000 [WARNING] - Deletion Request Failure: (0YDcoCkKuVM) - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
+2025-11-04 07:17:47+0000 [WARNING] - Deletion Request Failure: (KEMFbQePRv0) - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
+2025-11-04 07:17:47+0000 [WARNING] - Deletion Request Failure: (1bGcMB3xFwc) - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
+2025-11-04 07:17:48+0000 [WARNING] - Deletion Request Failure: (7xpXCGBcjGc) - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
+2025-11-04 07:17:48+0000 [WARNING] - Deletion Request Failure: (zBRf7zI5vVo) - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
+2025-11-04 07:17:49+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2025-11-04 07:17:49+0000 [INFO] - Process ended.
