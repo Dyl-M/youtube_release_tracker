@@ -9,7 +9,7 @@ on:
                 default: 'warning'
 
     schedule:
-        -   cron: "0 7 * * *"  # Runs at 7:00 AM UTC, which aligns with midnight PST outside of daylight saving time
+        -   cron: "0 7 * * *"  # Runs at 7:00 AM UTC, waits until midnight PT (auto-adjusts for PST/PDT)
 
 jobs:
     build-linux:
@@ -42,39 +42,28 @@ jobs:
                 name: Set Up Timezone
                 if: env.proceed_with_check == 'true'
                 run: |
-                    # Install timezone data and set the timezone to America/Los_Angeles
+                    # Install timezone data
                     sudo apt-get update && sudo apt-get install -y tzdata
-                    export TZ="America/Los_Angeles"
-                    echo "Timezone set to America/Los_Angeles" 
+                    echo "Timezone data installed"
 
             -   id: wait-0000-pst
-                name: Wait Until Midnight PST
+                name: Wait Until Midnight PT (PST/PDT)
                 if: env.proceed_with_check == 'true'
                 run: |
                     while true; do
-                      # Get the current hour and minute in the specified timezone
-                      current_hour=$(date +'%H')
-                      current_minute=$(date +'%M')
-                    
-                      # Check if the current time is midnight or past midnight
-                      if [ "$current_hour" -eq "00" ] && [ "$current_minute" -eq "00" ]; then
-                        echo "It's midnight PST! Proceeding with the task."
-                        break
-                      elif [ "$current_hour" -gt "00" ] || ([ "$current_hour" -eq "00" ] && [ "$current_minute" -gt "00" ]); then
-                        echo "The current time is past midnight PST. Proceeding without waiting."
+                      # Get the current hour and minute in Pacific Time (handles PST/PDT automatically)
+                      current_hour=$(TZ="America/Los_Angeles" date +'%H')
+                      current_minute=$(TZ="America/Los_Angeles" date +'%M')
+
+                      # Check if it's midnight hour (00:00-00:59) or later
+                      if [ "$current_hour" -eq 0 ]; then
+                        echo "It's midnight PT or later! Current time: $current_hour:$current_minute PT. Proceeding."
                         break
                       else
-                        echo "It's not midnight PST yet. Current time: $current_hour:$current_minute. Waiting..."
+                        echo "Not midnight PT yet. Current time: $current_hour:$current_minute PT. Waiting..."
                         sleep 60 # Wait for 1 minute before checking again
                       fi
                     done
-
-            -   id: tz-reset
-                name: Reset Timezone to UTC
-                if: env.proceed_with_check == 'true'
-                run: |
-                    export TZ="UTC"
-                    echo "Timezone reset to UTC"
 
             -   id: git-checkout
                 name: Checkout repository
