@@ -1,14 +1,21 @@
-2025-11-05 07:13:43+0000 [INFO] - Process started.
-2025-11-05 07:13:43+0000 [INFO] - API credentials refreshed.
-2025-11-05 07:13:43+0000 [INFO] - YouTube service created successfully.
-2025-11-05 07:13:43+0000 [INFO] - Iterative research for 230 YouTube channels.
-2025-11-05 07:14:41+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
-2025-11-05 07:14:59+0000 [INFO] - Add statistics for 46 video(s).
-2025-11-05 07:17:10+0000 [INFO] - Addition to "Banger Radar": 4 video(s).
-2025-11-05 07:17:11+0000 [WARNING] - Addition Request Failure: (DM7EVwMQ4qo) - SERVICE_UNAVAILABLE - The operation was aborted.
-2025-11-05 07:17:13+0000 [WARNING] - Addition Request Failure: (Y9HfI1Iy9wI) - SERVICE_UNAVAILABLE - The operation was aborted.
-2025-11-05 07:17:13+0000 [INFO] - Addition to "Release Radar": 18 video(s).
-2025-11-05 07:17:22+0000 [INFO] - Addition to "Watch Later": 5 video(s).
-2025-11-05 07:17:27+0000 [INFO] - No addition necessary for Release Radar
-2025-11-05 07:17:28+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2025-11-05 07:17:28+0000 [INFO] - Process ended.
+2025-11-06 07:13:28+0000 [INFO] - Process started.
+2025-11-06 07:13:28+0000 [INFO] - API credentials refreshed.
+2025-11-06 07:13:28+0000 [INFO] - YouTube service created successfully.
+2025-11-06 07:13:28+0000 [INFO] - 2 addition(s) to Banger Radar playlist from previous API failure.
+2025-11-06 07:13:29+0000 [WARNING] - Addition Request Failure: (Y9HfI1Iy9wI) - SERVICE_UNAVAILABLE - The operation was aborted.
+2025-11-06 07:13:29+0000 [INFO] - Iterative research for 230 YouTube channels.
+2025-11-06 07:14:43+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
+2025-11-06 07:14:45+0000 [INFO] - Add statistics for 50 video(s).
+2025-11-06 07:16:41+0000 [INFO] - Addition to "Banger Radar": 3 video(s).
+2025-11-06 07:16:43+0000 [INFO] - Addition to "Release Radar": 19 video(s).
+2025-11-06 07:16:52+0000 [INFO] - Addition to "Watch Later": 7 video(s).
+2025-11-06 07:16:53+0000 [WARNING] - Addition Request Failure: (RiXbhfHKpiU) - quotaExceeded - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
+2025-11-06 07:16:53+0000 [WARNING] - Addition Request Failure: (Y_ivbmhL1os) - quotaExceeded - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
+2025-11-06 07:16:53+0000 [WARNING] - Addition Request Failure: (tAZEYtgAO80) - quotaExceeded - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
+2025-11-06 07:16:53+0000 [WARNING] - Addition Request Failure: (FE-hM1kRK4Y) - quotaExceeded - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
+2025-11-06 07:16:53+0000 [WARNING] - Addition Request Failure: (e3VVfecwOlA) - quotaExceeded - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
+2025-11-06 07:16:53+0000 [WARNING] - Addition Request Failure: (jpNJm8R6qYI) - quotaExceeded - The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
+2025-11-06 07:16:53+0000 [WARNING] - API quota exceeded.
+2025-11-06 07:16:53+0000 [INFO] - No addition necessary for Release Radar
+2025-11-06 07:16:54+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2025-11-06 07:16:54+0000 [INFO] - Process ended.
