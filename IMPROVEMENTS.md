@@ -103,18 +103,18 @@ if __name__ == '__main__':
         sys.exit(1)
 ```
 
-### 6. Broad Exception Catching
-**Locations:** `youtube.py:155`, `youtube.py:202`, `main.py:116`
-```python
-except Exception as error:  # skipcq: PYL-W0703 - No error found so far
-```
-**Issue:** Catches ALL exceptions including KeyboardInterrupt, SystemExit, and programming errors.
+### 6. ✅ FIXED - Broad Exception Catching
+**Locations:** `youtube.py:156`, `youtube.py:203`, `main.py:133`
 
-**Recommendation:** Catch specific exceptions only:
-```python
-except (googleapiclient.errors.Error, ValueError, KeyError) as error:
-    history.critical('...')
-```
+**Status:** ✅ **FIXED**
+
+**Issue:** Caught ALL exceptions including KeyboardInterrupt, SystemExit, and programming errors.
+
+**Fix Applied:**
+- **youtube.py:156** (`create_service_local`): Now catches `(pyt.error.PyYouTubeException, ValueError, AttributeError)`
+- **youtube.py:203** (`create_service_workflow`): Now catches `(pyt.error.PyYouTubeException, ValueError, AttributeError)`
+- **main.py:133** (`update_repo_secrets`): Now catches `(github.GithubException, ValueError)`
+- All exception handlers now catch only specific, expected exceptions
 
 ### 7. Performance: is_shorts() Called for Every Video
 **Location:** `src/youtube.py:365` (called from get_stats)
@@ -414,7 +414,8 @@ def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int = Non
 ## Summary
 
 **Critical:** ~~4~~ **0** issues requiring immediate attention (✅ All Fixed!)
-**High Priority:** 6 issues that significantly impact reliability/performance
+**DeepSource:** ~~4~~ **0** code quality issues (✅ All Fixed!)
+**High Priority:** ~~5~~ **4** issues that significantly impact reliability/performance (✅ 1 Fixed!)
 **Medium Priority:** 9 issues that improve maintainability
 **Low Priority:** 9 nice-to-have improvements
 **Additional Improvements:** 1 major refactoring completed
@@ -424,20 +425,27 @@ def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int = Non
 2. ✅ Error handling for all config file operations (Critical #2)
 3. ✅ Added encoding parameter to add-on.json (Critical #3)
 4. ✅ Handle missing stats.csv on first run (Critical #4)
-5. ✅ Created file_utils.py module and eliminated all redundant file handling code (Refactoring #24)
+5. ✅ Overlapping exception handlers in youtube.py (DeepSource #5)
+6. ✅ Unused import in main.py (DeepSource #6)
+7. ✅ Path traversal vulnerability in file_utils.py (DeepSource #7)
+8. ✅ Unused function parameter in file_utils.py (DeepSource #8)
+9. ✅ Broad exception catching replaced with specific exceptions (High Priority #6)
+10. ✅ Created file_utils.py module and eliminated all redundant file handling code (Refactoring #24)
 
 **Code Quality Impact:**
 - ~106 lines of redundant code eliminated
 - All JSON file operations now use centralized error handling
 - Consistent error messages across the codebase
+- Path traversal attacks prevented with allowlist validation
+- All DeepSource code quality warnings resolved
+- Exception handlers now catch only specific, expected exceptions
 - Easier to add new configuration files in the future
 
 **Recommended Priority Order (Remaining):**
 1. Replace sys.exit() with exceptions (High #5)
-2. Fix broad exception catching (High #6)
-3. Cache shorts detection (High #7)
-4. Investigate pending API failures (High #8)
-5. Fix hardcoded paths (High #9)
-6. Add basic unit tests (Medium #10)
-7. Create configuration file (Medium #11)
-8. Address remaining issues as time permits
+2. Cache shorts detection (High #7)
+3. Investigate pending API failures (High #8)
+4. Fix hardcoded paths (High #9)
+5. Add basic unit tests (Medium #10)
+6. Create configuration file (Medium #11)
+7. Address remaining issues as time permits

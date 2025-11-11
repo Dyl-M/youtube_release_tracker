@@ -130,7 +130,7 @@ def update_repo_secrets(secret_name: str, new_value: str, logger: logging.Logger
         else:
             print(f"Repository Secret '{secret_name}' updated successfully.")
 
-    except Exception as error:  # skipcq: PYL-W0703 - No error found so far
+    except (github.GithubException, ValueError) as error:
         if logger:
             logger.error(f"Failed to update Repository Secret '{secret_name}' : {error}")
         else:

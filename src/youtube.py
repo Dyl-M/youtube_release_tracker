@@ -153,7 +153,7 @@ def create_service_local(log: bool = True):
 
         return service
 
-    except Exception as error:  # skipcq: PYL-W0703 - No known errors at the moment.
+    except (pyt.error.PyYouTubeException, ValueError, AttributeError) as error:
         if log:
             history.critical('(%s) %s', error, instance_fail_message)
 
@@ -200,7 +200,7 @@ def create_service_workflow():
         history.info('YouTube service created successfully.')
         return service, creds_b64
 
-    except Exception as error:  # skipcq: PYL-W0703 - No known errors at the moment.
+    except (pyt.error.PyYouTubeException, ValueError, AttributeError) as error:
         history.critical('(%s) %s', error, instance_fail_message)
         sys.exit()
 
