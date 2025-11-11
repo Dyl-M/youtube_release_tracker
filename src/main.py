@@ -8,6 +8,7 @@ import pandas as pd
 import re
 import sys
 
+import file_utils
 import youtube
 
 """File Information
@@ -35,15 +36,24 @@ except IndexError:
 
 "PARAMETER FILES"
 
-# Open and read data files
-with open('../data/pocket_tube.json', 'r', encoding='utf8') as pt_file:
-    pocket_tube = json.load(pt_file)
+# Load configuration files with validation
+pocket_tube = file_utils.load_json(
+    '../data/pocket_tube.json',
+    required_keys=['MUSIQUE', 'APPRENTISSAGE', 'DIVERTISSEMENT', 'GAMING']
+)
 
-with open('../data/playlists.json', 'r', encoding='utf8') as playlists_file:
-    playlists = json.load(playlists_file)
+playlists = file_utils.load_json(
+    '../data/playlists.json',
+    required_keys=['release', 'banger', 'watch_later', 're_listening', 'legacy']
+)
 
-with open('../data/add-on.json') as add_on_file:
-    favorites = json.load(add_on_file)['favorites'].values()
+add_on_data = file_utils.load_json(
+    '../data/add-on.json',
+    required_keys=['favorites']
+)
+
+# Extract configuration values
+favorites = add_on_data['favorites'].values()
 
 # YouTube Channels list
 music = pocket_tube['MUSIQUE']
@@ -58,8 +68,16 @@ watch_later = playlists['watch_later']['id']
 re_listening = playlists['re_listening']['id']
 legacy = playlists['legacy']['id']
 
-# Historical Data
-histo_data = pd.read_csv('../data/stats.csv', encoding='utf-8')
+# Historical Data - create if doesn't exist
+if os.path.exists('../data/stats.csv'):
+    histo_data = pd.read_csv('../data/stats.csv', encoding='utf-8')
+else:
+    print("INFO: stats.csv not found. Creating new empty DataFrame.")
+    # Create empty DataFrame with correct schema
+    columns = ['video_id', 'channel_id', 'release_date', 'status', 'is_shorts', 'duration', 'views_w1', 'views_w4',
+               'views_w12', 'views_w24', 'likes_w1', 'likes_w4', 'likes_w12', 'likes_w24', 'comments_w1', 'comments_w4',
+               'comments_w12', 'comments_w24', 'channel_name', 'video_title']
+    histo_data = pd.DataFrame(columns=columns)
 
 "FUNCTIONS"
 
