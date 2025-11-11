@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import github
-import json
 import logging
 import os
 import pandas as pd

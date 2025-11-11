@@ -530,7 +530,7 @@ def is_shorts(video_id: str):
         )
         return response.status_code == 200
 
-    except (requests.RequestException, requests.Timeout) as error:
+    except requests.RequestException as error:
         history.warning('Failed to check shorts status for video %s: %s', video_id, str(error))
         return False  # Default to non-short on error
 
