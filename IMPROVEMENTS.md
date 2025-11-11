@@ -139,20 +139,57 @@ def get_stats(service: pyt.Client, videos_list: list, check_shorts: bool = True)
     ...
 ```
 
-### 8. Pending API Failures
-**Location:** `data/api_failure.json`
+### 8. Transient API Error Handling (GCP Service Unavailability)
+**Location:** `src/youtube.py:442-447` (add_to_playlist function)
 
-**Issue:** File currently contains 3 videos that failed to add:
-```json
-"PLOMUdQFdS-XNpAVOwJ52c_U94kd0rannK": {
-    "failure": ["sY-fv4EmmfY", "vr1-l3yUJH0", "mzzNXERdW5A"]
-}
-```
+**Related Issue:** [#103 - Handling GCP Service Unavailability](https://github.com/Dyl-M/youtube_release_tracker/issues/103)
+
+**Issue:** All API errors are treated equally without differentiating between:
+- **Transient errors** (`SERVICE_UNAVAILABLE`, `backendError`, `internalError`) - temporary GCP issues that could succeed with immediate retry
+- **Quota errors** (`quotaExceeded`) - need to wait until quota resets
+- **Permanent errors** (`videoNotFound`, `forbidden`) - will never succeed
+
+Currently, all failures immediately go to `api_failure.json` for next-run retry (24 hours later), even transient errors that could succeed with immediate exponential backoff retry.
+
+**Impact:**
+- Transient GCP infrastructure hiccups cause 24-hour delays instead of immediate resolution
+- No visibility into error types and patterns
+- Videos may accumulate in api_failure.json unnecessarily
 
 **Recommendation:**
-- Investigate why these 3 videos are failing repeatedly
-- Add retry limit to prevent infinite retry loops
-- Add logging to track how long videos remain in failure state
+- Categorize error types by their nature (transient vs permanent vs quota)
+- Implement retry logic with exponential backoff for transient errors (1s, 2s, 4s)
+- Only add to api_failure.json if:
+  - Quota exceeded (retry next day)
+  - Transient error still fails after max retries
+- Don't retry permanent errors (videoNotFound, forbidden)
+- Add structured logging to track error patterns
+
+**Example Implementation:**
+```python
+TRANSIENT_ERRORS = ['serviceUnavailable', 'backendError', 'internalError']
+PERMANENT_ERRORS = ['videoNotFound', 'forbidden', 'playlistOperationUnsupported']
+QUOTA_ERRORS = ['quotaExceeded']
+MAX_RETRIES = 3
+
+for attempt in range(MAX_RETRIES):
+    try:
+        service.playlistItems.insert(parts='snippet', body=r_body)
+        break  # Success!
+    except pyt.error.PyYouTubeException as http_error:
+        error_reason = http_error.response.json()['error']['errors'][0]['reason']
+
+        # Retry transient errors with exponential backoff
+        if error_reason in TRANSIENT_ERRORS and attempt < MAX_RETRIES - 1:
+            wait_time = 2 ** attempt
+            time.sleep(wait_time)
+            continue
+
+        # Only save non-permanent errors to api_failure.json
+        if error_reason not in PERMANENT_ERRORS:
+            api_failure[playlist_id]['failure'].append(video_id)
+        break
+```
 
 ### 9. Hardcoded Relative Paths
 **Locations:** Throughout codebase (`../data/`, `../log/`, `../tokens/`)
@@ -442,10 +479,13 @@ def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int = Non
 - Easier to add new configuration files in the future
 
 **Recommended Priority Order (Remaining):**
-1. Replace sys.exit() with exceptions (High #5)
-2. Cache shorts detection (High #7)
-3. Investigate pending API failures (High #8)
-4. Fix hardcoded paths (High #9)
+1. **Transient API error handling (High #8)** ⭐ **HIGHEST PRIORITY** - Production issue causing video addition failures
+2. Cache shorts detection (High #7) - Performance optimization
+3. Fix hardcoded paths (High #9) - Developer experience improvement
+4. Replace sys.exit() with exceptions (High #5) - Code quality (best done after other refactors)
 5. Add basic unit tests (Medium #10)
 6. Create configuration file (Medium #11)
 7. Address remaining issues as time permits
+
+**Rationale for #8 Priority:**
+Issue #8 now addresses a real production problem (GitHub issue #103) where GCP service unavailability causes legitimate videos to fail addition and wait 24 hours for retry. Implementing intelligent retry logic with exponential backoff will resolve transient errors in seconds instead of days, significantly improving system reliability and user experience.
