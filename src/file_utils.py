@@ -40,11 +40,10 @@ ALLOWED_EXTENSIONS = ['.json', '.csv', '.log', '.txt']
 "FUNCTIONS"
 
 
-def validate_file_path(file_path: str, operation: str = 'read'):
+def validate_file_path(file_path: str):
     """Validate and sanitize file path to prevent path traversal attacks.
 
     :param file_path: Path to validate
-    :param operation: Type of operation ('read' or 'write')
     :return: Normalized absolute path if valid
     :raises SystemExit: If path is invalid or outside allowed directories
     """
@@ -78,7 +77,7 @@ def load_json(file_path: str, required_keys: list = None):
     :return: Parsed JSON data as dictionary
     """
     # Validate path for security
-    validated_path = validate_file_path(file_path, operation='read')
+    validated_path = validate_file_path(file_path)
     file_name = file_path.split('/')[-1]
 
     try:
@@ -114,7 +113,7 @@ def save_json(file_path: str, data: dict, indent: int = 2):
     :param indent: Indentation level for pretty printing (default: 2)
     """
     # Validate path for security
-    validated_path = validate_file_path(file_path, operation='write')
+    validated_path = validate_file_path(file_path)
     file_name = file_path.split('/')[-1]
 
     try:
