@@ -136,6 +136,3 @@ dmypy.json
 /cmd/
 gha-creds-*.json
 /archive/
-
-# Claude.ai
-CLAUDE.md

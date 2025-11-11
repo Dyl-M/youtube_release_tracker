@@ -18,6 +18,8 @@ import sys
 import tqdm
 import tzlocal
 
+import file_utils
+
 # noinspection PyPackageRequirements
 from google.auth.exceptions import RefreshError
 # noinspection PyPackageRequirements
@@ -51,8 +53,7 @@ def last_exe_date():
     return date
 
 
-with open('../data/add-on.json', 'r', encoding='utf8') as add_on_file:
-    ADD_ON = json.load(add_on_file)
+ADD_ON = file_utils.load_json('../data/add-on.json')
 
 NOW = dt.datetime.now(tz=tzlocal.get_localzone())
 LAST_EXE = last_exe_date()
@@ -424,14 +425,11 @@ def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list, pr
     :param videos_list: list of YouTube video IDs
     :param prog_bar: to use tqdm progress bar or not.
     """
-    with open('../data/api_failure.json', 'r', encoding='utf-8') as api_failure_file:
-        api_failure = json.load(api_failure_file)
-
+    api_failure = file_utils.load_json('../data/api_failure.json')
     api_fail = False
 
     if prog_bar:
         add_iterator = tqdm.tqdm(videos_list, desc=f'Adding videos to the playlist ({playlist_id})')
-
     else:
         add_iterator = videos_list
 
@@ -449,9 +447,7 @@ def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list, pr
             api_fail = True
 
     if api_fail:  # Save API failure
-        with open('../data/api_failure.json', 'w', encoding='utf-8') as api_failure_file:
-            # noinspection PyTypeChecker
-            json.dump(api_failure, api_failure_file, ensure_ascii=False, indent=2)
+        file_utils.save_json('../data/api_failure.json', api_failure)
 
 
 def del_from_playlist(service: pyt.Client, playlist_id: str, items_list: list, prog_bar: bool = True):
@@ -509,8 +505,7 @@ def sort_db(service: pyt.Client):
 
         return ids_only
 
-    with open('../data/pocket_tube.json', mode='r', encoding='utf-8') as pt_file:  # Open PocketTube JSON file
-        channels_db = json.load(pt_file)
+    channels_db = file_utils.load_json('../data/pocket_tube.json')
 
     categories = [db_keys for db_keys in channels_db.keys() if 'ysc' not in db_keys]  # Get PT categories
     db_sorted = {category: get_channels(_service=service, _channel_list=channels_db[category])
@@ -519,17 +514,25 @@ def sort_db(service: pyt.Client):
     for category in categories:  # Rewrite categories in the dict object associated with the PT JSON file
         channels_db[category] = db_sorted[category]
 
-    with open('../data/pocket_tube.json', 'w', encoding='utf-8') as pt_save:  # Export as JSON file
-        # noinspection PyTypeChecker
-        json.dump(channels_db, pt_save, indent=2, ensure_ascii=False)
+    file_utils.save_json('../data/pocket_tube.json', channels_db)
 
 
 def is_shorts(video_id: str):
     """Check if a YouTube video is a short or not
     :param video_id: YouTube video ID
-    :return: True if the video is short, False otherwise.
+    :return: True if the video is short, False otherwise. Returns False on network errors.
     """
-    return requests.head(f'https://www.youtube.com/shorts/{video_id}').status_code == 200
+    try:
+        response = requests.head(
+            f'https://www.youtube.com/shorts/{video_id}',
+            timeout=5,
+            allow_redirects=True
+        )
+        return response.status_code == 200
+
+    except requests.RequestException as error:
+        history.warning('Failed to check shorts status for video %s: %s', video_id, str(error))
+        return False  # Default to non-short on error
 
 
 def weekly_stats(service: pyt.Client, histo_data: pd.DataFrame, week_delta: int,
@@ -669,9 +672,7 @@ def add_api_fail(service: pyt.Client, prog_bar: bool = True):
     :param service: a Python YouTube Client
     :param prog_bar: to use tqdm progress bar or not.
     """
-    with open('../data/api_failure.json', 'r', encoding='utf-8') as api_failure_file:
-        api_failure = json.load(api_failure_file)
-
+    api_failure = file_utils.load_json('../data/api_failure.json')
     addition = 0
 
     for p_id, info in api_failure.items():
@@ -683,9 +684,7 @@ def add_api_fail(service: pyt.Client, prog_bar: bool = True):
             addition += 1
 
     if addition > 0:  # Save the cleared file
-        with open('../data/api_failure.json', 'w', encoding='utf-8') as api_failure_file:
-            # noinspection PyTypeChecker
-            json.dump(api_failure, api_failure_file, ensure_ascii=False, indent=2)
+        file_utils.save_json('../data/api_failure.json', api_failure)
 
 
 if __name__ == '__main__':

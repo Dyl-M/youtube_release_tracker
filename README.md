@@ -27,7 +27,7 @@ project, evolving on a smaller panel of YouTube channels with fewer fluctuations
 Repository structure
 -------------
 
-Elements followed by `(IGNORED)` are kept ignored / hidden by git for privacy purpose or for being useless for code 
+Elements followed by `(IGNORED)` are kept ignored / hidden by git for privacy purpose or for being useless for code
 comprehension or workflow execution.
 
 ```
@@ -37,7 +37,7 @@ comprehension or workflow execution.
 │   │   └── issue_report.yml
 │   ├── workflows
 │   │   ├── licence_workflow.yml
-│   │   └── update_workflow.yml
+│   │   └── main_workflow.yml
 │   └── dependabot.yml
 │
 ├── archive (IGNORED)
@@ -49,6 +49,10 @@ comprehension or workflow execution.
 │   ├── pocket_tube.json
 │   └── stats.csv
 │
+├── log
+│   ├── history.log
+│   └── last_exe.log
+│
 ├── media
 │
 ├── notebooks
@@ -58,6 +62,7 @@ comprehension or workflow execution.
 │   ├── _sandbox.py
 │   ├── analytics.py
 │   ├── deprecated_functions.py
+│   ├── file_utils.py
 │   ├── main.py
 │   └── youtube.py
 │
@@ -65,6 +70,8 @@ comprehension or workflow execution.
 │
 ├── .deepsource.toml
 ├── .gitignore
+├── CLAUDE.md
+├── IMPROVEMENTS.md
 ├── LICENSE
 ├── notes.txt
 ├── README.md
