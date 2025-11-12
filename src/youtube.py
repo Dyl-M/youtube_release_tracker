@@ -526,7 +526,7 @@ def is_shorts(video_id: str):
         response = requests.head(
             f'https://www.youtube.com/shorts/{video_id}',
             timeout=5,
-            allow_redirects=True
+            allow_redirects=False
         )
         return response.status_code == 200
 
