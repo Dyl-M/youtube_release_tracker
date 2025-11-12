@@ -52,8 +52,8 @@ def validate_file_path(file_path: str):
     # Normalize the path to resolve any .. or . components
     normalized_path = os.path.normpath(file_path)
 
-    # Check if the path starts with an allowed directory
-    is_allowed = any(normalized_path.startswith(allowed_dir) for allowed_dir in ALLOWED_DIRS)
+    # Check if the path starts with an allowed directory (normalize allowed dirs for comparison)
+    is_allowed = any(normalized_path.startswith(os.path.normpath(allowed_dir)) for allowed_dir in ALLOWED_DIRS)
 
     if not is_allowed:
         logger.critical('Access denied: %s is outside allowed directories', file_path)

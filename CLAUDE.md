@@ -72,6 +72,8 @@ The application supports two execution modes determined by `sys.argv[1]`:
 - Manages playlist operations: `add_to_playlist()`, `del_from_playlist()`
 - Tracks video statistics over time with `weekly_stats()`
 - Detects YouTube Shorts via HEAD request to `/shorts/{video_id}` endpoint
+  - **Important**: Uses `allow_redirects=False` to distinguish shorts from regular videos
+  - Real shorts return 200, regular videos return 3xx redirect to /watch?v= URL
 - Handles API quota failures with retry mechanism via `add_api_fail()`
 
 **src/analytics.py**
