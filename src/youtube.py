@@ -442,12 +442,10 @@ def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list, pr
 
     for video_id in add_iterator:
         r_body = {'snippet': {'playlistId': playlist_id, 'resourceId': {'kind': 'youtube#video', 'videoId': video_id}}}
-        success = False
 
         for attempt in range(MAX_RETRIES):
             try:
                 service.playlistItems.insert(parts='snippet', body=r_body)
-                success = True
                 break  # Success, exit retry loop
 
             except pyt.error.PyYouTubeException as http_error:
