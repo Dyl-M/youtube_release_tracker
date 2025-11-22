@@ -297,31 +297,41 @@ errors that could succeed with immediate exponential backoff retry.
 - Only quota errors and exhausted transient retries are saved to `api_failure.json`
 - Fixed `add_api_fail()` to preserve video IDs that fail again on retry (previously lost due to premature list clearing)
 
-### 9. Hardcoded Relative Paths
+### 9. ✅ FIXED - Hardcoded Relative Paths
 
-**Locations:** Throughout codebase (`../data/`, `../log/`, `../tokens/`)
+**Locations:** `src/paths.py` (new), `src/main.py`, `src/youtube.py`, `src/file_utils.py`
 
-**Issue:**
+**Status:** ✅ **FIXED** (2025-11-23)
 
-- Only works when running from `src/` directory
-- Breaks if script is called from different location
-- Makes testing difficult
+**Issue:** Hardcoded relative paths (`../data/`, `../log/`, `../tokens/`) only worked when running from `src/` directory.
 
-**Recommendation:** Use path resolution:
+**Impact:**
+
+- Script broke if called from different location
+- Made testing difficult
+- Path validation was fragile
+
+**Fix Applied:**
+
+- Created new `src/paths.py` module with centralized path definitions using `Path(__file__).parent.parent.resolve()`
+- Exports directory paths: `BASE_DIR`, `DATA_DIR`, `LOG_DIR`, `TOKENS_DIR`
+- Exports file paths: `POCKET_TUBE_JSON`, `PLAYLISTS_JSON`, `ADD_ON_JSON`, `API_FAILURE_JSON`, `STATS_CSV`, `HISTORY_LOG`, `LAST_EXE_LOG`, `OAUTH_JSON`, `CREDENTIALS_JSON`
+- Exports `ALLOWED_DIRS` and `ALLOWED_EXTENSIONS` for `file_utils.py` validation
+- Updated `main.py`, `youtube.py`, and `file_utils.py` to import and use paths from `paths.py`
+- Updated `file_utils.py` to use `os.path.basename()` for cross-platform file name extraction
 
 ```python
-import os
+# src/paths.py
 from pathlib import Path
 
-# At top of file
 BASE_DIR = Path(__file__).parent.parent.resolve()
 DATA_DIR = BASE_DIR / 'data'
-LOG_DIR = BASE_DIR / 'log'
-TOKENS_DIR = BASE_DIR / 'tokens'
+POCKET_TUBE_JSON = DATA_DIR / 'pocket_tube.json'
+# ... etc
 
-# Usage
-with open(DATA_DIR / 'pocket_tube.json', 'r', encoding='utf8') as f:
-    pocket_tube = json.load(f)
+# Usage in other modules
+import paths
+pocket_tube = file_utils.load_json(str(paths.POCKET_TUBE_JSON))
 ```
 
 ## Medium Priority Issues
@@ -640,7 +650,7 @@ is_allowed = any(normalized_path.startswith(os.path.normpath(allowed_dir)) for a
 
 **Critical:** ~~4~~ **0** issues requiring immediate attention (✅ All Fixed!)
 **DeepSource:** ~~4~~ **0** code quality issues (✅ All Fixed!)
-**High Priority:** ~~5~~ **2** issues that significantly impact reliability/performance (✅ 3 Fixed!)
+**High Priority:** ~~5~~ **1** issues that significantly impact reliability/performance (✅ 4 Fixed!)
 **Medium Priority:** 9 issues that improve maintainability
 **Low Priority:** 9 nice-to-have improvements
 **Additional Improvements:** 2 fixes completed, 1 major refactoring completed
@@ -661,7 +671,8 @@ is_allowed = any(normalized_path.startswith(os.path.normpath(allowed_dir)) for a
 12. ✅ Created file_utils.py module and eliminated all redundant file handling code (Refactoring #25)
 13. ✅ Transient API error handling with retry logic - Issue #103 (High Priority #8)
 14. ✅ Videos without release date causing TypeError - Issue #104 (Critical #4a)
-15. ✅ **Shorts detection optimization - skip HTTP requests for historical stats (High Priority #7)** ← **NEW (2025-11-23)**
+15. ✅ Shorts detection optimization - skip HTTP requests for historical stats (High Priority #7)
+16. ✅ **Centralized path definitions via paths.py module (High Priority #9)** ← **NEW (2025-11-23)**
 
 **Latest Session Impact (2025-11-23):**
 
@@ -669,6 +680,10 @@ is_allowed = any(normalized_path.startswith(os.path.normpath(allowed_dir)) for a
 - `weekly_stats()` now skips shorts detection for historical videos (already classified)
 - Reduces redundant HTTP HEAD requests during weekly statistics collection
 - Improves execution speed and reduces network bandwidth usage
+- Created `src/paths.py` module with centralized path definitions
+- All hardcoded relative paths replaced with dynamic path resolution
+- Script can now run from any directory (not just `src/`)
+- Cross-platform compatibility improved with `os.path.basename()` for file name extraction
 
 **Previous Session Impact (2025-11-22):**
 
@@ -696,8 +711,7 @@ is_allowed = any(normalized_path.startswith(os.path.normpath(allowed_dir)) for a
 
 **Recommended Priority Order (Remaining):**
 
-1. Fix hardcoded paths (High #9) - Developer experience improvement
-2. Replace sys.exit() with exceptions (High #5) - Code quality (best done after other refactors)
-3. Add basic unit tests (Medium #10)
-4. Create configuration file (Medium #11)
-5. Address remaining issues as time permits
+1. Replace sys.exit() with exceptions (High #5) - Code quality, improves testability
+2. Add basic unit tests (Medium #10)
+3. Create configuration file (Medium #11)
+4. Address remaining issues as time permits

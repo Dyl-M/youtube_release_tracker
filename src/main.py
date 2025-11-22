@@ -8,6 +8,7 @@ import re
 import sys
 
 import file_utils
+import paths
 import youtube
 
 """File Information
@@ -37,17 +38,17 @@ except IndexError:
 
 # Load configuration files with validation
 pocket_tube = file_utils.load_json(
-    '../data/pocket_tube.json',
+    str(paths.POCKET_TUBE_JSON),
     required_keys=['MUSIQUE', 'APPRENTISSAGE', 'DIVERTISSEMENT', 'GAMING']
 )
 
 playlists = file_utils.load_json(
-    '../data/playlists.json',
+    str(paths.PLAYLISTS_JSON),
     required_keys=['release', 'banger', 'watch_later', 're_listening', 'legacy']
 )
 
 add_on_data = file_utils.load_json(
-    '../data/add-on.json',
+    str(paths.ADD_ON_JSON),
     required_keys=['favorites']
 )
 
@@ -68,8 +69,8 @@ re_listening = playlists['re_listening']['id']
 legacy = playlists['legacy']['id']
 
 # Historical Data - create if doesn't exist
-if os.path.exists('../data/stats.csv'):
-    histo_data = pd.read_csv('../data/stats.csv', encoding='utf-8')
+if os.path.exists(paths.STATS_CSV):
+    histo_data = pd.read_csv(paths.STATS_CSV, encoding='utf-8')
 else:
     print("INFO: stats.csv not found. Creating new empty DataFrame.")
     # Create empty DataFrame with correct schema
@@ -83,14 +84,14 @@ else:
 
 def copy_last_exe_log():
     """Copy the last execution logging from the main history file."""
-    with open('../log/history.log', 'r', encoding='utf8') as history_file:
+    with open(paths.HISTORY_LOG, 'r', encoding='utf8') as history_file:
         history = history_file.read()
 
     last_exe = re.findall(r".*?Process started\.", history)[-1]
     last_exe_idx = history.rfind(last_exe)
     last_exe_log = history[last_exe_idx:]
 
-    with open('../log/last_exe.log', 'w', encoding='utf8') as last_exe_file:
+    with open(paths.LAST_EXE_LOG, 'w', encoding='utf8') as last_exe_file:
         last_exe_file.write(last_exe_log)
 
 
@@ -151,7 +152,7 @@ if __name__ == '__main__':
     history_main = logging.Logger(name='history_main', level=0)
 
     # Create file handlers
-    history_main_file = logging.FileHandler(filename='../log/history.log')  # mode='a'
+    history_main_file = logging.FileHandler(filename=paths.HISTORY_LOG)  # mode='a'
 
     # Create formatter
     formatter_main = logging.Formatter(fmt='%(asctime)s [%(levelname)s] - %(message)s', datefmt='%Y-%m-%d %H:%M:%S%z')
@@ -194,7 +195,7 @@ if __name__ == '__main__':
         # Store
         histo_data.drop_duplicates(inplace=True)
         histo_data.sort_values(['release_date', 'video_id'], inplace=True)
-        histo_data.to_csv('../data/stats.csv', encoding='utf-8', index=False)
+        histo_data.to_csv(paths.STATS_CSV, encoding='utf-8', index=False)
 
     else:
         # Add statistics about the videos for selection
@@ -220,7 +221,7 @@ if __name__ == '__main__':
 
         # Sort and store
         stored = pd.concat([histo_data, stored]).sort_values(['release_date', 'video_id']).drop_duplicates()
-        stored.to_csv('../data/stats.csv', encoding='utf-8', index=False)
+        stored.to_csv(paths.STATS_CSV, encoding='utf-8', index=False)
 
         # Define destination playlist
         new_data['dest_playlist'] = new_data.apply(lambda row: dest_playlist(row.channel_id,
@@ -252,8 +253,8 @@ if __name__ == '__main__':
     youtube.fill_release_radar(YOUTUBE_OAUTH, release, re_listening, legacy, lmt=40, prog_bar=PROG_BAR)
 
     if exe_mode == 'local':  # Credentials in base64 update - Local option
-        youtube.encode_key(json_path='../tokens/credentials.json')
-        youtube.encode_key(json_path='../tokens/oauth.json')
+        youtube.encode_key(json_path=str(paths.CREDENTIALS_JSON))
+        youtube.encode_key(json_path=str(paths.OAUTH_JSON))
 
     else:  # Credentials in base64 update - Remote option
         update_repo_secrets(secret_name='CREDS_B64', new_value=CREDS_B64, logger=history_main)

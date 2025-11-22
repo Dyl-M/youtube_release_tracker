@@ -5,6 +5,8 @@ import logging
 import os
 import sys
 
+import paths
+
 """File Information
 @file_name: file_utils.py
 @author: Dylan "dyl-m" Monfret
@@ -17,7 +19,7 @@ Utility functions for file operations with error handling.
 logger = logging.Logger(name='file_utils', level=0)
 
 # Create file handler
-log_file = logging.FileHandler(filename='../log/history.log')  # mode='a'
+log_file = logging.FileHandler(filename=paths.HISTORY_LOG)  # mode='a'
 
 # Create formatter
 formatter = logging.Formatter(fmt='%(asctime)s [%(levelname)s] - %(message)s', datefmt='%Y-%m-%d %H:%M:%S%z')
@@ -31,11 +33,9 @@ logger.addHandler(log_file)
 
 "CONSTANTS"
 
-# Allowed base directories for file operations (relative to src/)
-ALLOWED_DIRS = ['../data', '../log', '../tokens']
-
-# Allowed file extensions
-ALLOWED_EXTENSIONS = ['.json', '.csv', '.log', '.txt']
+# Import allowed directories and extensions from centralized paths module
+ALLOWED_DIRS = paths.ALLOWED_DIRS
+ALLOWED_EXTENSIONS = paths.ALLOWED_EXTENSIONS
 
 "FUNCTIONS"
 
@@ -43,11 +43,12 @@ ALLOWED_EXTENSIONS = ['.json', '.csv', '.log', '.txt']
 def validate_file_path(file_path: str):
     """Validate and sanitize file path to prevent path traversal attacks.
 
-    :param file_path: Path to validate
+    :param file_path: Path to validate (can be relative or absolute)
     :return: Normalized absolute path if valid
     :raises SystemExit: If path is invalid or outside allowed directories
     """
-    file_name = file_path.split('/')[-1]
+    # Get the file name from the path (handle both / and \ separators)
+    file_name = os.path.basename(file_path)
 
     # Normalize the path to resolve any .. or . components
     normalized_path = os.path.normpath(file_path)
@@ -78,7 +79,7 @@ def load_json(file_path: str, required_keys: list = None):
     """
     # Validate path for security
     validated_path = validate_file_path(file_path)
-    file_name = file_path.split('/')[-1]
+    file_name = os.path.basename(file_path)
 
     try:
         with open(validated_path, 'r', encoding='utf8') as f:
@@ -114,7 +115,7 @@ def save_json(file_path: str, data: dict, indent: int = 2):
     """
     # Validate path for security
     validated_path = validate_file_path(file_path)
-    file_name = file_path.split('/')[-1]
+    file_name = os.path.basename(file_path)
 
     try:
         with open(validated_path, 'w', encoding='utf-8') as f:
