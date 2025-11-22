@@ -477,10 +477,6 @@ def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list, pr
                 api_fail = True
                 break
 
-        if not success and prog_bar:
-            # Update progress bar description on failure (optional visual feedback)
-            pass
-
     if api_fail:  # Save API failure
         file_utils.save_json('../data/api_failure.json', api_failure)
 
