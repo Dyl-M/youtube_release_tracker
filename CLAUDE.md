@@ -76,6 +76,13 @@ The application supports two execution modes determined by `sys.argv[1]`:
   - Real shorts return 200, regular videos return 3xx redirect to /watch?v= URL
 - Handles API quota failures with retry mechanism via `add_api_fail()`
 
+**src/file_utils.py**
+- Centralized utility module for file operations
+- Provides `load_json()` and `save_json()` with comprehensive error handling
+- Implements path validation to prevent path traversal attacks
+- Validates file paths against allowlists for directories (`../data`, `../log`, `../tokens`) and extensions (`.json`, `.csv`, `.log`, `.txt`)
+- All file operations logged to `history.log` with proper error messages
+
 **src/analytics.py**
 - Placeholder for future analytics features
 - Currently minimal implementation

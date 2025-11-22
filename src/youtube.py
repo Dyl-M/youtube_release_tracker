@@ -15,6 +15,7 @@ import pyyoutube as pyt
 import re
 import requests
 import sys
+import time
 import tqdm
 import tzlocal
 
@@ -39,6 +40,12 @@ Script containing methods using YouTube API or doing scrapping / GET-requests on
 pd.set_option('display.max_columns', None)  # pd.set_option('display.max_rows', None)
 
 "GLOBAL"
+
+# Error categorization for API retry logic
+TRANSIENT_ERRORS = ['serviceUnavailable', 'backendError', 'internalError']
+PERMANENT_ERRORS = ['videoNotFound', 'forbidden', 'playlistOperationUnsupported', 'duplicate']
+QUOTA_ERRORS = ['quotaExceeded']
+MAX_RETRIES = 3
 
 
 def last_exe_date():
@@ -153,7 +160,7 @@ def create_service_local(log: bool = True):
 
         return service
 
-    except Exception as error:  # skipcq: PYL-W0703 - No known errors at the moment.
+    except (pyt.error.PyYouTubeException, ValueError, AttributeError) as error:
         if log:
             history.critical('(%s) %s', error, instance_fail_message)
 
@@ -200,7 +207,7 @@ def create_service_workflow():
         history.info('YouTube service created successfully.')
         return service, creds_b64
 
-    except Exception as error:  # skipcq: PYL-W0703 - No known errors at the moment.
+    except (pyt.error.PyYouTubeException, ValueError, AttributeError) as error:
         history.critical('(%s) %s', error, instance_fail_message)
         sys.exit()
 
@@ -435,16 +442,44 @@ def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list, pr
 
     for video_id in add_iterator:
         r_body = {'snippet': {'playlistId': playlist_id, 'resourceId': {'kind': 'youtube#video', 'videoId': video_id}}}
+        success = False
 
-        try:
-            service.playlistItems.insert(parts='snippet', body=r_body)
+        for attempt in range(MAX_RETRIES):
+            try:
+                service.playlistItems.insert(parts='snippet', body=r_body)
+                success = True
+                break  # Success, exit retry loop
 
-        except pyt.error.PyYouTubeException as http_error:  # skipcq: PYL-W0703
-            error_reason = http_error.response.json()['error']['errors'][0]['reason']
-            history.warning('Addition Request Failure: (%s) - %s - %s',
-                            video_id, error_reason, http_error.message)
-            api_failure[playlist_id]['failure'].append(video_id)  # Save the video ID in a dedicated file
-            api_fail = True
+            except pyt.error.PyYouTubeException as http_error:
+                try:
+                    error_reason = http_error.response.json()['error']['errors'][0]['reason']
+                except (KeyError, IndexError, TypeError):
+                    error_reason = 'unknown'
+
+                # Handle transient errors with exponential backoff
+                if error_reason in TRANSIENT_ERRORS and attempt < MAX_RETRIES - 1:
+                    wait_time = 2 ** attempt  # 1s, 2s, 4s
+                    history.warning('Transient error (%s) for video %s, retrying in %ss (attempt %s/%s)',
+                                    error_reason, video_id, wait_time, attempt + 1, MAX_RETRIES)
+                    time.sleep(wait_time)
+                    continue
+
+                # Handle permanent errors - log and skip, don't save for retry
+                if error_reason in PERMANENT_ERRORS:
+                    history.warning('Permanent error (%s) for video %s - skipping: %s',
+                                    error_reason, video_id, http_error.message)
+                    break  # Don't save to api_failure.json
+
+                # Handle quota errors or failed transient retries - save for next day retry
+                history.warning('Addition Request Failure: (%s) - %s - %s',
+                                video_id, error_reason, http_error.message)
+                api_failure[playlist_id]['failure'].append(video_id)
+                api_fail = True
+                break
+
+        if not success and prog_bar:
+            # Update progress bar description on failure (optional visual feedback)
+            pass
 
     if api_fail:  # Save API failure
         file_utils.save_json('../data/api_failure.json', api_failure)
@@ -668,7 +703,7 @@ def fill_release_radar(service: pyt.Client, target_playlist: str, re_listening_i
 
 
 def add_api_fail(service: pyt.Client, prog_bar: bool = True):
-    """Add missing videos to a targeted playlist following API failure on a previous run
+    """Add missing videos to a targeted playlist following API failures on a previous run
     :param service: a Python YouTube Client
     :param prog_bar: to use tqdm progress bar or not.
     """
@@ -677,14 +712,16 @@ def add_api_fail(service: pyt.Client, prog_bar: bool = True):
 
     for p_id, info in api_failure.items():
         if info['failure']:
+            videos_to_retry = info['failure'].copy()  # Copy the list before clearing
             history.info('%s addition(s) to %s playlist from previous API failure.',
-                         len(info['failure']), info['name'])
-            add_to_playlist(service, p_id, info['failure'], prog_bar=prog_bar)
-            api_failure[p_id]['failure'] = []
+                         len(videos_to_retry), info['name'])
+            api_failure[p_id]['failure'] = []  # Clear before retry so add_to_playlist can re-add failures
+            file_utils.save_json('../data/api_failure.json', api_failure)  # Save cleared state
+            add_to_playlist(service, p_id, videos_to_retry, prog_bar=prog_bar)  # Failed videos get re-added here
             addition += 1
 
-    if addition > 0:  # Save the cleared file
-        file_utils.save_json('../data/api_failure.json', api_failure)
+    if addition > 0:
+        history.info('Video recovery from previous API failure(s) complete.')
 
 
 if __name__ == '__main__':
