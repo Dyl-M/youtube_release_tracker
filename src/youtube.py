@@ -47,6 +47,9 @@ PERMANENT_ERRORS = ['videoNotFound', 'forbidden', 'playlistOperationUnsupported'
 QUOTA_ERRORS = ['quotaExceeded']
 MAX_RETRIES = 3
 
+# Date format for YouTube API responses
+ISO_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S%z'
+
 
 def last_exe_date():
     """Get the last execution datetime from a log file (supposing the first line is containing the right datetime).
@@ -212,6 +215,62 @@ def create_service_workflow():
         sys.exit()
 
 
+def _parse_playlist_item(item, date_format: str):
+    """Parse a playlist item into a dict, returns None if no release date.
+    :param item: A playlist item from YouTube API response.
+    :param date_format: Date format string for parsing.
+    :return: Parsed item dict or None if no release date.
+    """
+    if item.contentDetails.videoPublishedAt is None:
+        return None
+    return {
+        'video_id': item.contentDetails.videoId,
+        'video_title': item.snippet.title,
+        'item_id': item.id,
+        'release_date': dt.datetime.strptime(item.contentDetails.videoPublishedAt, date_format),
+        'status': item.status.privacyStatus,
+        'channel_id': item.snippet.videoOwnerChannelId,
+        'channel_name': item.snippet.videoOwnerChannelTitle
+    }
+
+
+def _handle_playlist_error(error: pyt.error.PyYouTubeException, playlist_id: str, add_on: dict = None):
+    """Handle playlist API errors. Exits program for fatal errors.
+    :param error: The PyYouTubeException that was raised.
+    :param playlist_id: The playlist ID that caused the error.
+    :param add_on: Configuration dict containing playlistNotFoundPass list. Defaults to global ADD_ON.
+    :return: True if should break loop, False otherwise. Exits program for fatal errors.
+    """
+    if add_on is None:
+        add_on = ADD_ON
+
+    if error.status_code == 404:
+        channel_id = f'UC{playlist_id[2:]}'
+        if channel_id not in add_on['playlistNotFoundPass']:
+            history.warning('Playlist not found: %s', playlist_id)
+        return True
+
+    history.error('[%s] Unknown error: %s', playlist_id, error.message)
+    sys.exit()
+
+
+def _filter_items_by_date_range(p_items: list, latest_d: dt.datetime,
+                                oldest_d: dt.datetime = None, day_ago: int = None):
+    """Filter videos on a date range.
+    :param p_items: Playlist items as a list.
+    :param latest_d: The latest reference date.
+    :param oldest_d: Latest execution date.
+    :param day_ago: Day difference with a reference date, delimits items' collection field.
+    :return: Filtered items.
+    """
+    if oldest_d:
+        return [item for item in p_items if oldest_d < item['release_date'] < latest_d]
+    if day_ago:
+        date_delta = latest_d - dt.timedelta(days=day_ago)
+        return [item for item in p_items if date_delta < item['release_date'] < latest_d]
+    return p_items
+
+
 def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int = None, latest_d: dt.datetime = NOW):
     """Get the videos in a YouTube playlist.
     :param service: A Python YouTube Client.
@@ -220,51 +279,26 @@ def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int = Non
     :param latest_d: The latest reference date.
     :return p_items: Playlist items (videos) as a list.
     """
-
-    def filter_items_by_date_range(_p_items: list, _latest_d: dt.datetime, _oldest_d: dt.datetime = None,
-                                   _day_ago: int = None):
-        """Filter videos on a date range
-        :param _p_items: playlist items as a list
-        :param _latest_d: the latest reference date
-        :param _oldest_d: latest execution date
-        :param _day_ago: day difference with a reference date, delimits items' collection field
-        :return _p_items: filtered items.
-        """
-        if _oldest_d:
-            return [item for item in _p_items if _oldest_d < item['release_date'] < _latest_d]
-        if _day_ago:
-            date_delta = _latest_d - dt.timedelta(days=_day_ago)
-            return [item for item in _p_items if date_delta < item['release_date'] < _latest_d]
-        return _p_items
-
     p_items = []
     next_page_token = None
-    date_format = '%Y-%m-%dT%H:%M:%S%z'
 
-    latest_d = latest_d.replace(minute=0, second=0, microsecond=0)  # Round hour to XX:00:00.0
-    oldest_d = LAST_EXE.replace(minute=0, second=0, microsecond=0)  # Round hour to XX:00:00.0
-
-    if day_ago:  # To use a day range over the default value (previous execution date)
-        oldest_d = None
+    latest_d = latest_d.replace(minute=0, second=0, microsecond=0)
+    oldest_d = None if day_ago else LAST_EXE.replace(minute=0, second=0, microsecond=0)
 
     while True:
         try:
-            request = service.playlistItems.list(part=['snippet', 'contentDetails', 'status'],
-                                                 playlist_id=playlist_id,
-                                                 max_results=50,
-                                                 pageToken=next_page_token)  # Request playlist's items
+            request = service.playlistItems.list(
+                part=['snippet', 'contentDetails', 'status'],
+                playlist_id=playlist_id,
+                max_results=50,
+                pageToken=next_page_token
+            )
 
-            # Keep necessary data, filtering out scheduled/premiere videos without release date
-            p_items += [{'video_id': item.contentDetails.videoId,
-                         'video_title': item.snippet.title,
-                         'item_id': item.id,
-                         'release_date': dt.datetime.strptime(item.contentDetails.videoPublishedAt, date_format),
-                         'status': item.status.privacyStatus,
-                         'channel_id': item.snippet.videoOwnerChannelId,
-                         'channel_name': item.snippet.videoOwnerChannelTitle}
-                        for item in request.items if item.contentDetails.videoPublishedAt is not None]
+            # Parse items, filtering out those without release date
+            p_items += [parsed for item in request.items
+                        if (parsed := _parse_playlist_item(item, ISO_DATE_FORMAT)) is not None]
+            p_items = _filter_items_by_date_range(p_items, latest_d, oldest_d=oldest_d, day_ago=day_ago)
 
-            p_items = filter_items_by_date_range(p_items, latest_d, _oldest_d=oldest_d, _day_ago=day_ago)
             next_page_token = request.nextPageToken
 
             # No need for more requests (the playlist must be ordered chronologically!)
@@ -272,16 +306,8 @@ def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int = Non
                 break
 
         except pyt.error.PyYouTubeException as error:
-            status_code = error.status_code
-
-            if status_code == 404:  # Handle channels with no upload yet
-                if f'UC{playlist_id[2:]}' not in ADD_ON['playlistNotFoundPass']:  # Ignore if channel well identified
-                    history.warning('Playlist not found: %s', playlist_id)
+            if _handle_playlist_error(error, playlist_id):
                 break
-
-            # Record a warning log otherwise
-            history.error('[%s] Unknown error: %s', playlist_id, error.message)
-            sys.exit()
 
     return p_items
 
@@ -667,7 +693,7 @@ def fill_release_radar(service: pyt.Client, target_playlist: str, re_listening_i
 
         # Format list for treatment
         to_re_listen_raw = [{'video_id': item.contentDetails.videoId,
-                             'add_date': dt.datetime.strptime(item.snippet.publishedAt, '%Y-%m-%dT%H:%M:%S%z'),
+                             'add_date': dt.datetime.strptime(item.snippet.publishedAt, ISO_DATE_FORMAT),
                              'item_id': item.id} for item in to_re_listen_items]
 
         legacy_raw = [{'video_id': item.contentDetails.videoId, 'item_id': item.id} for item in legacy_items]

@@ -147,6 +147,7 @@ The `dest_playlist()` function in main.py determines where each video goes:
 - `LAST_EXE` is parsed from `log/last_exe.log` first line (format: `%Y-%m-%d %H:%M:%S%z`)
 - `get_playlist_items()` filters videos between `LAST_EXE` and `NOW` (or custom day range)
 - All datetime comparisons round to the hour (XX:00:00) for consistency
+- Scheduled videos and premieres (with `videoPublishedAt = None`) are automatically filtered out and picked up on the next run after going live
 
 ### Error Handling & Logging
 
