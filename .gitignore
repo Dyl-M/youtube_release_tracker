@@ -132,7 +132,8 @@ dmypy.json
 .idea/
 
 # Private
-/tokens/
-/cmd/
+tokens/
+cmd/
 gha-creds-*.json
-/archive/
+archive/
+commit_m_tmp.txt
