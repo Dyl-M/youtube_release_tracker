@@ -254,14 +254,15 @@ def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int = Non
                                                  max_results=50,
                                                  pageToken=next_page_token)  # Request playlist's items
 
-            # Keep necessary data
+            # Keep necessary data, filtering out scheduled/premiere videos without release date
             p_items += [{'video_id': item.contentDetails.videoId,
                          'video_title': item.snippet.title,
                          'item_id': item.id,
                          'release_date': dt.datetime.strptime(item.contentDetails.videoPublishedAt, date_format),
                          'status': item.status.privacyStatus,
                          'channel_id': item.snippet.videoOwnerChannelId,
-                         'channel_name': item.snippet.videoOwnerChannelTitle} for item in request.items]
+                         'channel_name': item.snippet.videoOwnerChannelTitle}
+                        for item in request.items if item.contentDetails.videoPublishedAt is not None]
 
             p_items = filter_items_by_date_range(p_items, latest_d, _oldest_d=oldest_d, _day_ago=day_ago)
             next_page_token = request.nextPageToken

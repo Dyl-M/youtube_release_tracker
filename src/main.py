@@ -105,15 +105,23 @@ def dest_playlist(channel_id: str, is_shorts: bool, v_duration: int, max_duratio
     if is_shorts:
         return 'shorts'
 
-    if channel_id in music:
-        if v_duration > max_duration * 60:
-            if channel_id in other:
-                return watch_later
-            return 'none'
-        if channel_id in favorites:
-            return banger
-        return release
-    return watch_later
+    is_music_channel = channel_id in music
+    is_long_video = v_duration > max_duration * 60
+
+    # Non-music channels -> Watch Later
+    if not is_music_channel:
+        return watch_later
+
+    # Long music videos -> Watch Later (if also in other categories) or skip
+    if is_long_video:
+        return watch_later if channel_id in other else 'none'
+
+    # Short music videos from favorites -> Banger Radar
+    if channel_id in favorites:
+        return banger
+
+    # Regular short music videos -> Release Radar
+    return release
 
 
 def update_repo_secrets(secret_name: str, new_value: str, logger: logging.Logger = None):
