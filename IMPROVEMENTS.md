@@ -216,65 +216,43 @@ def get_stats(service: pyt.Client, videos_list: list, check_shorts: bool = True)
     ...
 ```
 
-### 8. Transient API Error Handling (GCP Service Unavailability)
+### 8. ✅ FIXED - Transient API Error Handling (GCP Service Unavailability)
 
-**Location:** `src/youtube.py:442-447` (add_to_playlist function)
+**Location:** `src/youtube.py:447-478` (add_to_playlist function)
 
-**Related Issue:
-** [#103 - Handling GCP Service Unavailability](https://github.com/Dyl-M/youtube_release_tracker/issues/103)
+**Related Issue:** [#103 - Handling GCP Service Unavailability](https://github.com/Dyl-M/youtube_release_tracker/issues/103)
 
-**Issue:** All API errors are treated equally without differentiating between:
+**Status:** ✅ **FIXED** (2025-11-22)
 
-- **Transient errors** (`SERVICE_UNAVAILABLE`, `backendError`, `internalError`) - temporary GCP issues that could
+**Issue:** All API errors were treated equally without differentiating between:
+
+- **Transient errors** (`serviceUnavailable`, `backendError`, `internalError`) - temporary GCP issues that could
   succeed with immediate retry
 - **Quota errors** (`quotaExceeded`) - need to wait until quota resets
-- **Permanent errors** (`videoNotFound`, `forbidden`) - will never succeed
+- **Permanent errors** (`videoNotFound`, `forbidden`, `duplicate`) - will never succeed
 
-Currently, all failures immediately go to `api_failure.json` for next-run retry (24 hours later), even transient errors
-that could succeed with immediate exponential backoff retry.
+Previously, all failures immediately went to `api_failure.json` for next-run retry (24 hours later), even transient
+errors that could succeed with immediate exponential backoff retry.
 
 **Impact:**
 
-- Transient GCP infrastructure hiccups cause 24-hour delays instead of immediate resolution
+- Transient GCP infrastructure hiccups caused 24-hour delays instead of immediate resolution
 - No visibility into error types and patterns
-- Videos may accumulate in api_failure.json unnecessarily
+- Videos accumulated in api_failure.json unnecessarily
 
-**Recommendation:**
+**Fix Applied:**
 
-- Categorize error types by their nature (transient vs permanent vs quota)
-- Implement retry logic with exponential backoff for transient errors (1s, 2s, 4s)
-- Only add to api_failure.json if:
-    - Quota exceeded (retry next day)
-    - Transient error still fails after max retries
-- Don't retry permanent errors (videoNotFound, forbidden)
-- Add structured logging to track error patterns
-
-**Example Implementation:**
-
-```python
-TRANSIENT_ERRORS = ['serviceUnavailable', 'backendError', 'internalError']
-PERMANENT_ERRORS = ['videoNotFound', 'forbidden', 'playlistOperationUnsupported']
-QUOTA_ERRORS = ['quotaExceeded']
-MAX_RETRIES = 3
-
-for attempt in range(MAX_RETRIES):
-    try:
-        service.playlistItems.insert(parts='snippet', body=r_body)
-        break  # Success!
-    except pyt.error.PyYouTubeException as http_error:
-        error_reason = http_error.response.json()['error']['errors'][0]['reason']
-
-        # Retry transient errors with exponential backoff
-        if error_reason in TRANSIENT_ERRORS and attempt < MAX_RETRIES - 1:
-            wait_time = 2 ** attempt
-            time.sleep(wait_time)
-            continue
-
-        # Only save non-permanent errors to api_failure.json
-        if error_reason not in PERMANENT_ERRORS:
-            api_failure[playlist_id]['failure'].append(video_id)
-        break
-```
+- Added error categorization constants at module level:
+  ```python
+  TRANSIENT_ERRORS = ['serviceUnavailable', 'backendError', 'internalError']
+  PERMANENT_ERRORS = ['videoNotFound', 'forbidden', 'playlistOperationUnsupported', 'duplicate']
+  QUOTA_ERRORS = ['quotaExceeded']
+  MAX_RETRIES = 3
+  ```
+- Implemented retry loop with exponential backoff (1s, 2s, 4s) for transient errors
+- Permanent errors are now logged and skipped immediately (no retry)
+- Only quota errors and exhausted transient retries are saved to `api_failure.json`
+- Fixed `add_api_fail()` to preserve video IDs that fail again on retry (previously lost due to premature list clearing)
 
 ### 9. Hardcoded Relative Paths
 
@@ -619,7 +597,7 @@ is_allowed = any(normalized_path.startswith(os.path.normpath(allowed_dir)) for a
 
 **Critical:** ~~4~~ **0** issues requiring immediate attention (✅ All Fixed!)
 **DeepSource:** ~~4~~ **0** code quality issues (✅ All Fixed!)
-**High Priority:** ~~5~~ **4** issues that significantly impact reliability/performance (✅ 1 Fixed!)
+**High Priority:** ~~5~~ **3** issues that significantly impact reliability/performance (✅ 2 Fixed!)
 **Medium Priority:** 9 issues that improve maintainability
 **Low Priority:** 9 nice-to-have improvements
 **Additional Improvements:** 2 fixes completed, 1 major refactoring completed
@@ -627,25 +605,26 @@ is_allowed = any(normalized_path.startswith(os.path.normpath(allowed_dir)) for a
 **Completed Fixes:**
 
 1. ✅ Network timeout for is_shorts() HTTP requests (Critical #1)
-2. ✅ **Shorts detection HTTP redirect bug - Issue #120 (Critical #1a)** ← **NEW (2025-11-12)**
+2. ✅ Shorts detection HTTP redirect bug - Issue #120 (Critical #1a)
 3. ✅ Error handling for all config file operations (Critical #2)
 4. ✅ Added encoding parameter to add-on.json (Critical #3)
 5. ✅ Handle missing stats.csv on first run (Critical #4)
-6. ✅ **Path validation Windows compatibility (Additional #24)** ← **NEW (2025-11-12)**
+6. ✅ Path validation Windows compatibility (Additional #24)
 7. ✅ Overlapping exception handlers in youtube.py (DeepSource #5)
-6. ✅ Unused import in main.py (DeepSource #6)
-7. ✅ Path traversal vulnerability in file_utils.py (DeepSource #7)
-8. ✅ Unused function parameter in file_utils.py (DeepSource #8)
-9. ✅ Broad exception catching replaced with specific exceptions (High Priority #6)
-10. ✅ Created file_utils.py module and eliminated all redundant file handling code (Refactoring #25)
+8. ✅ Unused import in main.py (DeepSource #6)
+9. ✅ Path traversal vulnerability in file_utils.py (DeepSource #7)
+10. ✅ Unused function parameter in file_utils.py (DeepSource #8)
+11. ✅ Broad exception catching replaced with specific exceptions (High Priority #6)
+12. ✅ Created file_utils.py module and eliminated all redundant file handling code (Refactoring #25)
+13. ✅ **Transient API error handling with retry logic - Issue #103 (High Priority #8)** ← **NEW (2025-11-22)**
 
-**Latest Session Impact (2025-11-12):**
+**Latest Session Impact (2025-11-22):**
 
-- Fixed critical bug where ALL videos were misclassified as YouTube Shorts
-- Cleaned 433 duplicate/incorrect entries from stats.csv
-- Fixed Windows compatibility issue preventing local execution
-- Now correctly distinguishes shorts from regular videos (95.6%+ accuracy)
-- Cross-platform compatibility fully restored
+- Implemented intelligent API error handling with exponential backoff retry for transient errors
+- Transient GCP errors (serviceUnavailable, backendError, internalError) now retry up to 3 times with 1s, 2s, 4s delays
+- Permanent errors (videoNotFound, forbidden, duplicate) are logged and skipped immediately
+- Fixed bug in `add_api_fail()` where video IDs were lost if they failed again on retry
+- Replaced broad exception catches with specific exception types across the codebase
 
 **Code Quality Impact:**
 
@@ -657,18 +636,13 @@ is_allowed = any(normalized_path.startswith(os.path.normpath(allowed_dir)) for a
 - Exception handlers now catch only specific, expected exceptions
 - Easier to add new configuration files in the future
 - Fixed data integrity issues in stats.csv
+- API errors now handled intelligently based on error type
 
 **Recommended Priority Order (Remaining):**
 
-1. **Transient API error handling (High #8)** ⭐ **HIGHEST PRIORITY** - Production issue causing video addition failures
-2. Cache shorts detection (High #7) - Performance optimization
-3. Fix hardcoded paths (High #9) - Developer experience improvement
-4. Replace sys.exit() with exceptions (High #5) - Code quality (best done after other refactors)
-5. Add basic unit tests (Medium #10)
-6. Create configuration file (Medium #11)
-7. Address remaining issues as time permits
-
-**Rationale for #8 Priority:**
-Issue #8 now addresses a real production problem (GitHub issue #103) where GCP service unavailability causes legitimate
-videos to fail addition and wait 24 hours for retry. Implementing intelligent retry logic with exponential backoff will
-resolve transient errors in seconds instead of days, significantly improving system reliability and user experience.
+1. Cache shorts detection (High #7) - Performance optimization
+2. Fix hardcoded paths (High #9) - Developer experience improvement
+3. Replace sys.exit() with exceptions (High #5) - Code quality (best done after other refactors)
+4. Add basic unit tests (Medium #10)
+5. Create configuration file (Medium #11)
+6. Address remaining issues as time permits

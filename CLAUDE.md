@@ -74,7 +74,11 @@ The application supports two execution modes determined by `sys.argv[1]`:
 - Detects YouTube Shorts via HEAD request to `/shorts/{video_id}` endpoint
   - **Important**: Uses `allow_redirects=False` to distinguish shorts from regular videos
   - Real shorts return 200, regular videos return 3xx redirect to /watch?v= URL
-- Handles API quota failures with retry mechanism via `add_api_fail()`
+- Handles API errors with intelligent retry mechanism:
+  - **Transient errors** (`serviceUnavailable`, `backendError`, `internalError`): Retry up to 3 times with exponential backoff (1s, 2s, 4s)
+  - **Permanent errors** (`videoNotFound`, `forbidden`, `duplicate`): Log and skip immediately
+  - **Quota errors** (`quotaExceeded`): Save to `api_failure.json` for next-day retry
+- Retries failed videos from previous runs via `add_api_fail()`
 
 **src/file_utils.py**
 - Centralized utility module for file operations
@@ -97,7 +101,7 @@ All configuration is stored in JSON files in the `data/` directory:
   - `favorites`: Channels that should route to Banger Radar playlist
   - `playlistNotFoundPass`: Channels to ignore if their upload playlist returns 404
   - `toPass`: Channels to skip entirely during iteration
-- **api_failure.json**: Tracks videos that failed to add due to API quota issues
+- **api_failure.json**: Tracks videos that failed to add due to API quota or transient errors (retried on next run)
 - **stats.csv**: Historical data with video statistics at weekly intervals
 
 ### Video Routing Logic
