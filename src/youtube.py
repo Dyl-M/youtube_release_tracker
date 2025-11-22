@@ -369,10 +369,11 @@ def check_if_live(service: pyt.Client, videos_list: list):
     return items
 
 
-def get_stats(service: pyt.Client, videos_list: list):
+def get_stats(service: pyt.Client, videos_list: list, check_shorts: bool = True):
     """Get duration, views and live status of YouTube video with their ID
     :param service: a Python YouTube Client
     :param videos_list: list of YouTube video IDs
+    :param check_shorts: whether to check if videos are shorts (skip for historical stats updates)
     :return items: playlist items (videos) as a list.
     """
     items = []
@@ -397,7 +398,7 @@ def get_stats(service: pyt.Client, videos_list: list):
                        'comments': item.statistics.commentCount,
                        'duration': isodate.parse_duration(getattr(item.contentDetails,
                                                                   'duration', 'PT0S') or 'PT0S').seconds,
-                       'is_shorts': is_shorts(video_id=item.id),
+                       'is_shorts': is_shorts(video_id=item.id) if check_shorts else None,
                        'live_status': item.snippet.liveBroadcastContent,
                        'latest_status': item.status.privacyStatus} for item in request]
 
@@ -612,9 +613,9 @@ def weekly_stats(service: pyt.Client, histo_data: pd.DataFrame, week_delta: int,
     if not selection.empty:  # If some videos are concerned
         vid_id_list = selection.video_id.tolist()  # Get YouTube videos' ID as a list
 
-        # Apply get_stats and keep only the three necessary features
+        # Apply get_stats and keep only the three necessary features (skip shorts check for historical data)
         to_keep = ['video_id', 'views', 'likes', 'comments', 'latest_status']
-        stats = pd.DataFrame(get_stats(service, vid_id_list))[to_keep]
+        stats = pd.DataFrame(get_stats(service, vid_id_list, check_shorts=False))[to_keep]
         histo_data = histo_data.merge(stats, how='left')  # Merge to previous dataframe
 
         # Add values to corresponding week delta and remove redondant columns in dataframe

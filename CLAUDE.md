@@ -193,6 +193,14 @@ The `weekly_stats()` function runs on every execution:
 - Only collects stats if the corresponding `views_w{N}` column is NULL
 - Updates stats in place within the DataFrame
 - This ensures consistent tracking at specific time intervals after release
+- **Optimization**: Skips shorts detection (`check_shorts=False`) since videos are already classified when first added
+
+### Shorts Detection Optimization
+
+The `get_stats()` function has a `check_shorts` parameter:
+- `check_shorts=True` (default): Calls `is_shorts()` for each video (used for new videos via `add_stats()`)
+- `check_shorts=False`: Skips the HTTP HEAD request (used by `weekly_stats()` for historical data)
+- This avoids redundant network requests for videos already classified in `stats.csv`
 
 ### Repository Secrets
 

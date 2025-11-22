@@ -225,31 +225,37 @@ if __name__ == '__main__':
 - **main.py:133** (`update_repo_secrets`): Now catches `(github.GithubException, ValueError)`
 - All exception handlers now catch only specific, expected exceptions
 
-### 7. Performance: is_shorts() Called for Every Video
+### 7. ✅ FIXED - Performance: is_shorts() Called for Every Video
 
-**Location:** `src/youtube.py:365` (called from get_stats)
+**Location:** `src/youtube.py:372` (get_stats function)
 
-**Issue:** Makes an HTTP HEAD request for every single video, even when checking stats for historical videos multiple
-times.
+**Status:** ✅ **FIXED** (2025-11-23)
+
+**Issue:** Made an HTTP HEAD request for every single video, even when checking stats for historical videos that were
+already classified.
 
 **Impact:**
 
-- Significantly slows down execution
-- Wastes network bandwidth
+- Slowed down execution during `weekly_stats()` calls
+- Wasted network bandwidth
 - Could trigger rate limiting from YouTube
 
-**Recommendation:**
+**Fix Applied:**
 
-- Cache shorts detection results in stats.csv
-- Once detected, don't re-check
-- Batch shorts detection requests if possible
-- Consider using API fields if available (check contentDetails)
+- Added `check_shorts: bool = True` parameter to `get_stats()` function
+- New videos via `add_stats()`: Uses default `check_shorts=True` to classify videos
+- Historical stats via `weekly_stats()`: Now passes `check_shorts=False` to skip redundant HTTP requests
+- Videos are classified once when first added and the result is stored in `stats.csv`
 
 ```python
+# get_stats() now has check_shorts parameter
 def get_stats(service: pyt.Client, videos_list: list, check_shorts: bool = True):
-    # Add check_shorts parameter
-    # Only call is_shorts() if check_shorts=True and not already known
     ...
+    'is_shorts': is_shorts(video_id=item.id) if check_shorts else None,
+    ...
+
+# weekly_stats() skips shorts detection for historical data
+stats = pd.DataFrame(get_stats(service, vid_id_list, check_shorts=False))[to_keep]
 ```
 
 ### 8. ✅ FIXED - Transient API Error Handling (GCP Service Unavailability)
@@ -634,7 +640,7 @@ is_allowed = any(normalized_path.startswith(os.path.normpath(allowed_dir)) for a
 
 **Critical:** ~~4~~ **0** issues requiring immediate attention (✅ All Fixed!)
 **DeepSource:** ~~4~~ **0** code quality issues (✅ All Fixed!)
-**High Priority:** ~~5~~ **3** issues that significantly impact reliability/performance (✅ 2 Fixed!)
+**High Priority:** ~~5~~ **2** issues that significantly impact reliability/performance (✅ 3 Fixed!)
 **Medium Priority:** 9 issues that improve maintainability
 **Low Priority:** 9 nice-to-have improvements
 **Additional Improvements:** 2 fixes completed, 1 major refactoring completed
@@ -653,10 +659,18 @@ is_allowed = any(normalized_path.startswith(os.path.normpath(allowed_dir)) for a
 10. ✅ Unused function parameter in file_utils.py (DeepSource #8)
 11. ✅ Broad exception catching replaced with specific exceptions (High Priority #6)
 12. ✅ Created file_utils.py module and eliminated all redundant file handling code (Refactoring #25)
-13. ✅ **Transient API error handling with retry logic - Issue #103 (High Priority #8)**
-14. ✅ **Videos without release date causing TypeError - Issue #104 (Critical #4a)** ← **NEW (2025-11-22)**
+13. ✅ Transient API error handling with retry logic - Issue #103 (High Priority #8)
+14. ✅ Videos without release date causing TypeError - Issue #104 (Critical #4a)
+15. ✅ **Shorts detection optimization - skip HTTP requests for historical stats (High Priority #7)** ← **NEW (2025-11-23)**
 
-**Latest Session Impact (2025-11-22):**
+**Latest Session Impact (2025-11-23):**
+
+- Added `check_shorts` parameter to `get_stats()` function for conditional shorts detection
+- `weekly_stats()` now skips shorts detection for historical videos (already classified)
+- Reduces redundant HTTP HEAD requests during weekly statistics collection
+- Improves execution speed and reduces network bandwidth usage
+
+**Previous Session Impact (2025-11-22):**
 
 - Implemented intelligent API error handling with exponential backoff retry for transient errors
 - Transient GCP errors (serviceUnavailable, backendError, internalError) now retry up to 3 times with 1s, 2s, 4s delays
@@ -678,12 +692,12 @@ is_allowed = any(normalized_path.startswith(os.path.normpath(allowed_dir)) for a
 - Easier to add new configuration files in the future
 - Fixed data integrity issues in stats.csv
 - API errors now handled intelligently based on error type
+- Optimized network usage by skipping redundant shorts detection
 
 **Recommended Priority Order (Remaining):**
 
-1. Cache shorts detection (High #7) - Performance optimization
-2. Fix hardcoded paths (High #9) - Developer experience improvement
-3. Replace sys.exit() with exceptions (High #5) - Code quality (best done after other refactors)
-4. Add basic unit tests (Medium #10)
-5. Create configuration file (Medium #11)
-6. Address remaining issues as time permits
+1. Fix hardcoded paths (High #9) - Developer experience improvement
+2. Replace sys.exit() with exceptions (High #5) - Code quality (best done after other refactors)
+3. Add basic unit tests (Medium #10)
+4. Create configuration file (Medium #11)
+5. Address remaining issues as time permits
