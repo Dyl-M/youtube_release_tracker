@@ -122,6 +122,42 @@ script crashes with unhelpful error.
 - Displays informational message when creating new file
 - Full column specification ensures schema consistency
 
+### 4a. ✅ FIXED - Videos Without Release Date Causing TypeError (Issue #104)
+
+**Location:** `src/youtube.py:297-299` (get_playlist_items function)
+
+**Related Issue:
+** [#104 - Rare case of videos without Release Date](https://github.com/Dyl-M/youtube_release_tracker/issues/104)
+
+**Status:** ✅ **FIXED** (2025-11-22)
+
+**Issue:** Some videos returned by the YouTube API have `None` for `videoPublishedAt` field instead of an ISO 8601 date
+string. This caused a `TypeError` when calling `datetime.strptime(None, date_format)`.
+
+**Root Cause:** Scheduled videos and premieres that haven't aired yet don't have a published date. They appear in the
+channel's upload playlist but with `videoPublishedAt = None`.
+
+**Impact:**
+
+- Workflow crashed with `TypeError` when encountering scheduled/premiere videos
+- Process could not complete, leaving videos unprocessed
+
+**Fix Applied:**
+
+- Added filter condition in list comprehension to skip videos without release date
+- Used walrus operator for efficient single-pass filtering:
+  ```python
+  p_items += [parsed for item in request.items
+              if (parsed := _parse_playlist_item(item, ISO_DATE_FORMAT)) is not None]
+  ```
+- `_parse_playlist_item()` returns `None` for items without `videoPublishedAt`
+- Scheduled videos will be picked up on the next run after they go live (with proper release date)
+
+**Additional Refactoring:**
+
+- Refactored `dest_playlist()` in main.py with flat structure and named boolean variables for clarity
+- Reduced cyclomatic complexity in `get_playlist_items()` by extracting helper functions
+
 ## High Priority Issues
 
 ### 5. Excessive sys.exit() Calls
@@ -220,7 +256,8 @@ def get_stats(service: pyt.Client, videos_list: list, check_shorts: bool = True)
 
 **Location:** `src/youtube.py:447-478` (add_to_playlist function)
 
-**Related Issue:** [#103 - Handling GCP Service Unavailability](https://github.com/Dyl-M/youtube_release_tracker/issues/103)
+**Related Issue:
+** [#103 - Handling GCP Service Unavailability](https://github.com/Dyl-M/youtube_release_tracker/issues/103)
 
 **Status:** ✅ **FIXED** (2025-11-22)
 
@@ -616,7 +653,8 @@ is_allowed = any(normalized_path.startswith(os.path.normpath(allowed_dir)) for a
 10. ✅ Unused function parameter in file_utils.py (DeepSource #8)
 11. ✅ Broad exception catching replaced with specific exceptions (High Priority #6)
 12. ✅ Created file_utils.py module and eliminated all redundant file handling code (Refactoring #25)
-13. ✅ **Transient API error handling with retry logic - Issue #103 (High Priority #8)** ← **NEW (2025-11-22)**
+13. ✅ **Transient API error handling with retry logic - Issue #103 (High Priority #8)**
+14. ✅ **Videos without release date causing TypeError - Issue #104 (Critical #4a)** ← **NEW (2025-11-22)**
 
 **Latest Session Impact (2025-11-22):**
 
@@ -625,6 +663,9 @@ is_allowed = any(normalized_path.startswith(os.path.normpath(allowed_dir)) for a
 - Permanent errors (videoNotFound, forbidden, duplicate) are logged and skipped immediately
 - Fixed bug in `add_api_fail()` where video IDs were lost if they failed again on retry
 - Replaced broad exception catches with specific exception types across the codebase
+- Fixed TypeError when videos have no release date (scheduled/premieres) - now filtered out gracefully
+- Refactored `dest_playlist()` with cleaner flat structure and named boolean variables
+- Reduced cyclomatic complexity in `get_playlist_items()` by extracting helper functions
 
 **Code Quality Impact:**
 
