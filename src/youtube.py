@@ -18,13 +18,9 @@ import time
 import tqdm
 import tzlocal
 
-# noinspection PyPackageRequirements
 from google.auth.exceptions import RefreshError
-# noinspection PyPackageRequirements
 from google.auth.transport.requests import Request
-# noinspection PyPackageRequirements
 from google.oauth2.credentials import Credentials
-# noinspection PyPackageRequirements
 from google_auth_oauthlib.flow import InstalledAppFlow
 
 import file_utils
@@ -115,15 +111,14 @@ def encode_key(json_path: str, export_dir: str = None, export_name: str = None):
         history.error('%s file does not exist.', json_path)
         raise FileAccessError(f'{json_path} file does not exist.')
 
-    else:
-        with open(json_path, 'r', encoding='utf8') as json_file:
-            key_dict = json.load(json_file)
+    with open(json_path, 'r', encoding='utf8') as json_file:
+        key_dict = json.load(json_file)
 
-        key_str = json.dumps(key_dict).encode('utf-8')
-        key_b64 = base64.urlsafe_b64encode(key_str)
+    key_str = json.dumps(key_dict).encode('utf-8')
+    key_b64 = base64.urlsafe_b64encode(key_str)
 
-        with open(export_dir + export_name, 'wb') as key_file:
-            key_file.write(key_b64)
+    with open(export_dir + export_name, 'wb') as key_file:
+        key_file.write(key_b64)
 
 
 def create_service_local(log: bool = True):
