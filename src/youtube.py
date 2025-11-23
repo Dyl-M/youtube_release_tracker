@@ -14,20 +14,19 @@ import pandas as pd
 import pyyoutube as pyt
 import re
 import requests
-import sys
 import time
 import tqdm
 import tzlocal
 
-import file_utils
-
-# noinspection PyPackageRequirements
 from google.auth.exceptions import RefreshError
-# noinspection PyPackageRequirements
 from google.auth.transport.requests import Request
-# noinspection PyPackageRequirements
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
+
+import file_utils
+import paths
+
+from exceptions import CredentialsError, YouTubeServiceError, APIError, FileAccessError
 
 """File Information
 @file_name: youtube.py
@@ -55,7 +54,7 @@ def last_exe_date():
     """Get the last execution datetime from a log file (supposing the first line is containing the right datetime).
     :return date: Last execution date.
     """
-    with open('../log/last_exe.log', 'r', encoding='utf8') as log_file:
+    with open(paths.LAST_EXE_LOG, 'r', encoding='utf8') as log_file:
         first_log = log_file.readlines()[0]  # Get first log
 
     d_str = re.search(r'(\d{4}(-\d{2}){2})\s(\d{2}:?){3}.[\d:]+', first_log).group()  # Extract date
@@ -63,7 +62,7 @@ def last_exe_date():
     return date
 
 
-ADD_ON = file_utils.load_json('../data/add-on.json')
+ADD_ON = file_utils.load_json(str(paths.ADD_ON_JSON))
 
 NOW = dt.datetime.now(tz=tzlocal.get_localzone())
 LAST_EXE = last_exe_date()
@@ -74,7 +73,7 @@ LAST_EXE = last_exe_date()
 history = logging.Logger(name='history', level=0)
 
 # Create file handlers
-history_file = logging.FileHandler(filename='../log/history.log')  # mode='a'
+history_file = logging.FileHandler(filename=paths.HISTORY_LOG)  # mode='a'
 
 # Create formatter
 formatter = logging.Formatter(fmt='%(asctime)s [%(levelname)s] - %(message)s', datefmt='%Y-%m-%d %H:%M:%S%z')
@@ -106,21 +105,20 @@ def encode_key(json_path: str, export_dir: str = None, export_name: str = None):
 
     if 'tokens' not in json_path:
         history.critical('FORBIDDEN ACCESS. Invalid file path.')
-        sys.exit()
+        raise FileAccessError('FORBIDDEN ACCESS. Invalid file path.')
 
-    elif not os.path.exists(json_path):
+    if not os.path.exists(json_path):
         history.error('%s file does not exist.', json_path)
-        sys.exit()
+        raise FileAccessError(f'{json_path} file does not exist.')
 
-    else:
-        with open(json_path, 'r', encoding='utf8') as json_file:
-            key_dict = json.load(json_file)
+    with open(json_path, 'r', encoding='utf8') as json_file:
+        key_dict = json.load(json_file)
 
-        key_str = json.dumps(key_dict).encode('utf-8')
-        key_b64 = base64.urlsafe_b64encode(key_str)
+    key_str = json.dumps(key_dict).encode('utf-8')
+    key_b64 = base64.urlsafe_b64encode(key_str)
 
-        with open(export_dir + export_name, 'wb') as key_file:
-            key_file.write(key_b64)
+    with open(export_dir + export_name, 'wb') as key_file:
+        key_file.write(key_b64)
 
 
 def create_service_local(log: bool = True):
@@ -129,13 +127,13 @@ def create_service_local(log: bool = True):
     :param log: to apply logging or not
     :return service: a Google API service object build with 'googleapiclient.discovery.build'.
     """
-    oauth_file = '../tokens/oauth.json'  # OAUTH 2.0 ID path
+    oauth_file = paths.OAUTH_JSON  # OAUTH 2.0 ID path
     scopes = ['https://www.googleapis.com/auth/youtube', 'https://www.googleapis.com/auth/youtube.force-ssl']
     instance_fail_message = 'Failed to create service instance for YouTube'
     cred = None
 
-    if os.path.exists('../tokens/credentials.json'):
-        cred = Credentials.from_authorized_user_file('../tokens/credentials.json')  # Retrieve credentials
+    if os.path.exists(paths.CREDENTIALS_JSON):
+        cred = Credentials.from_authorized_user_file(paths.CREDENTIALS_JSON)  # Retrieve credentials
 
     if not cred or not cred.valid:  # Cover outdated or non-existant credentials
         if cred and cred.expired and cred.refresh_token:
@@ -152,7 +150,7 @@ def create_service_local(log: bool = True):
             flow = InstalledAppFlow.from_client_secrets_file(oauth_file, scopes)
             cred = flow.run_local_server()
 
-        with open('../tokens/credentials.json', 'w') as cred_file:  # Save credentials as a JSON file
+        with open(paths.CREDENTIALS_JSON, 'w') as cred_file:  # Save credentials as a JSON file
             # noinspection PyTypeChecker
             json.dump(ast.literal_eval(cred.to_json()), cred_file, ensure_ascii=False, indent=4)
 
@@ -167,7 +165,7 @@ def create_service_local(log: bool = True):
         if log:
             history.critical('(%s) %s', error, instance_fail_message)
 
-        sys.exit()
+        raise YouTubeServiceError(f'{instance_fail_message}: {error}')
 
 
 def create_service_workflow():
@@ -203,7 +201,7 @@ def create_service_workflow():
 
         else:
             history.critical('ERROR: Unable to refresh credentials. Check Google API OAUTH parameter.')
-            sys.exit()
+            raise CredentialsError('Unable to refresh credentials. Check Google API OAUTH parameter.')
 
     try:
         service = pyt.Client(client_id=creds.client_id, client_secret=creds.client_secret, access_token=creds.token)
@@ -212,7 +210,7 @@ def create_service_workflow():
 
     except (pyt.error.PyYouTubeException, ValueError, AttributeError) as error:
         history.critical('(%s) %s', error, instance_fail_message)
-        sys.exit()
+        raise YouTubeServiceError(f'{instance_fail_message}: {error}')
 
 
 def _parse_playlist_item(item, date_format: str):
@@ -251,7 +249,7 @@ def _handle_playlist_error(error: pyt.error.PyYouTubeException, playlist_id: str
         return True
 
     history.error('[%s] Unknown error: %s', playlist_id, error.message)
-    sys.exit()
+    raise APIError(f'[{playlist_id}] Unknown error: {error.message}')
 
 
 def _filter_items_by_date_range(p_items: list, latest_d: dt.datetime,
@@ -364,15 +362,16 @@ def check_if_live(service: pyt.Client, videos_list: list):
 
         except googleapiclient.errors.HttpError as http_error:
             history.error(http_error.error_details)
-            sys.exit()
+            raise APIError(f'HTTP error while checking live status: {http_error.error_details}')
 
     return items
 
 
-def get_stats(service: pyt.Client, videos_list: list):
+def get_stats(service: pyt.Client, videos_list: list, check_shorts: bool = True):
     """Get duration, views and live status of YouTube video with their ID
     :param service: a Python YouTube Client
     :param videos_list: list of YouTube video IDs
+    :param check_shorts: whether to check if videos are shorts (skip for historical stats updates)
     :return items: playlist items (videos) as a list.
     """
     items = []
@@ -397,13 +396,13 @@ def get_stats(service: pyt.Client, videos_list: list):
                        'comments': item.statistics.commentCount,
                        'duration': isodate.parse_duration(getattr(item.contentDetails,
                                                                   'duration', 'PT0S') or 'PT0S').seconds,
-                       'is_shorts': is_shorts(video_id=item.id),
+                       'is_shorts': is_shorts(video_id=item.id) if check_shorts else None,
                        'live_status': item.snippet.liveBroadcastContent,
                        'latest_status': item.status.privacyStatus} for item in request]
 
         except googleapiclient.errors.HttpError as http_error:
             history.error(http_error.error_details)
-            sys.exit()
+            raise APIError(f'HTTP error while getting stats: {http_error.error_details}')
 
     validated = [video['video_id'] for video in items]
     missing = [vid_id for vid_id in videos_list if vid_id not in validated]
@@ -459,7 +458,7 @@ def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list, pr
     :param videos_list: list of YouTube video IDs
     :param prog_bar: to use tqdm progress bar or not.
     """
-    api_failure = file_utils.load_json('../data/api_failure.json')
+    api_failure = file_utils.load_json(str(paths.API_FAILURE_JSON))
     api_fail = False
 
     if prog_bar:
@@ -503,7 +502,7 @@ def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list, pr
                 break
 
     if api_fail:  # Save API failure
-        file_utils.save_json('../data/api_failure.json', api_failure)
+        file_utils.save_json(str(paths.API_FAILURE_JSON), api_failure)
 
 
 def del_from_playlist(service: pyt.Client, playlist_id: str, items_list: list, prog_bar: bool = True):
@@ -552,8 +551,8 @@ def sort_db(service: pyt.Client):
                 information += [{'title': an_item.snippet.title, 'id': an_item.id} for an_item in request]
 
             except googleapiclient.errors.HttpError as http_error:
-                print(http_error.error_details)
-                sys.exit()
+                history.error(http_error.error_details)
+                raise APIError(f'HTTP error while sorting database: {http_error.error_details}')
 
         # Sort channels' name by alphabetical order
         information = sorted(information, key=lambda dic: dic['title'].lower())
@@ -561,7 +560,7 @@ def sort_db(service: pyt.Client):
 
         return ids_only
 
-    channels_db = file_utils.load_json('../data/pocket_tube.json')
+    channels_db = file_utils.load_json(str(paths.POCKET_TUBE_JSON))
 
     categories = [db_keys for db_keys in channels_db.keys() if 'ysc' not in db_keys]  # Get PT categories
     db_sorted = {category: get_channels(_service=service, _channel_list=channels_db[category])
@@ -570,7 +569,7 @@ def sort_db(service: pyt.Client):
     for category in categories:  # Rewrite categories in the dict object associated with the PT JSON file
         channels_db[category] = db_sorted[category]
 
-    file_utils.save_json('../data/pocket_tube.json', channels_db)
+    file_utils.save_json(str(paths.POCKET_TUBE_JSON), channels_db)
 
 
 def is_shorts(video_id: str):
@@ -612,9 +611,9 @@ def weekly_stats(service: pyt.Client, histo_data: pd.DataFrame, week_delta: int,
     if not selection.empty:  # If some videos are concerned
         vid_id_list = selection.video_id.tolist()  # Get YouTube videos' ID as a list
 
-        # Apply get_stats and keep only the three necessary features
+        # Apply get_stats and keep only the three necessary features (skip shorts check for historical data)
         to_keep = ['video_id', 'views', 'likes', 'comments', 'latest_status']
-        stats = pd.DataFrame(get_stats(service, vid_id_list))[to_keep]
+        stats = pd.DataFrame(get_stats(service, vid_id_list, check_shorts=False))[to_keep]
         histo_data = histo_data.merge(stats, how='left')  # Merge to previous dataframe
 
         # Add values to corresponding week delta and remove redondant columns in dataframe
@@ -728,7 +727,7 @@ def add_api_fail(service: pyt.Client, prog_bar: bool = True):
     :param service: a Python YouTube Client
     :param prog_bar: to use tqdm progress bar or not.
     """
-    api_failure = file_utils.load_json('../data/api_failure.json')
+    api_failure = file_utils.load_json(str(paths.API_FAILURE_JSON))
     addition = 0
 
     for p_id, info in api_failure.items():
@@ -737,7 +736,7 @@ def add_api_fail(service: pyt.Client, prog_bar: bool = True):
             history.info('%s addition(s) to %s playlist from previous API failure.',
                          len(videos_to_retry), info['name'])
             api_failure[p_id]['failure'] = []  # Clear before retry so add_to_playlist can re-add failures
-            file_utils.save_json('../data/api_failure.json', api_failure)  # Save cleared state
+            file_utils.save_json(str(paths.API_FAILURE_JSON), api_failure)  # Save cleared state
             add_to_playlist(service, p_id, videos_to_retry, prog_bar=prog_bar)  # Failed videos get re-added here
             addition += 1
 

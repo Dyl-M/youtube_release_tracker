@@ -8,7 +8,10 @@ import re
 import sys
 
 import file_utils
+import paths
 import youtube
+
+from exceptions import YouTubeTrackerError, GitHubError
 
 """File Information
 @file_name: main.py
@@ -30,6 +33,7 @@ except KeyError:
 
 try:
     exe_mode = sys.argv[1]
+
 except IndexError:
     exe_mode = 'local'
 
@@ -37,17 +41,17 @@ except IndexError:
 
 # Load configuration files with validation
 pocket_tube = file_utils.load_json(
-    '../data/pocket_tube.json',
+    str(paths.POCKET_TUBE_JSON),
     required_keys=['MUSIQUE', 'APPRENTISSAGE', 'DIVERTISSEMENT', 'GAMING']
 )
 
 playlists = file_utils.load_json(
-    '../data/playlists.json',
+    str(paths.PLAYLISTS_JSON),
     required_keys=['release', 'banger', 'watch_later', 're_listening', 'legacy']
 )
 
 add_on_data = file_utils.load_json(
-    '../data/add-on.json',
+    str(paths.ADD_ON_JSON),
     required_keys=['favorites']
 )
 
@@ -68,8 +72,9 @@ re_listening = playlists['re_listening']['id']
 legacy = playlists['legacy']['id']
 
 # Historical Data - create if doesn't exist
-if os.path.exists('../data/stats.csv'):
-    histo_data = pd.read_csv('../data/stats.csv', encoding='utf-8')
+if os.path.exists(paths.STATS_CSV):
+    histo_data = pd.read_csv(paths.STATS_CSV, encoding='utf-8')
+
 else:
     print("INFO: stats.csv not found. Creating new empty DataFrame.")
     # Create empty DataFrame with correct schema
@@ -83,14 +88,14 @@ else:
 
 def copy_last_exe_log():
     """Copy the last execution logging from the main history file."""
-    with open('../log/history.log', 'r', encoding='utf8') as history_file:
+    with open(paths.HISTORY_LOG, 'r', encoding='utf8') as history_file:
         history = history_file.read()
 
     last_exe = re.findall(r".*?Process started\.", history)[-1]
     last_exe_idx = history.rfind(last_exe)
     last_exe_log = history[last_exe_idx:]
 
-    with open('../log/last_exe.log', 'w', encoding='utf8') as last_exe_file:
+    with open(paths.LAST_EXE_LOG, 'w', encoding='utf8') as last_exe_file:
         last_exe_file.write(last_exe_log)
 
 
@@ -134,24 +139,29 @@ def update_repo_secrets(secret_name: str, new_value: str, logger: logging.Logger
     try:
         repo.create_secret(secret_name, new_value)
         if logger:
-            logger.info(f"Repository Secret '{secret_name}' updated successfully.")
+            logger.info("Repository Secret '%s' updated successfully.", secret_name)
         else:
             print(f"Repository Secret '{secret_name}' updated successfully.")
 
     except (github.GithubException, ValueError) as error:
         if logger:
-            logger.error(f"Failed to update Repository Secret '{secret_name}' : {error}")
+            logger.error("Failed to update Repository Secret '%s' : %s", secret_name, error)
+
         else:
             print(f"Failed to update secret {secret_name}. Error: {error}")
-        sys.exit()
+
+        raise GitHubError(f"Failed to update Repository Secret '{secret_name}': {error}")
 
 
-if __name__ == '__main__':
+def main(historical_data: pd.DataFrame) -> None:
+    """Main process execution.
+    :param historical_data: Historical data DataFrame with video statistics.
+    """
     # Create loggers
     history_main = logging.Logger(name='history_main', level=0)
 
     # Create file handlers
-    history_main_file = logging.FileHandler(filename='../log/history.log')  # mode='a'
+    history_main_file = logging.FileHandler(filename=paths.HISTORY_LOG)  # mode='a'
 
     # Create formatter
     formatter_main = logging.Formatter(fmt='%(asctime)s [%(levelname)s] - %(message)s', datefmt='%Y-%m-%d %H:%M:%S%z')
@@ -167,39 +177,39 @@ if __name__ == '__main__':
     history_main.info('Process started.')
 
     if exe_mode == 'local':  # YouTube service creation
-        YOUTUBE_OAUTH, CREDS_B64 = youtube.create_service_local(), None  # YouTube service in local mode
-        PROG_BAR = True  # Display progress bar
+        youtube_oauth, creds_b64 = youtube.create_service_local(), None  # YouTube service in local mode
+        prog_bar = True  # Display progress bar
 
     else:
         # YouTube service with GitHub workflow and Credentials
-        YOUTUBE_OAUTH, CREDS_B64 = youtube.create_service_workflow()
-        PROG_BAR = False  # Do not display the progress bar
+        youtube_oauth, creds_b64 = youtube.create_service_workflow()
+        prog_bar = False  # Do not display the progress bar
 
     # Add missing videos due to quota exceeded on previous run
-    youtube.add_api_fail(service=YOUTUBE_OAUTH, prog_bar=PROG_BAR)
+    youtube.add_api_fail(service=youtube_oauth, prog_bar=prog_bar)
 
     # Search for new videos to add
     history_main.info('Iterative research for %s YouTube channels.', len(all_channels))
-    new_videos = youtube.iter_channels(YOUTUBE_OAUTH, all_channels, prog_bar=PROG_BAR)
+    new_videos = youtube.iter_channels(youtube_oauth, all_channels, prog_bar=prog_bar)
 
     if not new_videos:
         history_main.info('No addition to perform.')
 
         # Get stats for already retrieved videos
-        histo_data = youtube.weekly_stats(service=YOUTUBE_OAUTH, histo_data=histo_data, week_delta=1)
-        histo_data = youtube.weekly_stats(service=YOUTUBE_OAUTH, histo_data=histo_data, week_delta=4)
-        histo_data = youtube.weekly_stats(service=YOUTUBE_OAUTH, histo_data=histo_data, week_delta=12)
-        histo_data = youtube.weekly_stats(service=YOUTUBE_OAUTH, histo_data=histo_data, week_delta=24)
+        historical_data = youtube.weekly_stats(service=youtube_oauth, histo_data=historical_data, week_delta=1)
+        historical_data = youtube.weekly_stats(service=youtube_oauth, histo_data=historical_data, week_delta=4)
+        historical_data = youtube.weekly_stats(service=youtube_oauth, histo_data=historical_data, week_delta=12)
+        historical_data = youtube.weekly_stats(service=youtube_oauth, histo_data=historical_data, week_delta=24)
 
         # Store
-        histo_data.drop_duplicates(inplace=True)
-        histo_data.sort_values(['release_date', 'video_id'], inplace=True)
-        histo_data.to_csv('../data/stats.csv', encoding='utf-8', index=False)
+        historical_data.drop_duplicates(inplace=True)
+        historical_data.sort_values(['release_date', 'video_id'], inplace=True)
+        historical_data.to_csv(paths.STATS_CSV, encoding='utf-8', index=False)
 
     else:
         # Add statistics about the videos for selection
         history_main.info('Add statistics for %s video(s).', len(new_videos))
-        new_data = youtube.add_stats(service=YOUTUBE_OAUTH, video_list=new_videos)
+        new_data = youtube.add_stats(service=youtube_oauth, video_list=new_videos)
 
         # Prepare data for storing
         to_keep = ['video_id', 'channel_id', 'release_date', 'status', 'is_shorts', 'duration', 'channel_name',
@@ -213,14 +223,14 @@ if __name__ == '__main__':
         stored = stored[to_keep[:-2] + stats_list + to_keep[-2:]]
 
         # Get stats for already retrieved videos
-        histo_data = youtube.weekly_stats(service=YOUTUBE_OAUTH, histo_data=histo_data, week_delta=1)
-        histo_data = youtube.weekly_stats(service=YOUTUBE_OAUTH, histo_data=histo_data, week_delta=4)
-        histo_data = youtube.weekly_stats(service=YOUTUBE_OAUTH, histo_data=histo_data, week_delta=12)
-        histo_data = youtube.weekly_stats(service=YOUTUBE_OAUTH, histo_data=histo_data, week_delta=24)
+        historical_data = youtube.weekly_stats(service=youtube_oauth, histo_data=historical_data, week_delta=1)
+        historical_data = youtube.weekly_stats(service=youtube_oauth, histo_data=historical_data, week_delta=4)
+        historical_data = youtube.weekly_stats(service=youtube_oauth, histo_data=historical_data, week_delta=12)
+        historical_data = youtube.weekly_stats(service=youtube_oauth, histo_data=historical_data, week_delta=24)
 
         # Sort and store
-        stored = pd.concat([histo_data, stored]).sort_values(['release_date', 'video_id']).drop_duplicates()
-        stored.to_csv('../data/stats.csv', encoding='utf-8', index=False)
+        stored = pd.concat([historical_data, stored]).sort_values(['release_date', 'video_id']).drop_duplicates()
+        stored.to_csv(paths.STATS_CSV, encoding='utf-8', index=False)
 
         # Define destination playlist
         new_data['dest_playlist'] = new_data.apply(lambda row: dest_playlist(row.channel_id,
@@ -238,25 +248,43 @@ if __name__ == '__main__':
         # Addition by priority (Favorites > Music releases > Normal videos > Shorts)
         if add_banger:
             history_main.info('Addition to "Banger Radar": %s video(s).', len(add_banger))
-            youtube.add_to_playlist(YOUTUBE_OAUTH, banger, add_banger, prog_bar=PROG_BAR)
+            youtube.add_to_playlist(youtube_oauth, banger, add_banger, prog_bar=prog_bar)
 
         if add_release:
             history_main.info('Addition to "Release Radar": %s video(s).', len(add_release))
-            youtube.add_to_playlist(YOUTUBE_OAUTH, release, add_release, prog_bar=PROG_BAR)
+            youtube.add_to_playlist(youtube_oauth, release, add_release, prog_bar=prog_bar)
 
         if add_wl:
             history_main.info('Addition to "Watch Later": %s video(s).', len(add_wl))
-            youtube.add_to_playlist(YOUTUBE_OAUTH, watch_later, add_wl, prog_bar=PROG_BAR)
+            youtube.add_to_playlist(youtube_oauth, watch_later, add_wl, prog_bar=prog_bar)
 
     # Fill the Release Radar playlist
-    youtube.fill_release_radar(YOUTUBE_OAUTH, release, re_listening, legacy, lmt=40, prog_bar=PROG_BAR)
+    youtube.fill_release_radar(youtube_oauth, release, re_listening, legacy, lmt=40, prog_bar=prog_bar)
 
     if exe_mode == 'local':  # Credentials in base64 update - Local option
-        youtube.encode_key(json_path='../tokens/credentials.json')
-        youtube.encode_key(json_path='../tokens/oauth.json')
+        youtube.encode_key(json_path=str(paths.CREDENTIALS_JSON))
+        youtube.encode_key(json_path=str(paths.OAUTH_JSON))
 
     else:  # Credentials in base64 update - Remote option
-        update_repo_secrets(secret_name='CREDS_B64', new_value=CREDS_B64, logger=history_main)
+        update_repo_secrets(secret_name='CREDS_B64', new_value=creds_b64, logger=history_main)
 
     history_main.info('Process ended.')  # End
     copy_last_exe_log()  # Copy what happened during process execution to the associated file.
+
+
+if __name__ == '__main__':
+    # Create a basic logger for top-level exception handling
+    top_level_logger = logging.Logger(name='top_level', level=0)
+    top_level_handler = logging.FileHandler(filename=paths.HISTORY_LOG)
+    top_level_handler.setFormatter(
+        logging.Formatter(fmt='%(asctime)s [%(levelname)s] - %(message)s', datefmt='%Y-%m-%d %H:%M:%S%z')
+    )
+    top_level_logger.addHandler(top_level_handler)
+
+    try:
+        main(histo_data)
+
+    except YouTubeTrackerError as e:
+        # Handle all custom exceptions (ConfigurationError, APIError, CredentialsError, etc.)
+        top_level_logger.critical('Fatal error: %s', e)
+        sys.exit(1)
