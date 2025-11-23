@@ -5,7 +5,7 @@ from pathlib import Path
 """File Information
 @file_name: paths.py
 @author: Dylan "dyl-m" Monfret
-Centralized path definitions for the project. This module resolves paths dynamically based on the script location, 
+Centralized path definitions for the project. This module resolves paths dynamically based on the script location,
 allowing the project to run from any directory.
 """
 
