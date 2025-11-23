@@ -136,4 +136,9 @@ tokens/
 cmd/
 gha-creds-*.json
 archive/
-commit_m_tmp.txt
+
+# Claude Code & Claude personal Config
+.claude/
+_docs/commit_m_tmp.txt
+_docs/IMPROVEMENTS.md
+CLAUDE.md
