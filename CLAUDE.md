@@ -74,6 +74,8 @@ The application supports two execution modes determined by `sys.argv[1]`:
 - Coordinates the video discovery and playlist management workflow
 - Handles logging to `log/history.log` and `log/last_exe.log`
 - Manages GitHub repository secrets updates in workflow mode
+- Uses top-level exception handler for graceful error handling
+- `copy_last_exe_log()` only runs on successful execution (failed runs don't update `last_exe.log`)
 
 **src/youtube.py**
 
@@ -107,6 +109,16 @@ The application supports two execution modes determined by `sys.argv[1]`:
 - Implements path validation to prevent path traversal attacks
 - Validates file paths against allowlists imported from `paths.py`
 - All file operations logged to `history.log` with proper error messages
+
+**src/exceptions.py**
+
+- Custom exception hierarchy for the application
+- `YouTubeTrackerError`: Base exception class
+- `ConfigurationError`: Config file issues (missing, malformed, invalid keys)
+- `FileAccessError`: Path validation failures (outside allowed directories, invalid extension)
+- `YouTubeServiceError`: API service creation failures
+- `CredentialsError`: Authentication/credential issues
+- `APIError`: YouTube API call failures
 
 **src/analytics.py**
 
@@ -180,9 +192,12 @@ The `dest_playlist()` function in main.py determines where each video goes:
 - Uses Python's `logging` module with file handlers
 - All logs written to `log/history.log` in append mode
 - Format: `%(asctime)s [%(levelname)s] - %(message)s`
-- `copy_last_exe_log()` extracts the most recent run's logs to `log/last_exe.log`
+- `copy_last_exe_log()` extracts the most recent run's logs to `log/last_exe.log` (only on success)
 - API failures (quota exceeded, video unavailable) are logged as warnings
 - Failed video additions are saved to `api_failure.json` for retry on next run
+- Custom exceptions (see `exceptions.py`) are used instead of `sys.exit()` for testability
+- Top-level exception handler in `main.py` catches `YouTubeTrackerError` subclasses
+- Unexpected exceptions are not caught - they fail with full traceback for debugging
 
 ### GitHub Actions Workflow
 

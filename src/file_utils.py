@@ -3,9 +3,10 @@
 import json
 import logging
 import os
-import sys
 
 import paths
+
+from exceptions import ConfigurationError, FileAccessError
 
 """File Information
 @file_name: file_utils.py
@@ -45,7 +46,7 @@ def validate_file_path(file_path: str):
 
     :param file_path: Path to validate (can be relative or absolute)
     :return: Normalized absolute path if valid
-    :raises SystemExit: If path is invalid or outside allowed directories
+    :raises FileAccessError: If path is invalid or outside allowed directories
     """
     # Get the file name from the path (handle both / and \ separators)
     file_name = os.path.basename(file_path)
@@ -59,13 +60,13 @@ def validate_file_path(file_path: str):
     if not is_allowed:
         logger.critical('Access denied: %s is outside allowed directories', file_path)
         logger.critical('Allowed directories: %s', ', '.join(ALLOWED_DIRS))
-        sys.exit(1)
+        raise FileAccessError(f'Access denied: {file_path} is outside allowed directories')
 
     # Check file extension
     file_ext = os.path.splitext(file_name)[1]
     if file_ext not in ALLOWED_EXTENSIONS:
         logger.critical('Invalid file type: %s (allowed: %s)', file_ext, ', '.join(ALLOWED_EXTENSIONS))
-        sys.exit(1)
+        raise FileAccessError(f'Invalid file type: {file_ext}')
 
     return normalized_path
 
@@ -76,6 +77,7 @@ def load_json(file_path: str, required_keys: list = None):
     :param file_path: Path to the JSON file
     :param required_keys: Optional list of keys that must exist in the JSON
     :return: Parsed JSON data as dictionary
+    :raises ConfigurationError: If file is missing, malformed, or missing required keys
     """
     # Validate path for security
     validated_path = validate_file_path(file_path)
@@ -84,24 +86,27 @@ def load_json(file_path: str, required_keys: list = None):
     try:
         with open(validated_path, 'r', encoding='utf8') as f:
             data = json.load(f)
+
     except FileNotFoundError:
         logger.critical('%s not found. Expected location: %s', file_name, file_path)
         logger.critical('Please ensure all required files exist.')
-        sys.exit(1)
+        raise ConfigurationError(f'{file_name} not found at {file_path}')
+
     except json.JSONDecodeError as e:
         logger.critical('%s is malformed: %s', file_name, str(e))
         logger.critical('Please check the JSON syntax.')
-        sys.exit(1)
+        raise ConfigurationError(f'{file_name} is malformed: {e}')
+
     except Exception as e:
         logger.critical('Unexpected error loading %s: %s', file_name, str(e))
-        sys.exit(1)
+        raise ConfigurationError(f'Unexpected error loading {file_name}: {e}')
 
     # Validate required keys if specified
     if required_keys:
         missing_keys = [key for key in required_keys if key not in data]
         if missing_keys:
             logger.critical('%s missing required keys: %s', file_name, ', '.join(missing_keys))
-            sys.exit(1)
+            raise ConfigurationError(f'{file_name} missing required keys: {", ".join(missing_keys)}')
 
     return data
 
@@ -112,6 +117,7 @@ def save_json(file_path: str, data: dict, indent: int = 2):
     :param file_path: Path to save the JSON file
     :param data: Dictionary to save as JSON
     :param indent: Indentation level for pretty printing (default: 2)
+    :raises ConfigurationError: If file cannot be written
     """
     # Validate path for security
     validated_path = validate_file_path(file_path)
@@ -120,12 +126,14 @@ def save_json(file_path: str, data: dict, indent: int = 2):
     try:
         with open(validated_path, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=indent)
+
     except IOError as e:
         logger.critical('Failed to write %s: %s', file_name, str(e))
-        sys.exit(1)
+        raise ConfigurationError(f'Failed to write {file_name}: {e}')
+
     except Exception as e:
         logger.critical('Unexpected error saving %s: %s', file_name, str(e))
-        sys.exit(1)
+        raise ConfigurationError(f'Unexpected error saving {file_name}: {e}')
 
 
 def validate_nested_keys(data: dict, key_path: list, file_name: str):
@@ -134,11 +142,14 @@ def validate_nested_keys(data: dict, key_path: list, file_name: str):
     :param data: Dictionary to validate
     :param key_path: List of keys representing the path (e.g., ['playlists', 'release', 'id'])
     :param file_name: Name of file for error messages
+    :raises ConfigurationError: If a key in the path is missing
     """
     current = data
+
     for key in key_path:
         if key not in current:
             path_str = ' -> '.join(key_path)
             logger.critical('%s missing key in path: %s', file_name, path_str)
-            sys.exit(1)
+            raise ConfigurationError(f'{file_name} missing key in path: {path_str}')
+
         current = current[key]

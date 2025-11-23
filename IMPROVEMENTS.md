@@ -160,9 +160,11 @@ channel's upload playlist but with `videoPublishedAt = None`.
 
 ## High Priority Issues
 
-### 5. Excessive sys.exit() Calls
+### 5. ✅ FIXED - Excessive sys.exit() Calls
 
-**Locations:** 10+ occurrences across `youtube.py` and `main.py`
+**Locations:** 10+ occurrences across `youtube.py`, `main.py`, and `file_utils.py`
+
+**Status:** ✅ **FIXED** (2025-11-23)
 
 **Issue:** Using `sys.exit()` terminates the entire program, making functions non-reusable and difficult to test.
 
@@ -172,42 +174,26 @@ channel's upload playlist but with `videoPublishedAt = None`.
 - GitHub workflow commits incomplete data on error
 - Difficult to implement retry logic
 
-**Recommendation:**
+**Fix Applied:**
 
-- Raise custom exceptions instead
-- Let caller decide whether to exit
-- Add top-level exception handler in main.py
+- Created new `src/exceptions.py` module with custom exception hierarchy:
+  - `YouTubeTrackerError` (base exception)
+  - `ConfigurationError` (config file issues)
+  - `FileAccessError` (path validation failures)
+  - `YouTubeServiceError` (API service creation failures)
+  - `CredentialsError` (authentication issues)
+  - `APIError` (API call failures)
+- Replaced all `sys.exit()` calls with appropriate exception raises
+- Added top-level exception handler in `main.py` that catches all custom exceptions
+- Errors are still logged before exit, preserving workflow behavior
+- Code is now testable with `pytest.raises()` instead of `pytest.raises(SystemExit)`
 
-```python
-# Define custom exceptions
-class YouTubeServiceError(Exception):
-    pass
+**Files Modified:**
 
-
-class ConfigurationError(Exception):
-    pass
-
-
-# In functions, raise instead of exit
-def encode_key(json_path: str, parameters):
-    if 'tokens' not in json_path:
-        raise ConfigurationError('FORBIDDEN ACCESS. Invalid file path.')
-    if not os.path.exists(json_path):
-        raise FileNotFoundError(f'{json_path} file does not exist.')
-    # ... rest of function
-
-
-# In main.py, wrap execution
-if __name__ == '__main__':
-    try:
-        existing_code()
-    except (YouTubeServiceError, ConfigurationError) as e:
-        history_main.critical(f'Fatal error: {e}')
-        sys.exit(1)
-    except Exception as e:
-        history_main.critical(f'Unexpected error: {e}')
-        sys.exit(1)
-```
+- `src/exceptions.py` (new file)
+- `src/file_utils.py` - 7 `sys.exit()` calls replaced with `ConfigurationError` and `FileAccessError`
+- `src/youtube.py` - 6 `sys.exit()` calls replaced with `YouTubeServiceError`, `CredentialsError`, `APIError`, `FileAccessError`
+- `src/main.py` - 1 `sys.exit()` call replaced, added `main()` function and top-level exception handler
 
 ### 6. ✅ FIXED - Broad Exception Catching
 
@@ -650,7 +636,7 @@ is_allowed = any(normalized_path.startswith(os.path.normpath(allowed_dir)) for a
 
 **Critical:** ~~4~~ **0** issues requiring immediate attention (✅ All Fixed!)
 **DeepSource:** ~~4~~ **0** code quality issues (✅ All Fixed!)
-**High Priority:** ~~5~~ **1** issues that significantly impact reliability/performance (✅ 4 Fixed!)
+**High Priority:** ~~5~~ **0** issues that significantly impact reliability/performance (✅ All Fixed!)
 **Medium Priority:** 9 issues that improve maintainability
 **Low Priority:** 9 nice-to-have improvements
 **Additional Improvements:** 2 fixes completed, 1 major refactoring completed
@@ -672,7 +658,8 @@ is_allowed = any(normalized_path.startswith(os.path.normpath(allowed_dir)) for a
 13. ✅ Transient API error handling with retry logic - Issue #103 (High Priority #8)
 14. ✅ Videos without release date causing TypeError - Issue #104 (Critical #4a)
 15. ✅ Shorts detection optimization - skip HTTP requests for historical stats (High Priority #7)
-16. ✅ **Centralized path definitions via paths.py module (High Priority #9)** ← **NEW (2025-11-23)**
+16. ✅ Centralized path definitions via paths.py module (High Priority #9)
+17. ✅ **Replaced sys.exit() calls with custom exceptions (High Priority #5)** ← **NEW (2025-11-23)**
 
 **Latest Session Impact (2025-11-23):**
 
@@ -684,6 +671,12 @@ is_allowed = any(normalized_path.startswith(os.path.normpath(allowed_dir)) for a
 - All hardcoded relative paths replaced with dynamic path resolution
 - Script can now run from any directory (not just `src/`)
 - Cross-platform compatibility improved with `os.path.basename()` for file name extraction
+- **Created `src/exceptions.py` with custom exception hierarchy for better error handling**
+- **Replaced 14 `sys.exit()` calls across 3 files with proper exception raises**
+- **Added top-level exception handler in `main.py` for graceful error handling**
+- **Code is now fully testable with pytest (no more `SystemExit` exceptions)**
+- **`copy_last_exe_log()` now only runs on successful execution** - failed runs preserve `last_exe.log` from the last successful run, ensuring no videos are skipped on retry
+- **Unexpected exceptions are not caught** - they fail with full traceback for easier debugging
 
 **Previous Session Impact (2025-11-22):**
 
@@ -708,10 +701,10 @@ is_allowed = any(normalized_path.startswith(os.path.normpath(allowed_dir)) for a
 - Fixed data integrity issues in stats.csv
 - API errors now handled intelligently based on error type
 - Optimized network usage by skipping redundant shorts detection
+- **All `sys.exit()` calls replaced with custom exceptions - code is now testable**
 
 **Recommended Priority Order (Remaining):**
 
-1. Replace sys.exit() with exceptions (High #5) - Code quality, improves testability
-2. Add basic unit tests (Medium #10)
-3. Create configuration file (Medium #11)
-4. Address remaining issues as time permits
+1. Add basic unit tests (Medium #10) - Now possible with exception-based error handling
+2. Create configuration file (Medium #11)
+3. Address remaining issues as time permits

@@ -11,6 +11,8 @@ import file_utils
 import paths
 import youtube
 
+from exceptions import YouTubeTrackerError, ConfigurationError, APIError
+
 """File Information
 @file_name: main.py
 @author: Dylan "dyl-m" Monfret
@@ -144,10 +146,12 @@ def update_repo_secrets(secret_name: str, new_value: str, logger: logging.Logger
             logger.error(f"Failed to update Repository Secret '{secret_name}' : {error}")
         else:
             print(f"Failed to update secret {secret_name}. Error: {error}")
-        sys.exit()
+        raise APIError(f"Failed to update Repository Secret '{secret_name}': {error}")
 
 
-if __name__ == '__main__':
+def main():
+    """Main process execution."""
+    global histo_data  # Need to access the global histo_data DataFrame
     # Create loggers
     history_main = logging.Logger(name='history_main', level=0)
 
@@ -261,3 +265,21 @@ if __name__ == '__main__':
 
     history_main.info('Process ended.')  # End
     copy_last_exe_log()  # Copy what happened during process execution to the associated file.
+
+
+if __name__ == '__main__':
+    # Create a basic logger for top-level exception handling
+    top_level_logger = logging.Logger(name='top_level', level=0)
+    top_level_handler = logging.FileHandler(filename=paths.HISTORY_LOG)
+    top_level_handler.setFormatter(
+        logging.Formatter(fmt='%(asctime)s [%(levelname)s] - %(message)s', datefmt='%Y-%m-%d %H:%M:%S%z')
+    )
+    top_level_logger.addHandler(top_level_handler)
+
+    try:
+        main()
+
+    except YouTubeTrackerError as e:
+        # Handle all custom exceptions (ConfigurationError, APIError, CredentialsError, etc.)
+        top_level_logger.critical(f'Fatal error: {e}')
+        sys.exit(1)

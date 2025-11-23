@@ -14,13 +14,9 @@ import pandas as pd
 import pyyoutube as pyt
 import re
 import requests
-import sys
 import time
 import tqdm
 import tzlocal
-
-import file_utils
-import paths
 
 # noinspection PyPackageRequirements
 from google.auth.exceptions import RefreshError
@@ -28,7 +24,13 @@ from google.auth.exceptions import RefreshError
 from google.auth.transport.requests import Request
 # noinspection PyPackageRequirements
 from google.oauth2.credentials import Credentials
+# noinspection PyPackageRequirements
 from google_auth_oauthlib.flow import InstalledAppFlow
+
+import file_utils
+import paths
+
+from exceptions import CredentialsError, YouTubeServiceError, APIError, FileAccessError
 
 """File Information
 @file_name: youtube.py
@@ -107,11 +109,11 @@ def encode_key(json_path: str, export_dir: str = None, export_name: str = None):
 
     if 'tokens' not in json_path:
         history.critical('FORBIDDEN ACCESS. Invalid file path.')
-        sys.exit()
+        raise FileAccessError('FORBIDDEN ACCESS. Invalid file path.')
 
-    elif not os.path.exists(json_path):
+    if not os.path.exists(json_path):
         history.error('%s file does not exist.', json_path)
-        sys.exit()
+        raise FileAccessError(f'{json_path} file does not exist.')
 
     else:
         with open(json_path, 'r', encoding='utf8') as json_file:
@@ -168,7 +170,7 @@ def create_service_local(log: bool = True):
         if log:
             history.critical('(%s) %s', error, instance_fail_message)
 
-        sys.exit()
+        raise YouTubeServiceError(f'{instance_fail_message}: {error}')
 
 
 def create_service_workflow():
@@ -204,7 +206,7 @@ def create_service_workflow():
 
         else:
             history.critical('ERROR: Unable to refresh credentials. Check Google API OAUTH parameter.')
-            sys.exit()
+            raise CredentialsError('Unable to refresh credentials. Check Google API OAUTH parameter.')
 
     try:
         service = pyt.Client(client_id=creds.client_id, client_secret=creds.client_secret, access_token=creds.token)
@@ -213,7 +215,7 @@ def create_service_workflow():
 
     except (pyt.error.PyYouTubeException, ValueError, AttributeError) as error:
         history.critical('(%s) %s', error, instance_fail_message)
-        sys.exit()
+        raise YouTubeServiceError(f'{instance_fail_message}: {error}')
 
 
 def _parse_playlist_item(item, date_format: str):
@@ -252,7 +254,7 @@ def _handle_playlist_error(error: pyt.error.PyYouTubeException, playlist_id: str
         return True
 
     history.error('[%s] Unknown error: %s', playlist_id, error.message)
-    sys.exit()
+    raise APIError(f'[{playlist_id}] Unknown error: {error.message}')
 
 
 def _filter_items_by_date_range(p_items: list, latest_d: dt.datetime,
@@ -365,7 +367,7 @@ def check_if_live(service: pyt.Client, videos_list: list):
 
         except googleapiclient.errors.HttpError as http_error:
             history.error(http_error.error_details)
-            sys.exit()
+            raise APIError(f'HTTP error while checking live status: {http_error.error_details}')
 
     return items
 
@@ -405,7 +407,7 @@ def get_stats(service: pyt.Client, videos_list: list, check_shorts: bool = True)
 
         except googleapiclient.errors.HttpError as http_error:
             history.error(http_error.error_details)
-            sys.exit()
+            raise APIError(f'HTTP error while getting stats: {http_error.error_details}')
 
     validated = [video['video_id'] for video in items]
     missing = [vid_id for vid_id in videos_list if vid_id not in validated]
@@ -554,8 +556,8 @@ def sort_db(service: pyt.Client):
                 information += [{'title': an_item.snippet.title, 'id': an_item.id} for an_item in request]
 
             except googleapiclient.errors.HttpError as http_error:
-                print(http_error.error_details)
-                sys.exit()
+                history.error(http_error.error_details)
+                raise APIError(f'HTTP error while sorting database: {http_error.error_details}')
 
         # Sort channels' name by alphabetical order
         information = sorted(information, key=lambda dic: dic['title'].lower())
