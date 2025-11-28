@@ -132,10 +132,9 @@ dmypy.json
 .idea/
 
 # Private
-tokens/
-cmd/
+_archive/
+_tokens/
 gha-creds-*.json
-archive/
 
 # Claude Code & Claude personal Config
 .claude/

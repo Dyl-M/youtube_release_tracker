@@ -106,7 +106,7 @@ def encode_key(json_path: str, export_dir: str = None, export_name: str = None):
     if export_name is None:
         export_name = f'{file_name}_b64.txt'
 
-    if 'tokens' not in json_path:
+    if '_tokens' not in json_path:
         history.critical('FORBIDDEN ACCESS. Invalid file path.')
         raise FileAccessError('FORBIDDEN ACCESS. Invalid file path.')
 

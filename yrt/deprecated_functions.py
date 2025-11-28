@@ -222,9 +222,9 @@ def update_playlist(service: pyt.Client, playlist_id: str, videos_to_add: list, 
 
             if not to_del.empty:  # Save deleted videos as CSV
                 to_del_filter = to_del.loc[to_del.channel_id.notna()]
-                mix_history = pd.read_csv('../data/mix_history.csv', encoding='utf8', low_memory=False)
+                mix_history = pd.read_csv('../_data/mix_history.csv', encoding='utf8', low_memory=False)
                 mix_history = pd.concat([mix_history, to_del_filter], ignore_index=True)
-                mix_history.to_csv('../data/mix_history.csv', encoding='utf8', index=False)
+                mix_history.to_csv('../_data/mix_history.csv', encoding='utf8', index=False)
 
     to_add = pd.DataFrame(videos_to_add)
 
