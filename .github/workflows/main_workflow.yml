@@ -91,7 +91,7 @@ jobs:
             -   id: main
                 name: Main process execution
                 run: |
-                    cd src
+                    cd yrt
                     python main.py 'action'
                     cd ../
 
