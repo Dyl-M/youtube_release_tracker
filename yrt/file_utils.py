@@ -4,9 +4,8 @@ import json
 import logging
 import os
 
-import paths
-
-from exceptions import ConfigurationError, FileAccessError
+from . import paths
+from .exceptions import ConfigurationError, FileAccessError
 
 """File Information
 @file_name: file_utils.py
@@ -140,16 +139,25 @@ def validate_nested_keys(data: dict, key_path: list, file_name: str):
     """Validate nested dictionary keys exist.
 
     :param data: Dictionary to validate
-    :param key_path: List of keys representing the path (e.g., ['playlists', 'release', 'id'])
+    :param key_path: List of keys to validate. Each key can use dot notation for nested paths (e.g., ['key1', 'key2']
+                     validates two top-level keys, ['level1.level2.key'] validates a nested path)
     :param file_name: Name of file for error messages
     :raises ConfigurationError: If a key in the path is missing
     """
-    current = data
-
     for key in key_path:
-        if key not in current:
-            path_str = ' -> '.join(key_path)
-            logger.critical('%s missing key in path: %s', file_name, path_str)
-            raise ConfigurationError(f'{file_name} missing key in path: {path_str}')
+        # Split on dot to support nested paths
+        nested_keys = key.split('.')
+        current = data
 
-        current = current[key]
+        for nested_key in nested_keys:
+            if not isinstance(current, dict):
+                path_str = '.'.join(nested_keys)
+                logger.critical('%s: path %s is not navigable (non-dict value encountered)', file_name, path_str)
+                raise ConfigurationError(f'{file_name} missing key in path: {path_str}')
+
+            if nested_key not in current:
+                path_str = '.'.join(nested_keys)
+                logger.critical('%s missing key in path: %s', file_name, path_str)
+                raise ConfigurationError(f'{file_name} missing key in path: {path_str}')
+
+            current = current[nested_key]

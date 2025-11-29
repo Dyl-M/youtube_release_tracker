@@ -4995,3 +4995,82 @@
 2025-11-28 08:02:23+0000 [INFO] - No addition necessary for Release Radar
 2025-11-28 08:02:25+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
 2025-11-28 08:02:25+0000 [INFO] - Process ended.
+2025-11-29 00:20:14+0100 [CRITICAL] - Access denied: C:\Users\dylmp\AppData\Local\Temp\pytest-of-dylmp\pytest-0\test_load_valid_json0\valid.json is outside allowed directories
+2025-11-29 00:20:14+0100 [CRITICAL] - Allowed directories: D:\dylmp\Documents\[!] PROJETS PERSONNELS\youtube_release_tracker\_data, D:\dylmp\Documents\[!] PROJETS PERSONNELS\youtube_release_tracker\_log, D:\dylmp\Documents\[!] PROJETS PERSONNELS\youtube_release_tracker\_tokens
+2025-11-29 00:20:14+0100 [CRITICAL] - Access denied: C:\Users\dylmp\AppData\Local\Temp\pytest-of-dylmp\pytest-0\test_load_json_with_required_k0\with_keys.json is outside allowed directories
+2025-11-29 00:20:14+0100 [CRITICAL] - Allowed directories: D:\dylmp\Documents\[!] PROJETS PERSONNELS\youtube_release_tracker\_data, D:\dylmp\Documents\[!] PROJETS PERSONNELS\youtube_release_tracker\_log, D:\dylmp\Documents\[!] PROJETS PERSONNELS\youtube_release_tracker\_tokens
+2025-11-29 00:20:14+0100 [CRITICAL] - Access denied: C:\Users\dylmp\AppData\Local\Temp\pytest-of-dylmp\pytest-0\test_load_json_missing_require0\missing_key.json is outside allowed directories
+2025-11-29 00:20:14+0100 [CRITICAL] - Allowed directories: D:\dylmp\Documents\[!] PROJETS PERSONNELS\youtube_release_tracker\_data, D:\dylmp\Documents\[!] PROJETS PERSONNELS\youtube_release_tracker\_log, D:\dylmp\Documents\[!] PROJETS PERSONNELS\youtube_release_tracker\_tokens
+2025-11-29 00:20:14+0100 [CRITICAL] - Access denied: C:\Users\dylmp\AppData\Local\Temp\pytest-of-dylmp\pytest-0\test_load_json_file_not_found0\nonexistent.json is outside allowed directories
+2025-11-29 00:20:14+0100 [CRITICAL] - Allowed directories: D:\dylmp\Documents\[!] PROJETS PERSONNELS\youtube_release_tracker\_data, D:\dylmp\Documents\[!] PROJETS PERSONNELS\youtube_release_tracker\_log, D:\dylmp\Documents\[!] PROJETS PERSONNELS\youtube_release_tracker\_tokens
+2025-11-29 00:20:14+0100 [CRITICAL] - Access denied: C:\Users\dylmp\AppData\Local\Temp\pytest-of-dylmp\pytest-0\test_load_json_invalid_json0\invalid.json is outside allowed directories
+2025-11-29 00:20:14+0100 [CRITICAL] - Allowed directories: D:\dylmp\Documents\[!] PROJETS PERSONNELS\youtube_release_tracker\_data, D:\dylmp\Documents\[!] PROJETS PERSONNELS\youtube_release_tracker\_log, D:\dylmp\Documents\[!] PROJETS PERSONNELS\youtube_release_tracker\_tokens
+2025-11-29 00:20:14+0100 [CRITICAL] - Access denied: C:\Users\dylmp\AppData\Local\Temp\pytest-of-dylmp\pytest-0\test_save_valid_json0\output.json is outside allowed directories
+2025-11-29 00:20:14+0100 [CRITICAL] - Allowed directories: D:\dylmp\Documents\[!] PROJETS PERSONNELS\youtube_release_tracker\_data, D:\dylmp\Documents\[!] PROJETS PERSONNELS\youtube_release_tracker\_log, D:\dylmp\Documents\[!] PROJETS PERSONNELS\youtube_release_tracker\_tokens
+2025-11-29 00:20:14+0100 [CRITICAL] - Access denied: C:\Users\dylmp\AppData\Local\Temp\pytest-of-dylmp\pytest-0\test_save_json_formatting0\formatted.json is outside allowed directories
+2025-11-29 00:20:14+0100 [CRITICAL] - Allowed directories: D:\dylmp\Documents\[!] PROJETS PERSONNELS\youtube_release_tracker\_data, D:\dylmp\Documents\[!] PROJETS PERSONNELS\youtube_release_tracker\_log, D:\dylmp\Documents\[!] PROJETS PERSONNELS\youtube_release_tracker\_tokens
+2025-11-29 00:20:14+0100 [CRITICAL] - Access denied: C:\Users\dylmp\AppData\Local\Temp\pytest-of-dylmp\pytest-0\test_save_json_overwrites_exis0\overwrite.json is outside allowed directories
+2025-11-29 00:20:14+0100 [CRITICAL] - Allowed directories: D:\dylmp\Documents\[!] PROJETS PERSONNELS\youtube_release_tracker\_data, D:\dylmp\Documents\[!] PROJETS PERSONNELS\youtube_release_tracker\_log, D:\dylmp\Documents\[!] PROJETS PERSONNELS\youtube_release_tracker\_tokens
+2025-11-29 00:20:14+0100 [CRITICAL] - test.json missing key in path: key1 -> key2
+2025-11-29 00:20:14+0100 [CRITICAL] - test.json missing key in path: level1.level2.key
+2025-11-29 00:20:14+0100 [CRITICAL] - test.json missing key in path: key1 -> missing_key
+2025-11-29 00:20:14+0100 [CRITICAL] - test.json missing key in path: level1.level2.missing
+2025-11-29 00:34:52+0100 [CRITICAL] - missing_key.json missing required keys: key2
+2025-11-29 00:34:52+0100 [CRITICAL] - nonexistent.json not found. Expected location: C:\Users\dylmp\AppData\Local\Temp\pytest-of-dylmp\pytest-1\test_load_json_file_not_found0\nonexistent.json
+2025-11-29 00:34:52+0100 [CRITICAL] - Please ensure all required files exist.
+2025-11-29 00:34:52+0100 [CRITICAL] - invalid.json is malformed: Expecting property name enclosed in double quotes: line 1 column 3 (char 2)
+2025-11-29 00:34:52+0100 [CRITICAL] - Please check the JSON syntax.
+2025-11-29 00:34:52+0100 [CRITICAL] - test.json missing key in path: key1 -> key2
+2025-11-29 00:34:52+0100 [CRITICAL] - test.json missing key in path: level1.level2.key
+2025-11-29 00:34:53+0100 [CRITICAL] - test.json missing key in path: key1 -> missing_key
+2025-11-29 00:34:53+0100 [CRITICAL] - test.json missing key in path: level1.level2.missing
+2025-11-29 00:35:23+0100 [CRITICAL] - missing_key.json missing required keys: key2
+2025-11-29 00:35:23+0100 [CRITICAL] - nonexistent.json not found. Expected location: C:\Users\dylmp\AppData\Local\Temp\pytest-of-dylmp\pytest-2\test_load_json_file_not_found0\nonexistent.json
+2025-11-29 00:35:23+0100 [CRITICAL] - Please ensure all required files exist.
+2025-11-29 00:35:23+0100 [CRITICAL] - invalid.json is malformed: Expecting property name enclosed in double quotes: line 1 column 3 (char 2)
+2025-11-29 00:35:23+0100 [CRITICAL] - Please check the JSON syntax.
+2025-11-29 00:35:23+0100 [CRITICAL] - test.json missing key in path: key1 -> key2
+2025-11-29 00:35:23+0100 [CRITICAL] - test.json missing key in path: level1.level2.key
+2025-11-29 00:35:23+0100 [CRITICAL] - test.json missing key in path: key1 -> missing_key
+2025-11-29 00:35:23+0100 [CRITICAL] - test.json missing key in path: level1.level2.missing
+2025-11-29 00:36:32+0100 [CRITICAL] - missing_key.json missing required keys: key2
+2025-11-29 00:36:32+0100 [CRITICAL] - nonexistent.json not found. Expected location: C:\Users\dylmp\AppData\Local\Temp\pytest-of-dylmp\pytest-3\test_load_json_file_not_found0\nonexistent.json
+2025-11-29 00:36:32+0100 [CRITICAL] - Please ensure all required files exist.
+2025-11-29 00:36:32+0100 [CRITICAL] - invalid.json is malformed: Expecting property name enclosed in double quotes: line 1 column 3 (char 2)
+2025-11-29 00:36:32+0100 [CRITICAL] - Please check the JSON syntax.
+2025-11-29 00:36:32+0100 [CRITICAL] - test.json missing key in path: key1 -> key2
+2025-11-29 00:36:32+0100 [CRITICAL] - test.json missing key in path: level1.level2.key
+2025-11-29 00:36:32+0100 [CRITICAL] - test.json missing key in path: key1 -> missing_key
+2025-11-29 00:36:32+0100 [CRITICAL] - test.json missing key in path: level1.level2.missing
+2025-11-29 00:38:41+0100 [CRITICAL] - missing_key.json missing required keys: key2
+2025-11-29 00:38:41+0100 [CRITICAL] - nonexistent.json not found. Expected location: C:\Users\dylmp\AppData\Local\Temp\pytest-of-dylmp\pytest-4\test_load_json_file_not_found0\nonexistent.json
+2025-11-29 00:38:41+0100 [CRITICAL] - Please ensure all required files exist.
+2025-11-29 00:38:41+0100 [CRITICAL] - invalid.json is malformed: Expecting property name enclosed in double quotes: line 1 column 3 (char 2)
+2025-11-29 00:38:41+0100 [CRITICAL] - Please check the JSON syntax.
+2025-11-29 00:38:41+0100 [CRITICAL] - test.json missing key in path: key1 -> key2
+2025-11-29 00:38:41+0100 [CRITICAL] - test.json missing key in path: level1.level2.key
+2025-11-29 00:38:41+0100 [CRITICAL] - test.json missing key in path: key1 -> missing_key
+2025-11-29 00:38:41+0100 [CRITICAL] - test.json missing key in path: level1.level2.missing
+2025-11-29 10:55:36+0100 [CRITICAL] - missing_key.json missing required keys: key2
+2025-11-29 10:55:36+0100 [CRITICAL] - nonexistent.json not found. Expected location: C:\Users\dylmp\AppData\Local\Temp\pytest-of-dylmp\pytest-5\test_load_json_file_not_found0\nonexistent.json
+2025-11-29 10:55:36+0100 [CRITICAL] - Please ensure all required files exist.
+2025-11-29 10:55:36+0100 [CRITICAL] - invalid.json is malformed: Expecting property name enclosed in double quotes: line 1 column 3 (char 2)
+2025-11-29 10:55:36+0100 [CRITICAL] - Please check the JSON syntax.
+2025-11-29 10:55:36+0100 [CRITICAL] - test.json missing key in path: missing_key
+2025-11-29 10:55:36+0100 [CRITICAL] - test.json missing key in path: level1.level2.missing
+2025-11-29 10:56:53+0100 [CRITICAL] - missing_key.json missing required keys: key2
+2025-11-29 10:56:53+0100 [CRITICAL] - nonexistent.json not found. Expected location: C:\Users\dylmp\AppData\Local\Temp\pytest-of-dylmp\pytest-6\test_load_json_file_not_found0\nonexistent.json
+2025-11-29 10:56:53+0100 [CRITICAL] - Please ensure all required files exist.
+2025-11-29 10:56:53+0100 [CRITICAL] - invalid.json is malformed: Expecting property name enclosed in double quotes: line 1 column 3 (char 2)
+2025-11-29 10:56:53+0100 [CRITICAL] - Please check the JSON syntax.
+2025-11-29 10:56:53+0100 [CRITICAL] - test.json missing key in path: missing_key
+2025-11-29 10:56:53+0100 [CRITICAL] - test.json missing key in path: level1.level2.missing
+2025-11-29 10:56:53+0100 [WARNING] - Failed to check shorts status for video dQw4w9WgXcQ: Network error
+2025-11-29 10:57:17+0100 [CRITICAL] - missing_key.json missing required keys: key2
+2025-11-29 10:57:17+0100 [CRITICAL] - nonexistent.json not found. Expected location: C:\Users\dylmp\AppData\Local\Temp\pytest-of-dylmp\pytest-7\test_load_json_file_not_found0\nonexistent.json
+2025-11-29 10:57:17+0100 [CRITICAL] - Please ensure all required files exist.
+2025-11-29 10:57:17+0100 [CRITICAL] - invalid.json is malformed: Expecting property name enclosed in double quotes: line 1 column 3 (char 2)
+2025-11-29 10:57:17+0100 [CRITICAL] - Please check the JSON syntax.
+2025-11-29 10:57:17+0100 [CRITICAL] - test.json missing key in path: missing_key
+2025-11-29 10:57:17+0100 [CRITICAL] - test.json missing key in path: level1.level2.missing
+2025-11-29 10:57:18+0100 [WARNING] - Failed to check shorts status for video dQw4w9WgXcQ: Network error

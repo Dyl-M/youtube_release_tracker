@@ -7,11 +7,10 @@ import pandas as pd
 import re
 import sys
 
-import file_utils
-import paths
-import youtube
-
-from exceptions import YouTubeTrackerError, GitHubError
+from . import file_utils
+from . import paths
+from . import youtube
+from .exceptions import YouTubeTrackerError, GitHubError
 
 """File Information
 @file_name: main.py
