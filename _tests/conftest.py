@@ -138,6 +138,12 @@ def temp_json_file(tmp_path):
     """Create a temporary JSON file for testing."""
 
     def _create_temp_json(data, filename='test.json'):
+        """Create a JSON file in the temp directory.
+
+        :param data: Dictionary to write as JSON
+        :param filename: Name of the file to create
+        :return: Absolute path to the created file
+        """
         file_path = tmp_path / filename
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2)

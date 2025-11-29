@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-import datetime as dt
 
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 
 from yrt import youtube
 
@@ -105,25 +104,22 @@ class TestErrorConstants:
 class TestDurationParsing:
     """Test ISO 8601 duration parsing."""
 
+    @pytest.mark.skip("Not yet implemented")
     def test_parse_short_duration(self):
         """Test parsing short video duration (< 1 minute)."""
         # PT30S = 30 seconds
-        duration_str = 'PT30S'
         # This test assumes a helper function exists or we test via get_stats
         # If no helper exists, this documents expected behavior
-        pass
 
+    @pytest.mark.skip("Not yet implemented")
     def test_parse_medium_duration(self):
         """Test parsing medium video duration (minutes)."""
         # PT3M30S = 3 minutes 30 seconds
-        duration_str = 'PT3M30S'
-        pass
 
+    @pytest.mark.skip("Not yet implemented")
     def test_parse_long_duration(self):
         """Test parsing long video duration (hours)."""
         # PT1H30M = 1 hour 30 minutes
-        duration_str = 'PT1H30M'
-        pass
 
 
 @pytest.mark.unit
