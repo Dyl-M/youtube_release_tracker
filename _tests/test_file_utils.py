@@ -6,7 +6,7 @@ import pytest
 from pathlib import Path
 
 from yrt import file_utils
-from yrt.exceptions import ConfigurationError, FileAccessError
+from yrt.exceptions import ConfigurationError
 
 """Tests for file utility functions."""
 
