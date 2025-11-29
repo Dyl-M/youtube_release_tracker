@@ -15,7 +15,8 @@ from yrt.exceptions import ConfigurationError, FileAccessError
 class TestLoadJson:
     """Test load_json() function."""
 
-    def test_load_valid_json(self, temp_json_file):
+    @staticmethod
+    def test_load_valid_json(temp_json_file):
         """Test loading a valid JSON file."""
         data = {'test': 'value', 'number': 42}
         file_path = temp_json_file(data, 'valid.json')
@@ -23,7 +24,8 @@ class TestLoadJson:
         result = file_utils.load_json(file_path)
         assert result == data
 
-    def test_load_json_with_required_keys(self, temp_json_file):
+    @staticmethod
+    def test_load_json_with_required_keys(temp_json_file):
         """Test loading JSON with required keys validation."""
         data = {'key1': 'value1', 'key2': 'value2'}
         file_path = temp_json_file(data, 'with_keys.json')
@@ -31,7 +33,8 @@ class TestLoadJson:
         result = file_utils.load_json(file_path, required_keys=['key1', 'key2'])
         assert result == data
 
-    def test_load_json_missing_required_key(self, temp_json_file):
+    @staticmethod
+    def test_load_json_missing_required_key(temp_json_file):
         """Test loading JSON raises error when required key is missing."""
         data = {'key1': 'value1'}
         file_path = temp_json_file(data, 'missing_key.json')
@@ -42,7 +45,8 @@ class TestLoadJson:
         assert 'missing_key.json' in str(exc_info.value).lower()
         assert 'key2' in str(exc_info.value)
 
-    def test_load_json_file_not_found(self, tmp_path):
+    @staticmethod
+    def test_load_json_file_not_found(tmp_path):
         """Test loading non-existent file raises ConfigurationError."""
         file_path = str(tmp_path / 'nonexistent.json')
 
@@ -51,7 +55,8 @@ class TestLoadJson:
 
         assert 'not found' in str(exc_info.value).lower()
 
-    def test_load_json_invalid_json(self, tmp_path):
+    @staticmethod
+    def test_load_json_invalid_json(tmp_path):
         """Test loading invalid JSON raises ConfigurationError."""
         file_path = tmp_path / 'invalid.json'
         with open(file_path, 'w') as f:
@@ -67,7 +72,8 @@ class TestLoadJson:
 class TestSaveJson:
     """Test save_json() function."""
 
-    def test_save_valid_json(self, tmp_path):
+    @staticmethod
+    def test_save_valid_json(tmp_path):
         """Test saving data to JSON file."""
         data = {'test': 'value', 'number': 42}
         file_path = str(tmp_path / 'output.json')
@@ -80,7 +86,8 @@ class TestSaveJson:
             loaded = json.load(f)
         assert loaded == data
 
-    def test_save_json_formatting(self, tmp_path):
+    @staticmethod
+    def test_save_json_formatting(tmp_path):
         """Test JSON is saved with correct formatting (indent=2)."""
         data = {'nested': {'key': 'value'}}
         file_path = str(tmp_path / 'formatted.json')
@@ -94,7 +101,8 @@ class TestSaveJson:
         assert '  ' in content  # Should have 2-space indentation
         assert '{\n  "nested"' in content
 
-    def test_save_json_overwrites_existing(self, tmp_path):
+    @staticmethod
+    def test_save_json_overwrites_existing(tmp_path):
         """Test saving overwrites existing file."""
         file_path = str(tmp_path / 'overwrite.json')
 
@@ -115,7 +123,8 @@ class TestSaveJson:
 class TestValidateNestedKeys:
     """Test validate_nested_keys() function."""
 
-    def test_validate_flat_keys(self):
+    @staticmethod
+    def test_validate_flat_keys():
         """Test validation of flat (non-nested) keys."""
         data = {'key1': 'value1', 'key2': 'value2'}
         required = ['key1', 'key2']
@@ -123,7 +132,8 @@ class TestValidateNestedKeys:
         # Should not raise any exception
         file_utils.validate_nested_keys(data, required, 'test.json')
 
-    def test_validate_nested_keys(self):
+    @staticmethod
+    def test_validate_nested_keys():
         """Test validation of nested keys using dot notation."""
         data = {
             'level1': {
@@ -137,7 +147,8 @@ class TestValidateNestedKeys:
         # Should not raise any exception
         file_utils.validate_nested_keys(data, required, 'test.json')
 
-    def test_validate_missing_key_raises_error(self):
+    @staticmethod
+    def test_validate_missing_key_raises_error():
         """Test missing key raises ConfigurationError."""
         data = {'key1': 'value1'}
         required = ['key1', 'missing_key']
@@ -147,7 +158,8 @@ class TestValidateNestedKeys:
 
         assert 'missing_key' in str(exc_info.value)
 
-    def test_validate_missing_nested_key(self):
+    @staticmethod
+    def test_validate_missing_nested_key():
         """Test missing nested key raises ConfigurationError."""
         data = {'level1': {'level2': {}}}
         required = ['level1.level2.missing']
@@ -162,7 +174,8 @@ class TestValidateNestedKeys:
 class TestPathValidation:
     """Test path validation in file_utils."""
 
-    def test_path_validation_implementation(self):
+    @staticmethod
+    def test_path_validation_implementation():
         """Test that path validation is implemented."""
         # This test ensures the module has path validation logic
         # The actual validation happens in individual functions

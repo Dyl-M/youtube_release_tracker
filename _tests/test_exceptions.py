@@ -18,43 +18,50 @@ from yrt.exceptions import (
 class TestExceptionHierarchy:
     """Test custom exception class hierarchy."""
 
-    def test_base_exception(self):
+    @staticmethod
+    def test_base_exception():
         """Test YouTubeTrackerError base exception."""
         error = YouTubeTrackerError("Base error message")
         assert str(error) == "Base error message"
         assert isinstance(error, Exception)
 
-    def test_configuration_error(self):
+    @staticmethod
+    def test_configuration_error():
         """Test ConfigurationError inherits from base."""
         error = ConfigurationError("Config error")
         assert isinstance(error, YouTubeTrackerError)
         assert str(error) == "Config error"
 
-    def test_file_access_error(self):
+    @staticmethod
+    def test_file_access_error():
         """Test FileAccessError inherits from base."""
         error = FileAccessError("File access denied")
         assert isinstance(error, YouTubeTrackerError)
         assert str(error) == "File access denied"
 
-    def test_youtube_service_error(self):
+    @staticmethod
+    def test_youtube_service_error():
         """Test YouTubeServiceError inherits from base."""
         error = YouTubeServiceError("Service creation failed")
         assert isinstance(error, YouTubeTrackerError)
         assert str(error) == "Service creation failed"
 
-    def test_credentials_error(self):
+    @staticmethod
+    def test_credentials_error():
         """Test CredentialsError inherits from base."""
         error = CredentialsError("Invalid credentials")
         assert isinstance(error, YouTubeTrackerError)
         assert str(error) == "Invalid credentials"
 
-    def test_api_error(self):
+    @staticmethod
+    def test_api_error():
         """Test APIError inherits from base."""
         error = APIError("API call failed")
         assert isinstance(error, YouTubeTrackerError)
         assert str(error) == "API call failed"
 
-    def test_exception_catching(self):
+    @staticmethod
+    def test_exception_catching():
         """Test that all custom exceptions can be caught by base class."""
         exceptions = [
             ConfigurationError("test"),

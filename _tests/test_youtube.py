@@ -68,7 +68,8 @@ class TestIsShorts:
 class TestErrorConstants:
     """Test error categorization constants."""
 
-    def test_transient_errors_defined(self):
+    @staticmethod
+    def test_transient_errors_defined():
         """Test TRANSIENT_ERRORS constant is defined."""
         assert hasattr(youtube, 'TRANSIENT_ERRORS')
         assert isinstance(youtube.TRANSIENT_ERRORS, list)
@@ -76,7 +77,8 @@ class TestErrorConstants:
         assert 'backendError' in youtube.TRANSIENT_ERRORS
         assert 'internalError' in youtube.TRANSIENT_ERRORS
 
-    def test_permanent_errors_defined(self):
+    @staticmethod
+    def test_permanent_errors_defined():
         """Test PERMANENT_ERRORS constant is defined."""
         assert hasattr(youtube, 'PERMANENT_ERRORS')
         assert isinstance(youtube.PERMANENT_ERRORS, list)
@@ -84,13 +86,15 @@ class TestErrorConstants:
         assert 'forbidden' in youtube.PERMANENT_ERRORS
         assert 'duplicate' in youtube.PERMANENT_ERRORS
 
-    def test_quota_errors_defined(self):
+    @staticmethod
+    def test_quota_errors_defined():
         """Test QUOTA_ERRORS constant is defined."""
         assert hasattr(youtube, 'QUOTA_ERRORS')
         assert isinstance(youtube.QUOTA_ERRORS, list)
         assert 'quotaExceeded' in youtube.QUOTA_ERRORS
 
-    def test_retry_constants_defined(self):
+    @staticmethod
+    def test_retry_constants_defined():
         """Test retry configuration constants are defined."""
         assert hasattr(youtube, 'MAX_RETRIES')
         assert hasattr(youtube, 'BASE_DELAY')
@@ -127,13 +131,15 @@ class TestDurationParsing:
 class TestGetStats:
     """Test get_stats() function."""
 
-    def test_get_stats_has_check_shorts_parameter(self):
+    @staticmethod
+    def test_get_stats_has_check_shorts_parameter():
         """Test get_stats() accepts check_shorts parameter."""
         import inspect
         sig = inspect.signature(youtube.get_stats)
         assert 'check_shorts' in sig.parameters
 
-    def test_get_stats_check_shorts_default_true(self):
+    @staticmethod
+    def test_get_stats_check_shorts_default_true():
         """Test check_shorts defaults to True for new videos."""
         import inspect
         sig = inspect.signature(youtube.get_stats)
@@ -145,7 +151,8 @@ class TestGetStats:
 class TestDateFormatting:
     """Test date and time formatting constants."""
 
-    def test_iso_date_format_constant(self):
+    @staticmethod
+    def test_iso_date_format_constant():
         """Test ISO_DATE_FORMAT constant is defined."""
         assert hasattr(youtube, 'ISO_DATE_FORMAT')
         assert isinstance(youtube.ISO_DATE_FORMAT, str)
@@ -159,12 +166,14 @@ class TestDateFormatting:
 class TestServiceCreation:
     """Test YouTube API service creation functions."""
 
-    def test_create_service_local_function_exists(self):
+    @staticmethod
+    def test_create_service_local_function_exists():
         """Test create_service_local() function exists."""
         assert hasattr(youtube, 'create_service_local')
         assert callable(youtube.create_service_local)
 
-    def test_create_service_workflow_function_exists(self):
+    @staticmethod
+    def test_create_service_workflow_function_exists():
         """Test create_service_workflow() function exists."""
         assert hasattr(youtube, 'create_service_workflow')
         assert callable(youtube.create_service_workflow)
@@ -174,7 +183,8 @@ class TestServiceCreation:
 class TestHelperFunctions:
     """Test helper and utility functions."""
 
-    def test_encode_key_function_exists(self):
+    @staticmethod
+    def test_encode_key_function_exists():
         """Test encode_key() function exists for base64 encoding."""
         assert hasattr(youtube, 'encode_key')
         assert callable(youtube.encode_key)
