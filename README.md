@@ -75,7 +75,6 @@ Repository structure
 │   ├── __init__.py
 │   ├── _sandbox.py
 │   ├── analytics.py
-│   ├── deprecated_functions.py
 │   ├── exceptions.py
 │   ├── file_utils.py
 │   ├── main.py
