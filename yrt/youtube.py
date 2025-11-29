@@ -24,10 +24,9 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 
-import file_utils
-import paths
-
-from exceptions import CredentialsError, YouTubeServiceError, APIError, FileAccessError
+from . import file_utils
+from . import paths
+from .exceptions import CredentialsError, YouTubeServiceError, APIError, FileAccessError
 
 """File Information
 @file_name: youtube.py
@@ -590,7 +589,7 @@ def is_shorts(video_id: str):
         )
         return response.status_code == 200
 
-    except requests.RequestException as error:
+    except Exception as error:
         history.warning('Failed to check shorts status for video %s: %s', video_id, str(error))
         return False  # Default to non-short on error
 

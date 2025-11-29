@@ -58,7 +58,21 @@ Repository structure
 ├── _notebooks
 │   └── channels_reporting.ipynb
 │
+├── _tests
+│   ├── fixtures
+│   │   ├── sample_playlist_response.json
+│   │   └── sample_video_stats.json
+│   ├── __init__.py
+│   ├── conftest.py
+│   ├── README.md
+│   ├── test_exceptions.py
+│   ├── test_file_utils.py
+│   ├── test_main.py
+│   ├── test_paths.py
+│   └── test_youtube.py
+│
 ├── yrt
+│   ├── __init__.py
 │   ├── _sandbox.py
 │   ├── analytics.py
 │   ├── deprecated_functions.py
@@ -71,6 +85,7 @@ Repository structure
 ├── .deepsource.toml
 ├── .gitignore
 ├── LICENSE
+├── pytest.ini
 ├── README.md
 └── requirements.txt
 ```
