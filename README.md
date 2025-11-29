@@ -9,7 +9,7 @@
 [![Twitch Status](https://img.shields.io/twitch/status/dyl_m_?logo=twitch&label=dyl_m_)](https://www.twitch.tv/dyl_m_)
 [![Reddit User Karma](https://img.shields.io/reddit/user-karma/link/dyl_m?label=u%2Fdyl_m&style=social)](https://www.reddit.com/user/Dyl_M)
 
-![Repository illustration](media/repo_illustration.png?raw=true "Repository illustration")
+![Repository illustration](_media/repo_illustration.png?raw=true "Repository illustration")
 
 A YouTube project able to track the latest video releases among my subscriptions. The videos will be added to 3 
 specific playlist
@@ -38,30 +38,43 @@ Repository structure
 │   │   └── main_workflow.yml
 │   └── dependabot.yml
 │
-├── _docs
-│   └── notes.txt
-│
-├── data
+├── _data
 │   ├── add-on.json
 │   ├── api_failure.json
 │   ├── playlists.json
 │   ├── pocket_tube.json
 │   └── stats.csv
 │
-├── log
+├── _docs
+│   └── notes.txt
+│
+├── _log
 │   ├── history.log
 │   └── last_exe.log
 │
-├── media
+├── _media
 │   └── repo_illustration.png
 │
-├── notebooks
+├── _notebooks
 │   └── channels_reporting.ipynb
 │
-├── src
+├── _tests
+│   ├── fixtures
+│   │   ├── sample_playlist_response.json
+│   │   └── sample_video_stats.json
+│   ├── __init__.py
+│   ├── conftest.py
+│   ├── README.md
+│   ├── test_exceptions.py
+│   ├── test_file_utils.py
+│   ├── test_main.py
+│   ├── test_paths.py
+│   └── test_youtube.py
+│
+├── yrt
+│   ├── __init__.py
 │   ├── _sandbox.py
 │   ├── analytics.py
-│   ├── deprecated_functions.py
 │   ├── exceptions.py
 │   ├── file_utils.py
 │   ├── main.py
@@ -71,6 +84,7 @@ Repository structure
 ├── .deepsource.toml
 ├── .gitignore
 ├── LICENSE
+├── pytest.ini
 ├── README.md
 └── requirements.txt
 ```

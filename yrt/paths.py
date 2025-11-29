@@ -9,13 +9,13 @@ Centralized path definitions for the project. This module resolves paths dynamic
 allowing the project to run from any directory.
 """
 
-# Base directory (project root, one level up from src/)
+# Base directory (project root, one level up from yrt/)
 BASE_DIR = Path(__file__).parent.parent.resolve()
 
 # Directory paths
-DATA_DIR = BASE_DIR / 'data'
-LOG_DIR = BASE_DIR / 'log'
-TOKENS_DIR = BASE_DIR / 'tokens'
+DATA_DIR = BASE_DIR / '_data'
+LOG_DIR = BASE_DIR / '_log'
+TOKENS_DIR = BASE_DIR / '_tokens'
 
 # Data files
 POCKET_TUBE_JSON = DATA_DIR / 'pocket_tube.json'

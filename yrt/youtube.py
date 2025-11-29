@@ -12,6 +12,7 @@ import math
 import os
 import pandas as pd
 import pyyoutube as pyt
+import random
 import re
 import requests
 import time
@@ -23,10 +24,9 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 
-import file_utils
-import paths
-
-from exceptions import CredentialsError, YouTubeServiceError, APIError, FileAccessError
+from . import file_utils
+from . import paths
+from .exceptions import CredentialsError, YouTubeServiceError, APIError, FileAccessError
 
 """File Information
 @file_name: youtube.py
@@ -45,6 +45,8 @@ TRANSIENT_ERRORS = ['serviceUnavailable', 'backendError', 'internalError']
 PERMANENT_ERRORS = ['videoNotFound', 'forbidden', 'playlistOperationUnsupported', 'duplicate']
 QUOTA_ERRORS = ['quotaExceeded']
 MAX_RETRIES = 3
+BASE_DELAY = 1  # Base delay in seconds for exponential backoff
+MAX_BACKOFF = 32  # Maximum backoff delay in seconds
 
 # Date format for YouTube API responses
 ISO_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S%z'
@@ -103,7 +105,7 @@ def encode_key(json_path: str, export_dir: str = None, export_name: str = None):
     if export_name is None:
         export_name = f'{file_name}_b64.txt'
 
-    if 'tokens' not in json_path:
+    if '_tokens' not in json_path:
         history.critical('FORBIDDEN ACCESS. Invalid file path.')
         raise FileAccessError('FORBIDDEN ACCESS. Invalid file path.')
 
@@ -480,10 +482,12 @@ def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list, pr
                 except (KeyError, IndexError, TypeError):
                     error_reason = 'unknown'
 
-                # Handle transient errors with exponential backoff
+                # Handle transient errors with exponential backoff + jitter
                 if error_reason in TRANSIENT_ERRORS and attempt < MAX_RETRIES - 1:
-                    wait_time = 2 ** attempt  # 1s, 2s, 4s
-                    history.warning('Transient error (%s) for video %s, retrying in %ss (attempt %s/%s)',
+                    # Calculate exponential backoff with equal jitter to prevent thundering herd
+                    delay = min(MAX_BACKOFF, int(BASE_DELAY * math.exp(attempt)))
+                    wait_time = delay / 2 + random.uniform(0, delay / 2)
+                    history.warning('Transient error (%s) for video %s, retrying in %.2fs (attempt %s/%s)',
                                     error_reason, video_id, wait_time, attempt + 1, MAX_RETRIES)
                     time.sleep(wait_time)
                     continue
@@ -585,7 +589,7 @@ def is_shorts(video_id: str):
         )
         return response.status_code == 200
 
-    except requests.RequestException as error:
+    except Exception as error:
         history.warning('Failed to check shorts status for video %s: %s', video_id, str(error))
         return False  # Default to non-short on error
 

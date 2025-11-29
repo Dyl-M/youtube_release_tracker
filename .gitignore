@@ -132,13 +132,15 @@ dmypy.json
 .idea/
 
 # Private
-tokens/
-cmd/
+_archive/
+_tokens/
 gha-creds-*.json
-archive/
 
 # Claude Code & Claude personal Config
 .claude/
 _docs/commit_m_tmp.txt
 _docs/IMPROVEMENTS.md
 CLAUDE.md
+
+# Deprecated content
+yrt/deprecated_functions.py

@@ -1,0 +1,73 @@
+{
+  "kind": "youtube#videoListResponse",
+  "etag": "stats-etag",
+  "items": [
+    {
+      "kind": "youtube#video",
+      "etag": "video-etag-1",
+      "id": "videoId001",
+      "statistics": {
+        "viewCount": "1523678",
+        "likeCount": "45231",
+        "commentCount": "892"
+      },
+      "contentDetails": {
+        "duration": "PT3M45S",
+        "dimension": "2d",
+        "definition": "hd"
+      },
+      "snippet": {
+        "publishedAt": "2024-01-15T12:00:00Z",
+        "channelId": "UCchannel1",
+        "title": "Test Music Video 1",
+        "channelTitle": "Test Music Channel"
+      }
+    },
+    {
+      "kind": "youtube#video",
+      "etag": "video-etag-2",
+      "id": "videoId002",
+      "statistics": {
+        "viewCount": "892341",
+        "likeCount": "23456",
+        "commentCount": "567"
+      },
+      "contentDetails": {
+        "duration": "PT45S",
+        "dimension": "2d",
+        "definition": "hd"
+      },
+      "snippet": {
+        "publishedAt": "2024-01-16T14:30:00Z",
+        "channelId": "UCchannel2",
+        "title": "Test Short Video",
+        "channelTitle": "Test Channel 2"
+      }
+    },
+    {
+      "kind": "youtube#video",
+      "etag": "video-etag-3",
+      "id": "videoId003",
+      "statistics": {
+        "viewCount": "234567",
+        "likeCount": "8901",
+        "commentCount": "234"
+      },
+      "contentDetails": {
+        "duration": "PT15M30S",
+        "dimension": "2d",
+        "definition": "hd"
+      },
+      "snippet": {
+        "publishedAt": "2024-01-17T09:00:00Z",
+        "channelId": "UCchannel3",
+        "title": "Test Long Video",
+        "channelTitle": "Test Channel 3"
+      }
+    }
+  ],
+  "pageInfo": {
+    "totalResults": 3,
+    "resultsPerPage": 50
+  }
+}
