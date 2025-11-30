@@ -90,10 +90,7 @@ jobs:
 
             -   id: main
                 name: Main process execution
-                run: |
-                    cd yrt
-                    python main.py 'action'
-                    cd ../
+                run: python -m yrt.main action
 
             -   id: commit
                 name: Commit changes (Log and historical data)
