@@ -1,13 +1,13 @@
-2025-11-30 08:51:31+0000 [INFO] - Process started.
-2025-11-30 08:51:31+0000 [INFO] - YouTube service created successfully.
-2025-11-30 08:51:31+0000 [INFO] - 14 addition(s) to Release Radar playlist from previous API failure.
-2025-11-30 08:51:37+0000 [INFO] - 1 addition(s) to Banger Radar playlist from previous API failure.
-2025-11-30 08:51:38+0000 [INFO] - Video recovery from previous API failure(s) complete.
-2025-11-30 08:51:38+0000 [INFO] - Iterative research for 230 YouTube channels.
-2025-11-30 08:51:46+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
-2025-11-30 08:52:41+0000 [INFO] - No addition to perform.
-2025-11-30 08:52:41+0000 [INFO] - No change to apply on historical data for following delta: 1 week(s)
-2025-11-30 08:52:42+0000 [INFO] - No change to apply on historical data for following delta: 24 week(s)
-2025-11-30 08:52:42+0000 [INFO] - 7 addition(s) from Re-listening playlist.
-2025-11-30 08:52:49+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
-2025-11-30 08:52:49+0000 [INFO] - Process ended.
+2025-12-01 08:00:49+0000 [INFO] - Process started.
+2025-12-01 08:00:50+0000 [INFO] - API credentials refreshed.
+2025-12-01 08:00:50+0000 [INFO] - YouTube service created successfully.
+2025-12-01 08:00:50+0000 [INFO] - Iterative research for 230 YouTube channels.
+2025-12-01 08:01:17+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
+2025-12-01 08:02:01+0000 [INFO] - Add statistics for 33 video(s).
+2025-12-01 08:02:15+0000 [INFO] - Addition to "Banger Radar": 4 video(s).
+2025-12-01 08:02:16+0000 [INFO] - Addition to "Release Radar": 19 video(s).
+2025-12-01 08:02:25+0000 [INFO] - Addition to "Watch Later": 3 video(s).
+2025-12-01 08:02:29+0000 [INFO] - 21 addition(s) from Re-listening playlist.
+2025-12-01 08:02:37+0000 [WARNING] - Addition Request Failure: (27xOKDpJ4xc) - failedPrecondition - Precondition check failed.
+2025-12-01 08:02:49+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2025-12-01 08:02:49+0000 [INFO] - Process ended.
