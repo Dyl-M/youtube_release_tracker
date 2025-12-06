@@ -5190,3 +5190,17 @@
 2025-12-05 08:03:14+0000 [INFO] - 9 addition(s) from Re-listening playlist.
 2025-12-05 08:03:23+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
 2025-12-05 08:03:23+0000 [INFO] - Process ended.
+2025-12-06 08:00:32+0000 [INFO] - Process started.
+2025-12-06 08:00:32+0000 [INFO] - API credentials refreshed.
+2025-12-06 08:00:32+0000 [INFO] - YouTube service created successfully.
+2025-12-06 08:00:32+0000 [INFO] - 4 addition(s) to Release Radar playlist from previous API failure.
+2025-12-06 08:00:34+0000 [INFO] - Video recovery from previous API failure(s) complete.
+2025-12-06 08:00:34+0000 [INFO] - Iterative research for 232 YouTube channels.
+2025-12-06 08:01:11+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
+2025-12-06 08:01:46+0000 [INFO] - Add statistics for 79 video(s).
+2025-12-06 08:02:18+0000 [INFO] - Addition to "Banger Radar": 12 video(s).
+2025-12-06 08:02:23+0000 [INFO] - Addition to "Release Radar": 42 video(s).
+2025-12-06 08:02:42+0000 [INFO] - Addition to "Watch Later": 4 video(s).
+2025-12-06 08:02:47+0000 [INFO] - No addition necessary for Release Radar
+2025-12-06 08:02:48+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2025-12-06 08:02:48+0000 [INFO] - Process ended.
