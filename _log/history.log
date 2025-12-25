@@ -5468,3 +5468,17 @@
 2025-12-25 08:02:38+0000 [WARNING] - Permanent error (videoNotFound) for video 7tHXSgBxqZ8 - skipping: Video not found.
 2025-12-25 08:02:56+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
 2025-12-25 08:02:56+0000 [INFO] - Process ended.
+2025-12-25 09:49:54+0000 [INFO] - Process started.
+2025-12-25 09:49:54+0000 [INFO] - API credentials refreshed.
+2025-12-25 09:49:54+0000 [INFO] - YouTube service created successfully.
+2025-12-25 09:49:54+0000 [INFO] - 5 addition(s) to Release Radar playlist from previous API failure.
+2025-12-25 09:49:56+0000 [INFO] - 1 addition(s) to Banger Radar playlist from previous API failure.
+2025-12-25 09:49:57+0000 [INFO] - Video recovery from previous API failure(s) complete.
+2025-12-25 09:49:57+0000 [INFO] - Iterative research for 232 YouTube channels.
+2025-12-25 09:50:27+0000 [WARNING] - Playlist not found: UUuw1VDsmOWOldKGLYq6AkVg
+2025-12-25 09:51:02+0000 [INFO] - No addition to perform.
+2025-12-25 09:51:02+0000 [INFO] - No change to apply on historical data for following delta: 4 week(s)
+2025-12-25 09:51:02+0000 [INFO] - No change to apply on historical data for following delta: 12 week(s)
+2025-12-25 09:51:02+0000 [INFO] - No addition necessary for Release Radar
+2025-12-25 09:51:03+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2025-12-25 09:51:03+0000 [INFO] - Process ended.
