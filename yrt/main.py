@@ -134,7 +134,7 @@ def update_repo_secrets(secret_name: str, new_value: str, logger: logging.Logger
     :param new_value: new value for the selected Secret
     :param logger: object for logging
     """
-    repo = github.Github(PAT).get_repo(github_repo)
+    repo = github.Github(auth=github.Auth.Token(PAT)).get_repo(github_repo)
     try:
         repo.create_secret(secret_name, new_value)
         if logger:
@@ -227,8 +227,9 @@ def main(historical_data: pd.DataFrame) -> None:
         historical_data = youtube.weekly_stats(service=youtube_oauth, histo_data=historical_data, week_delta=12)
         historical_data = youtube.weekly_stats(service=youtube_oauth, histo_data=historical_data, week_delta=24)
 
-        # Sort and store
-        stored = pd.concat([historical_data, stored]).sort_values(['release_date', 'video_id']).drop_duplicates()
+        # Sort and store (filter out empty DataFrames to avoid deprecation warning)
+        dfs_to_concat = [df for df in [historical_data, stored] if not df.empty]
+        stored = pd.concat(dfs_to_concat).sort_values(['release_date', 'video_id']).drop_duplicates()
         stored.to_csv(paths.STATS_CSV, encoding='utf-8', index=False)
 
         # Define destination playlist (use source_channel_id to handle YouTube's auto-generated artist channels)
