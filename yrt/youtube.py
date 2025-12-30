@@ -40,10 +40,10 @@ pd.set_option('display.max_columns', None)  # pd.set_option('display.max_rows', 
 
 "GLOBAL"
 
-# Error categorization for API retry logic
-TRANSIENT_ERRORS = ['serviceUnavailable', 'backendError', 'internalError']
-PERMANENT_ERRORS = ['videoNotFound', 'forbidden', 'playlistOperationUnsupported', 'duplicate']
-QUOTA_ERRORS = ['quotaExceeded']
+# Error categorization for API retry logic (normalized to lowercase for comparison)
+TRANSIENT_ERRORS = {'serviceunavailable', 'backenderror', 'internalerror'}
+PERMANENT_ERRORS = {'videonotfound', 'forbidden', 'playlistoperationunsupported', 'duplicate'}
+QUOTA_ERRORS = {'quotaexceeded'}
 MAX_RETRIES = 3
 BASE_DELAY = 1  # Base delay in seconds for exponential backoff
 MAX_BACKOFF = 32  # Maximum backoff delay in seconds
@@ -482,8 +482,11 @@ def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list, pr
                 except (KeyError, IndexError, TypeError):
                     error_reason = 'unknown'
 
+                # Normalize error reason for comparison (API returns mixed formats: camelCase, SCREAMING_SNAKE_CASE)
+                error_reason_normalized = error_reason.lower().replace('_', '')
+
                 # Handle transient errors with exponential backoff + jitter
-                if error_reason in TRANSIENT_ERRORS and attempt < MAX_RETRIES - 1:
+                if error_reason_normalized in TRANSIENT_ERRORS and attempt < MAX_RETRIES - 1:
                     # Calculate exponential backoff with equal jitter to prevent thundering herd
                     delay = min(MAX_BACKOFF, int(BASE_DELAY * math.exp(attempt)))
                     wait_time = delay / 2 + random.uniform(0, delay / 2)
@@ -493,7 +496,7 @@ def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list, pr
                     continue
 
                 # Handle permanent errors - log and skip, don't save for retry
-                if error_reason in PERMANENT_ERRORS:
+                if error_reason_normalized in PERMANENT_ERRORS:
                     history.warning('Permanent error (%s) for video %s - skipping: %s',
                                     error_reason, video_id, http_error.message)
                     break  # Don't save to api_failure.json
