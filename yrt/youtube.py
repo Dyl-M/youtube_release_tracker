@@ -754,7 +754,7 @@ def cleanup_expired_videos(service: pyt.Client, playlist_config: dict, prog_bar:
                            Each playlist entry may have 'retention_days' key.
     :param prog_bar: To use tqdm progress bar or not.
     """
-    for playlist_key, config in playlist_config.items():
+    for config in playlist_config.values():
         # Skip playlists without retention rules
         if 'retention_days' not in config:
             continue
