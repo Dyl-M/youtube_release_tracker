@@ -3,7 +3,6 @@
 import ast
 import base64
 import datetime as dt
-import googleapiclient.errors
 import isodate
 import itertools
 import json
@@ -362,9 +361,9 @@ def check_if_live(service: pyt.Client, videos_list: list):
             # Keep necessary data
             items += [{'video_id': video.id, 'live_status': video.snippet.liveBroadcastContent} for video in request]
 
-        except googleapiclient.errors.HttpError as http_error:
-            history.error(http_error.error_details)
-            raise APIError(f'HTTP error while checking live status: {http_error.error_details}')
+        except pyt.error.PyYouTubeException as api_error:
+            history.error(api_error.message)
+            raise APIError(f'API error while checking live status: {api_error.message}')
 
     return items
 
@@ -402,9 +401,9 @@ def get_stats(service: pyt.Client, videos_list: list, check_shorts: bool = True)
                        'live_status': item.snippet.liveBroadcastContent,
                        'latest_status': item.status.privacyStatus} for item in request]
 
-        except googleapiclient.errors.HttpError as http_error:
-            history.error(http_error.error_details)
-            raise APIError(f'HTTP error while getting stats: {http_error.error_details}')
+        except pyt.error.PyYouTubeException as api_error:
+            history.error(api_error.message)
+            raise APIError(f'API error while getting stats: {api_error.message}')
 
     validated = [video['video_id'] for video in items]
     missing = [vid_id for vid_id in videos_list if vid_id not in validated]
@@ -557,9 +556,9 @@ def sort_db(service: pyt.Client):
                 # Extract upload playlists, channel names and their ID.
                 information += [{'title': an_item.snippet.title, 'id': an_item.id} for an_item in request]
 
-            except googleapiclient.errors.HttpError as http_error:
-                history.error(http_error.error_details)
-                raise APIError(f'HTTP error while sorting database: {http_error.error_details}')
+            except pyt.error.PyYouTubeException as api_error:
+                history.error(api_error.message)
+                raise APIError(f'API error while sorting database: {api_error.message}')
 
         # Sort channels' name by alphabetical order
         information = sorted(information, key=lambda dic: dic['title'].lower())
