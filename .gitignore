@@ -131,14 +131,14 @@ dmypy.json
 # Jetbrains PyCharm
 .idea/
 
-# Private
+# Private & Drafts files
 _archive/
+_draft/
 _tokens/
 gha-creds-*.json
 
 # Claude Code & Claude personal Config
 .claude/
-_docs/commit_m_tmp.txt
 _docs/IMPROVEMENTS.md
 CLAUDE.md
 
