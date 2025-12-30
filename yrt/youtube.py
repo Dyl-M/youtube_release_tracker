@@ -439,16 +439,25 @@ def iter_channels(service: pyt.Client, channels: list, day_ago: int = None, late
     :param day_ago: Day difference with a reference date, delimits items' collection field.
     :param latest_d: The latest reference date.
     :param prog_bar: To use tqdm progress bar or not.
-    :return: Videos retrieved in playlists.
+    :return: Videos retrieved in playlists, each with source_channel_id added.
     """
-    playlists = [f'UU{channel_id[2:]}' for channel_id in channels if channel_id not in ADD_ON['toPass']]
+    # Create pairs of (channel_id, playlist_id) to track source channel
+    channel_playlist_pairs = [(ch_id, f'UU{ch_id[2:]}') for ch_id in channels if ch_id not in ADD_ON['toPass']]
+
+    def get_items_with_source(channel_id: str, playlist_id: str):
+        """Fetch playlist items and add source_channel_id to each."""
+        items = get_playlist_items(service=service, playlist_id=playlist_id, day_ago=day_ago, latest_d=latest_d)
+        for item in items:
+            item['source_channel_id'] = channel_id
+        return items
 
     if prog_bar:
-        item_it = [get_playlist_items(service=service, playlist_id=playlist_id, day_ago=day_ago, latest_d=latest_d)
-                   for playlist_id in tqdm.tqdm(playlists, desc='Looking for videos to add')]
+        item_it = [get_items_with_source(ch_id, pl_id)
+                   for ch_id, pl_id in tqdm.tqdm(channel_playlist_pairs, desc='Looking for videos to add')]
+
     else:
-        item_it = [get_playlist_items(service=service, playlist_id=playlist_id, day_ago=day_ago, latest_d=latest_d)
-                   for playlist_id in playlists]
+        item_it = [get_items_with_source(ch_id, pl_id) for ch_id, pl_id in channel_playlist_pairs]
+
     return list(itertools.chain.from_iterable(item_it))
 
 

@@ -231,8 +231,8 @@ def main(historical_data: pd.DataFrame) -> None:
         stored = pd.concat([historical_data, stored]).sort_values(['release_date', 'video_id']).drop_duplicates()
         stored.to_csv(paths.STATS_CSV, encoding='utf-8', index=False)
 
-        # Define destination playlist
-        new_data['dest_playlist'] = new_data.apply(lambda row: dest_playlist(row.channel_id,
+        # Define destination playlist (use source_channel_id to handle YouTube's auto-generated artist channels)
+        new_data['dest_playlist'] = new_data.apply(lambda row: dest_playlist(row.source_channel_id,
                                                                              row.is_shorts,
                                                                              row.duration), axis=1)
 
