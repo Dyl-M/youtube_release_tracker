@@ -19,19 +19,32 @@
     "description": "Music release radar based on my YouTube subscriptions. Absolute. Priority.",
     "id": "PLOMUdQFdS-XOI8OIWV_Gx-SRhlCS9PKLn"
   },
-  "watch_later": {
-    "name": "⏳ Watch Later 2K24 (Private)",
-    "description": "2024 videos to watch later.",
-    "id": "PLOMUdQFdS-XPfjAeBp5TuNDQmMoiJHdvB"
-  },
   "re_listening": {
     "name": "🔂 Re-listening (Private)",
     "description": "Let's give them another chance.",
     "id": "PLOMUdQFdS-XP8fi89uBQ5P01DN_9tGJHu"
   },
   "legacy": {
-    "name": "[2020] À Écouter (Private)",
-    "description": "Liste de musique que je n'ai pas écouté en 2020 (5000 max).",
+    "name": "[2020] To listen to (Private)",
+    "description": "List of music I didn't listen to in 2020 (5,000 max).",
     "id": "PLOMUdQFdS-XOIs6AneCHZpASfU-9qtsW0"
+  },
+  "apprentissage": {
+    "name": "🧠 Educational content (Private)",
+    "description": "Videos for learning, discovery, and personal development.",
+    "id": "PLOMUdQFdS-XNcnepE6JblfefVMq1fpa8N",
+    "retention_days": 30
+  },
+  "divertissement_gaming": {
+    "name": "🍿🎮 Entertainment & Gaming (Private)",
+    "description": "Entertainment content.",
+    "id": "PLOMUdQFdS-XN6_25FjZJuKG6vQ6msi4W6",
+    "retention_days": 7
+  },
+  "asmr": {
+    "name": "💤 ASMR & Relaxation (Private)",
+    "description": "Relaxation videos, background noise, and stress relief.",
+    "id": "PLOMUdQFdS-XMjwIyrP2skD7RI1Xz-TbJw",
+    "retention_days": 10
   }
 }

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import annotations
+
 import json
 import logging
 import os
@@ -70,7 +72,7 @@ def validate_file_path(file_path: str):
     return normalized_path
 
 
-def load_json(file_path: str, required_keys: list = None):
+def load_json(file_path: str, required_keys: list | None = None):
     """Load a JSON file with comprehensive error handling.
 
     :param file_path: Path to the JSON file

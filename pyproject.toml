@@ -25,8 +25,7 @@ classifiers = [
     "Topic :: Multimedia :: Video",
 ]
 dependencies = [
-    "google-api-python-client~=2.187.0",
-    "google-auth>=2.41.1,<2.42.0",  # Pinned: google-auth-oauthlib 1.2.x requires <2.42.0
+    "google-auth>=2.41.1,<2.42.0", # Pinned: google-auth-oauthlib 1.2.x requires <2.42.0
     "google-auth-oauthlib~=1.2.3",
     "isodate~=0.7.2",
     "pandas~=2.3.3",
@@ -49,6 +48,9 @@ dev = [
 # Future analytics features (currently unused)
 analytics = [
     "beautifulsoup4~=4.14.3",
+    "ipykernel~=7.1.0",
+    "jupyter~=1.1.1",
+    "nbformat~=5.10.4",
     "numpy~=2.4.0",
     "plotly~=6.5.0",
     "scikit-learn~=1.8.0",

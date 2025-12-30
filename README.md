@@ -11,17 +11,25 @@
 
 ![Repository illustration](_media/repo_illustration.png?raw=true "Repository illustration")
 
-A YouTube project able to track the latest video releases among my subscriptions. The videos will be added to 3 
-specific playlist
+A YouTube project able to track the latest video releases among my subscriptions. The videos will be added to specific
+playlists based on channel categories.
 
-- [🚨 BANGER RADAR](https://www.youtube.com/playlist?list=PLOMUdQFdS-XOI8OIWV_Gx-SRhlCS9PKLn): music releases among a 
-  selection of music channels.
-- [📡 RELEASE RADAR](https://www.youtube.com/playlist?list=PLOMUdQFdS-XNpAVOwJ52c_U94kd0rannK): regular music releases 
+**Music Playlists:**
+
+- [🚨 BANGER RADAR](https://www.youtube.com/playlist?list=PLOMUdQFdS-XOI8OIWV_Gx-SRhlCS9PKLn): music releases among a
+  selection of favorite music channels.
+- [📡 RELEASE RADAR](https://www.youtube.com/playlist?list=PLOMUdQFdS-XNpAVOwJ52c_U94kd0rannK): regular music releases
   among my subscriptions.
-- [⏳ Watch Later 2K24](https://www.youtube.com/playlist?list=PLOMUdQFdS-XPfjAeBp5TuNDQmMoiJHdvB) (Private): other type of video to Watch Later (since regular Watch Later playlist can't be 
-  manipulated with the API).
 
-This project follows up the developments made in the [Automated YouTube Playlist](https://github.com/Dyl-M/auto_youtube_playlist) 
+**Category Playlists (with automatic retention-based cleanup):**
+
+- [🧠 Educational content](https://www.youtube.com/playlist?list=PLOMUdQFdS-XNcnepE6JblfefVMq1fpa8N) (Private): learning
+  and personal development videos - 30 days retention
+- [🍿🎮 Entertainment & Gaming](https://www.youtube.com/playlist?list=PLOMUdQFdS-XN6_25FjZJuKG6vQ6msi4W6) (Private):
+  entertainment and gaming content - 7 days retention
+
+This project follows up the developments made in
+the [Automated YouTube Playlist](https://github.com/Dyl-M/auto_youtube_playlist)
 project, evolving on a smaller panel of YouTube channels with fewer fluctuations.
 
 Repository structure
