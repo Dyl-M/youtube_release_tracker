@@ -70,28 +70,28 @@ class TestErrorConstants:
 
     @staticmethod
     def test_transient_errors_defined():
-        """Test TRANSIENT_ERRORS constant is defined."""
+        """Test TRANSIENT_ERRORS constant is defined with normalized lowercase values."""
         assert hasattr(youtube, 'TRANSIENT_ERRORS')
-        assert isinstance(youtube.TRANSIENT_ERRORS, list)
-        assert 'serviceUnavailable' in youtube.TRANSIENT_ERRORS
-        assert 'backendError' in youtube.TRANSIENT_ERRORS
-        assert 'internalError' in youtube.TRANSIENT_ERRORS
+        assert isinstance(youtube.TRANSIENT_ERRORS, set)
+        assert 'serviceunavailable' in youtube.TRANSIENT_ERRORS
+        assert 'backenderror' in youtube.TRANSIENT_ERRORS
+        assert 'internalerror' in youtube.TRANSIENT_ERRORS
 
     @staticmethod
     def test_permanent_errors_defined():
-        """Test PERMANENT_ERRORS constant is defined."""
+        """Test PERMANENT_ERRORS constant is defined with normalized lowercase values."""
         assert hasattr(youtube, 'PERMANENT_ERRORS')
-        assert isinstance(youtube.PERMANENT_ERRORS, list)
-        assert 'videoNotFound' in youtube.PERMANENT_ERRORS
+        assert isinstance(youtube.PERMANENT_ERRORS, set)
+        assert 'videonotfound' in youtube.PERMANENT_ERRORS
         assert 'forbidden' in youtube.PERMANENT_ERRORS
         assert 'duplicate' in youtube.PERMANENT_ERRORS
 
     @staticmethod
     def test_quota_errors_defined():
-        """Test QUOTA_ERRORS constant is defined."""
+        """Test QUOTA_ERRORS constant is defined with normalized lowercase values."""
         assert hasattr(youtube, 'QUOTA_ERRORS')
-        assert isinstance(youtube.QUOTA_ERRORS, list)
-        assert 'quotaExceeded' in youtube.QUOTA_ERRORS
+        assert isinstance(youtube.QUOTA_ERRORS, set)
+        assert 'quotaexceeded' in youtube.QUOTA_ERRORS
 
     @staticmethod
     def test_retry_constants_defined():

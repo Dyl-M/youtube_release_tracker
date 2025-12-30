@@ -84,9 +84,10 @@ Repository structure
 ├── .deepsource.toml
 ├── .gitignore
 ├── LICENSE
+├── pyproject.toml
 ├── pytest.ini
 ├── README.md
-└── requirements.txt
+└── uv.lock
 ```
 
 External information
