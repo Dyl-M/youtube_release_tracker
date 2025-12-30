@@ -36,13 +36,13 @@
     "retention_days": 30
   },
   "divertissement_gaming": {
-    "name": "🍿🎮 Entertainment & Gaming",
+    "name": "🍿🎮 Entertainment & Gaming (Private)",
     "description": "Entertainment content.",
     "id": "PLOMUdQFdS-XN6_25FjZJuKG6vQ6msi4W6",
     "retention_days": 7
   },
   "asmr": {
-    "name": "💤 ASMR & Relaxation",
+    "name": "💤 ASMR & Relaxation (Private)",
     "description": "Relaxation videos, background noise, and stress relief.",
     "id": "PLOMUdQFdS-XMjwIyrP2skD7RI1Xz-TbJw",
     "retention_days": 10
