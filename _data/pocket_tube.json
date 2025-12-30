@@ -35,6 +35,7 @@
     "UCIJZA6SJ3JjvuOZgYPYOHnA"
   ],
   "ASMR": [
+    "UCFmL725KKPx2URVPvH3Gp8w",
     "UC_n9r4yRVXusIa6Cabl4wDw",
     "UCvqzioHYJNDMclUJBVXV-7g"
   ],
@@ -190,7 +191,6 @@
     "UC6QRHEnq71zL5NboNm5n5Ag",
     "UCSJ4gkVC6NrvII8umztf0Ow",
     "UC029oCuh2jKkEEZcWdGG5xA",
-    "UCuw1VDsmOWOldKGLYq6AkVg",
     "UC_3LN2xxmK9CMYFh3WrxRVQ",
     "UCc5afI6TobiZjRke2sYBDPA",
     "UCu3JMz2OnEaMQYzeUiqJR5g",
@@ -345,7 +345,8 @@
     "namesur25": true,
     "namebf25": true,
     "nameblackfriday25": true,
-    "namecm25": true
+    "namecm25": true,
+    "nameny26": true
   },
   "ysc_settings": {
     "install_date": 1570293612515,
