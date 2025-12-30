@@ -1,27 +1,29 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import annotations
+
 import ast
 import base64
 import datetime as dt
-import isodate
+import isodate  # type: ignore[import-untyped]
 import itertools
 import json
 import logging
 import math
 import os
 import pandas as pd
-import pyyoutube as pyt
+import pyyoutube as pyt  # type: ignore[import-untyped]
 import random
 import re
 import requests
 import time
-import tqdm
+import tqdm  # type: ignore[import-untyped]
 import tzlocal
 
 from google.auth.exceptions import RefreshError
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
+from google_auth_oauthlib.flow import InstalledAppFlow  # type: ignore[import-untyped]
 
 from . import file_utils
 from . import paths
@@ -89,7 +91,7 @@ history.addHandler(history_file)
 "FUNCTIONS"
 
 
-def encode_key(json_path: str, export_dir: str = None, export_name: str = None):
+def encode_key(json_path: str, export_dir: str | None = None, export_name: str | None = None):
     """Encode a JSON authentication file to base64
     :param json_path: file's path to authentication JSON file
     :param export_dir: export directory
@@ -180,6 +182,8 @@ def create_service_workflow():
         :return value: decoded value
         """
         v_b64 = os.environ.get(var_name)  # Get environment variable
+        if v_b64 is None:
+            raise CredentialsError(f'Environment variable {var_name} not found')
         v_str = base64.urlsafe_b64decode(v_b64).decode(encoding='utf8')  # Decode
         value = ast.literal_eval(v_str)  # Eval
         return value
@@ -233,7 +237,7 @@ def _parse_playlist_item(item, date_format: str):
     }
 
 
-def _handle_playlist_error(error: pyt.error.PyYouTubeException, playlist_id: str, add_on: dict = None):
+def _handle_playlist_error(error: pyt.error.PyYouTubeException, playlist_id: str, add_on: dict | None = None):
     """Handle playlist API errors. Exits program for fatal errors.
     :param error: The PyYouTubeException that was raised.
     :param playlist_id: The playlist ID that caused the error.
@@ -254,7 +258,7 @@ def _handle_playlist_error(error: pyt.error.PyYouTubeException, playlist_id: str
 
 
 def _filter_items_by_date_range(p_items: list, latest_d: dt.datetime,
-                                oldest_d: dt.datetime = None, day_ago: int = None):
+                                oldest_d: dt.datetime | None = None, day_ago: int | None = None):
     """Filter videos on a date range.
     :param p_items: Playlist items as a list.
     :param latest_d: The latest reference date.
@@ -270,7 +274,7 @@ def _filter_items_by_date_range(p_items: list, latest_d: dt.datetime,
     return p_items
 
 
-def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int = None, latest_d: dt.datetime = NOW):
+def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int | None = None, latest_d: dt.datetime = NOW):
     """Get the videos in a YouTube playlist.
     :param service: A Python YouTube Client.
     :param playlist_id: A YouTube playlist ID.
@@ -431,7 +435,7 @@ def add_stats(service: pyt.Client, video_list: list):
     return video_first_data.merge(additional_data)
 
 
-def iter_channels(service: pyt.Client, channels: list, day_ago: int = None, latest_d: dt.datetime = NOW,
+def iter_channels(service: pyt.Client, channels: list, day_ago: int | None = None, latest_d: dt.datetime = NOW,
                   prog_bar: bool = True):
     """Apply 'get_playlist_items' for a collection of YouTube playlists.
     :param channels: List of YouTube channel IDs.
@@ -735,6 +739,74 @@ def fill_release_radar(service: pyt.Client, target_playlist: str, re_listening_i
             history.info('%s addition(s) from Legacy playlist.', len(addition_leg))
             add_to_playlist(service, target_playlist, [it['video_id'] for it in addition_leg], prog_bar)
             del_from_playlist(service, legacy_id, addition_leg, prog_bar)
+
+
+def cleanup_expired_videos(service: pyt.Client, playlist_config: dict, prog_bar: bool = True):
+    """Remove expired videos from playlists with retention rules.
+
+    For each playlist with 'retention_days' configured:
+    1. Fetch all items from the playlist
+    2. Filter items where snippet.publishedAt < (NOW - retention_days)
+    3. Delete expired items using del_from_playlist()
+
+    :param service: A Python YouTube Client.
+    :param playlist_config: Dictionary of playlist configurations from playlists.json.
+                           Each playlist entry may have 'retention_days' key.
+    :param prog_bar: To use tqdm progress bar or not.
+    """
+    for playlist_key, config in playlist_config.items():
+        # Skip playlists without retention rules
+        if 'retention_days' not in config:
+            continue
+
+        playlist_id = config['id']
+        retention_days = config['retention_days']
+        playlist_name = config['name']
+        cutoff_date = NOW - dt.timedelta(days=retention_days)
+
+        history.info('Checking retention for playlist "%s" (retention: %d days)', playlist_name, retention_days)
+
+        # Fetch all items with pagination
+        expired_items = []
+        next_page_token = None
+
+        while True:
+            try:
+                response = service.playlistItems.list(
+                    part=['snippet', 'contentDetails'],
+                    playlist_id=playlist_id,
+                    max_results=50,
+                    pageToken=next_page_token
+                )
+
+                for item in response.items:
+                    # snippet.publishedAt is when the video was added to the playlist
+                    added_date_str = item.snippet.publishedAt
+                    if added_date_str:
+                        added_date = dt.datetime.strptime(added_date_str, ISO_DATE_FORMAT)
+                        if added_date < cutoff_date:
+                            expired_items.append({
+                                'item_id': item.id,
+                                'video_id': item.contentDetails.videoId
+                            })
+
+                next_page_token = response.nextPageToken
+                if not next_page_token:
+                    break
+
+            except pyt.error.PyYouTubeException as error:
+                if error.status_code == 403:
+                    history.warning('API quota exceeded while checking retention for %s', playlist_name)
+                else:
+                    history.warning('Error fetching items from %s: %s', playlist_name, error.message)
+                break
+
+        # Delete expired items
+        if expired_items:
+            history.info('Removing %d expired video(s) from "%s"', len(expired_items), playlist_name)
+            del_from_playlist(service, playlist_id, expired_items, prog_bar)
+        else:
+            history.info('No expired videos in "%s"', playlist_name)
 
 
 def add_api_fail(service: pyt.Client, prog_bar: bool = True):

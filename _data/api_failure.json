@@ -9,9 +9,19 @@
     "description": "Music release radar based on my YouTube subscriptions. Absolute. Priority.",
     "failure": []
   },
-  "PLOMUdQFdS-XPfjAeBp5TuNDQmMoiJHdvB": {
-    "name": "Watch Later",
-    "description": "2024 videos to watch later.",
+  "PLOMUdQFdS-XNcnepE6JblfefVMq1fpa8N": {
+    "name": "Educational content",
+    "description": "Videos for learning, discovery, and personal development.",
+    "failure": []
+  },
+  "PLOMUdQFdS-XN6_25FjZJuKG6vQ6msi4W6": {
+    "name": "Entertainment & Gaming",
+    "description": "Entertainment content.",
+    "failure": []
+  },
+  "PLOMUdQFdS-XMjwIyrP2skD7RI1Xz-TbJw": {
+    "name": "ASMR & Relaxation",
+    "description": "Relaxation videos, background noise, and stress relief.",
     "failure": []
   }
 }

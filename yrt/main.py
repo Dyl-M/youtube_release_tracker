@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import annotations
+
 import github
 import logging
 import os
@@ -46,7 +48,8 @@ pocket_tube = file_utils.load_json(
 
 playlists = file_utils.load_json(
     str(paths.PLAYLISTS_JSON),
-    required_keys=['release', 'banger', 'watch_later', 're_listening', 'legacy']
+    required_keys=['release', 'banger', 're_listening', 'legacy',
+                   'apprentissage', 'divertissement_gaming', 'asmr']
 )
 
 add_on_data = file_utils.load_json(
@@ -59,16 +62,33 @@ favorites = add_on_data['favorites'].values()
 
 # YouTube Channels list
 music = pocket_tube['MUSIQUE']
-other_raw = pocket_tube['APPRENTISSAGE'] + pocket_tube['DIVERTISSEMENT'] + pocket_tube['GAMING']
+other_raw = (pocket_tube['APPRENTISSAGE'] + pocket_tube['DIVERTISSEMENT'] +
+             pocket_tube['GAMING'] + pocket_tube.get('ASMR', []))
 other = list(set(other_raw))
 all_channels = list(set(music + other))
 
 # YouTube playlists
 release = playlists['release']['id']
 banger = playlists['banger']['id']
-watch_later = playlists['watch_later']['id']
 re_listening = playlists['re_listening']['id']
 legacy = playlists['legacy']['id']
+
+# Category priority order and playlist mapping (for non-music channels)
+CATEGORY_PRIORITY = ['APPRENTISSAGE', 'DIVERTISSEMENT', 'GAMING', 'ASMR']
+
+CATEGORY_PLAYLISTS = {
+    'APPRENTISSAGE': playlists['apprentissage']['id'],
+    'DIVERTISSEMENT': playlists['divertissement_gaming']['id'],
+    'GAMING': playlists['divertissement_gaming']['id'],
+    'ASMR': playlists['asmr']['id'],
+}
+
+category_channels = {
+    'APPRENTISSAGE': set(pocket_tube['APPRENTISSAGE']),
+    'DIVERTISSEMENT': set(pocket_tube['DIVERTISSEMENT']),
+    'GAMING': set(pocket_tube['GAMING']),
+    'ASMR': set(pocket_tube.get('ASMR', [])),
+}
 
 # Historical Data - create if doesn't exist
 if os.path.exists(paths.STATS_CSV):
@@ -99,12 +119,23 @@ def copy_last_exe_log():
 
 
 def dest_playlist(channel_id: str, is_shorts: bool, v_duration: int, max_duration: int = 10):
-    """Return destination playlist for addition
+    """Return destination playlist for addition based on channel category and video properties.
+
+    Routing logic:
+    1. Shorts are always excluded (return 'shorts')
+    2. Non-music channels route to category playlists by priority:
+       APPRENTISSAGE > DIVERTISSEMENT/GAMING > ASMR
+    3. Music channels:
+       - Long videos (>10min) from dual-category channels -> their non-music category playlist
+       - Long videos (>10min) from music-only channels -> 'none' (skipped)
+       - Favorites -> Banger Radar
+       - Others -> Release Radar
+
     :param channel_id: YouTube channel ID
-    :param is_shorts: boolean indicating whether the video is a YouTube Short or not
+    :param is_shorts: boolean indicating whether the video is a YouTube Short
     :param v_duration: YouTube video duration in seconds
-    :param max_duration: duration threshold in minutes
-    :return: appropriate YouTube playlist ID based on video information
+    :param max_duration: duration threshold in minutes (default: 10)
+    :return: appropriate YouTube playlist ID or special string ('shorts', 'none')
     """
     if is_shorts:
         return 'shorts'
@@ -112,13 +143,27 @@ def dest_playlist(channel_id: str, is_shorts: bool, v_duration: int, max_duratio
     is_music_channel = channel_id in music
     is_long_video = v_duration > max_duration * 60
 
-    # Non-music channels -> Watch Later
-    if not is_music_channel:
-        return watch_later
+    # Determine non-music category (if any) using priority order
+    non_music_category = None
+    for category in CATEGORY_PRIORITY:
+        if channel_id in category_channels.get(category, set()):
+            non_music_category = category
+            break
 
-    # Long music videos -> Watch Later (if also in other categories) or skip
+    # Non-music channels -> route to category playlist
+    if not is_music_channel:
+        if non_music_category:
+            return CATEGORY_PLAYLISTS[non_music_category]
+        # Channel not in any known category (should not happen normally)
+        return 'none'
+
+    # Music channel with long video
     if is_long_video:
-        return watch_later if channel_id in other else 'none'
+        # Dual-category channel: route to non-music category playlist
+        if non_music_category:
+            return CATEGORY_PLAYLISTS[non_music_category]
+        # Music-only channel: skip long videos
+        return 'none'
 
     # Short music videos from favorites -> Banger Radar
     if channel_id in favorites:
@@ -128,7 +173,7 @@ def dest_playlist(channel_id: str, is_shorts: bool, v_duration: int, max_duratio
     return release
 
 
-def update_repo_secrets(secret_name: str, new_value: str, logger: logging.Logger = None):
+def update_repo_secrets(secret_name: str, new_value: str, logger: logging.Logger | None = None):
     """Update a GitHub repository Secret value
     :param secret_name: GH repository Secret name
     :param new_value: new value for the selected Secret
@@ -240,12 +285,16 @@ def main(historical_data: pd.DataFrame) -> None:
         # Reformat
         to_add = new_data.groupby('dest_playlist')['video_id'].apply(list).to_dict()
 
-        # Selection by playlist. An error could happen here!
+        # Selection by playlist
         add_banger = to_add.get(banger, [])
         add_release = to_add.get(release, [])
-        add_wl = to_add.get(watch_later, [])
 
-        # Addition by priority (Favorites > Music releases > Normal videos > Shorts)
+        # Category playlists
+        add_apprentissage = to_add.get(playlists['apprentissage']['id'], [])
+        add_divert_gaming = to_add.get(playlists['divertissement_gaming']['id'], [])
+        add_asmr = to_add.get(playlists['asmr']['id'], [])
+
+        # Addition by priority (Favorites > Music releases > Category videos)
         if add_banger:
             history_main.info('Addition to "Banger Radar": %s video(s).', len(add_banger))
             youtube.add_to_playlist(youtube_oauth, banger, add_banger, prog_bar=prog_bar)
@@ -254,19 +303,34 @@ def main(historical_data: pd.DataFrame) -> None:
             history_main.info('Addition to "Release Radar": %s video(s).', len(add_release))
             youtube.add_to_playlist(youtube_oauth, release, add_release, prog_bar=prog_bar)
 
-        if add_wl:
-            history_main.info('Addition to "Watch Later": %s video(s).', len(add_wl))
-            youtube.add_to_playlist(youtube_oauth, watch_later, add_wl, prog_bar=prog_bar)
+        if add_apprentissage:
+            history_main.info('Addition to "Educational content": %s video(s).', len(add_apprentissage))
+            youtube.add_to_playlist(youtube_oauth, playlists['apprentissage']['id'],
+                                    add_apprentissage, prog_bar=prog_bar)
+
+        if add_divert_gaming:
+            history_main.info('Addition to "Entertainment & Gaming": %s video(s).', len(add_divert_gaming))
+            youtube.add_to_playlist(youtube_oauth, playlists['divertissement_gaming']['id'],
+                                    add_divert_gaming, prog_bar=prog_bar)
+
+        if add_asmr:
+            history_main.info('Addition to "ASMR & Relaxation": %s video(s).', len(add_asmr))
+            youtube.add_to_playlist(youtube_oauth, playlists['asmr']['id'],
+                                    add_asmr, prog_bar=prog_bar)
 
     # Fill the Release Radar playlist
     youtube.fill_release_radar(youtube_oauth, release, re_listening, legacy, lmt=40, prog_bar=prog_bar)
+
+    # Cleanup expired videos from category playlists
+    youtube.cleanup_expired_videos(youtube_oauth, playlists, prog_bar=prog_bar)
 
     if exe_mode == 'local':  # Credentials in base64 update - Local option
         youtube.encode_key(json_path=str(paths.CREDENTIALS_JSON))
         youtube.encode_key(json_path=str(paths.OAUTH_JSON))
 
     else:  # Credentials in base64 update - Remote option
-        update_repo_secrets(secret_name='CREDS_B64', new_value=creds_b64, logger=history_main)
+        if creds_b64 is not None:
+            update_repo_secrets(secret_name='CREDS_B64', new_value=creds_b64, logger=history_main)
 
     history_main.info('Process ended.')  # End
     copy_last_exe_log()  # Copy what happened during process execution to the associated file.
