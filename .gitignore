@@ -133,7 +133,7 @@ dmypy.json
 
 # Private & Drafts files
 _archive/
-_draft/
+_drafts/
 _tokens/
 gha-creds-*.json
 

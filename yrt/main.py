@@ -272,8 +272,8 @@ def main(historical_data: pd.DataFrame) -> None:
         historical_data = youtube.weekly_stats(service=youtube_oauth, histo_data=historical_data, week_delta=12)
         historical_data = youtube.weekly_stats(service=youtube_oauth, histo_data=historical_data, week_delta=24)
 
-        # Sort and store (filter out empty DataFrames to avoid deprecation warning)
-        dfs_to_concat = [df for df in [historical_data, stored] if not df.empty]
+        # Sort and store (drop all-NA columns before concat to avoid FutureWarning)
+        dfs_to_concat = [df.dropna(axis=1, how='all') for df in [historical_data, stored] if not df.empty]
         stored = pd.concat(dfs_to_concat).sort_values(['release_date', 'video_id']).drop_duplicates()
         stored.to_csv(paths.STATS_CSV, encoding='utf-8', index=False)
 
