@@ -63,3 +63,6 @@ Issues = "https://github.com/Dyl-M/youtube_release_tracker/issues"
 # CLI entry point (requires wrapper function - see main.py)
 # [project.scripts]
 # yrt = "yrt.main:cli"
+
+[tool.ruff]
+extend-exclude = ["*.ipynb"]
