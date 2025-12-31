@@ -5616,3 +5616,23 @@
 2025-12-30 23:31:35+0100 [CRITICAL] - test.json missing key in path: missing_key
 2025-12-30 23:31:35+0100 [CRITICAL] - test.json missing key in path: level1.level2.missing
 2025-12-30 23:31:35+0100 [WARNING] - Failed to check shorts status for video dQw4w9WgXcQ: Network error
+2025-12-31 10:27:39+0000 [INFO] - Process started.
+2025-12-31 10:27:39+0000 [INFO] - API credentials refreshed.
+2025-12-31 10:27:39+0000 [INFO] - YouTube service created successfully.
+2025-12-31 10:27:39+0000 [INFO] - Iterative research for 234 YouTube channels.
+2025-12-31 10:28:43+0000 [INFO] - Add statistics for 47 video(s).
+2025-12-31 10:29:10+0000 [INFO] - Addition to "Banger Radar": 4 video(s).
+2025-12-31 10:29:12+0000 [INFO] - Addition to "Release Radar": 15 video(s).
+2025-12-31 10:29:13+0000 [WARNING] - Transient error (SERVICE_UNAVAILABLE) for video ZMKlPSHa3LI, retrying in 0.64s (attempt 1/3)
+2025-12-31 10:29:20+0000 [INFO] - Addition to "Educational content": 1 video(s).
+2025-12-31 10:29:21+0000 [INFO] - Addition to "Entertainment & Gaming": 2 video(s).
+2025-12-31 10:29:21+0000 [INFO] - Addition to "ASMR & Relaxation": 1 video(s).
+2025-12-31 10:29:22+0000 [INFO] - 25 addition(s) from Re-listening playlist.
+2025-12-31 10:29:44+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2025-12-31 10:29:44+0000 [INFO] - No expired videos in "🧠 Educational content (Private)"
+2025-12-31 10:29:44+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2025-12-31 10:29:44+0000 [INFO] - No expired videos in "🍿🎮 Entertainment & Gaming (Private)"
+2025-12-31 10:29:44+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2025-12-31 10:29:44+0000 [INFO] - No expired videos in "💤 ASMR & Relaxation (Private)"
+2025-12-31 10:29:45+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2025-12-31 10:29:45+0000 [INFO] - Process ended.
