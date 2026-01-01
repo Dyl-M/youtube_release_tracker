@@ -49,7 +49,8 @@ pocket_tube = file_utils.load_json(
 playlists = file_utils.load_json(
     str(paths.PLAYLISTS_JSON),
     required_keys=['release', 'banger', 're_listening', 'legacy',
-                   'apprentissage', 'divertissement_gaming', 'asmr']
+                   'apprentissage', 'divertissement_gaming', 'asmr',
+                   'music_lives', 'regular_streams']
 )
 
 add_on_data = file_utils.load_json(
@@ -72,6 +73,8 @@ release = playlists['release']['id']
 banger = playlists['banger']['id']
 re_listening = playlists['re_listening']['id']
 legacy = playlists['legacy']['id']
+music_lives = playlists['music_lives']['id']
+regular_streams = playlists['regular_streams']['id']
 
 # Category priority order and playlist mapping (for non-music channels)
 CATEGORY_PRIORITY = ['APPRENTISSAGE', 'DIVERTISSEMENT', 'GAMING', 'ASMR']
@@ -118,14 +121,16 @@ def copy_last_exe_log():
         last_exe_file.write(last_exe_log)
 
 
-def dest_playlist(channel_id: str, is_shorts: bool, v_duration: int, max_duration: int = 10):
+def dest_playlist(channel_id: str, is_shorts: bool, v_duration: int,
+                  live_status: str = 'none', max_duration: int = 10):
     """Return destination playlist for addition based on channel category and video properties.
 
     Routing logic:
-    1. Shorts are always excluded (return 'shorts')
-    2. Non-music channels route to category playlists by priority:
+    1. Upcoming streams -> route to stream playlists (music_lives or regular_streams)
+    2. Shorts are always excluded (return 'shorts')
+    3. Non-music channels route to category playlists by priority:
        APPRENTISSAGE > DIVERTISSEMENT/GAMING > ASMR
-    3. Music channels:
+    4. Music channels:
        - Long videos (>10min) from dual-category channels -> their non-music category playlist
        - Long videos (>10min) from music-only channels -> 'none' (skipped)
        - Favorites -> Banger Radar
@@ -134,9 +139,16 @@ def dest_playlist(channel_id: str, is_shorts: bool, v_duration: int, max_duratio
     :param channel_id: YouTube channel ID
     :param is_shorts: boolean indicating whether the video is a YouTube Short
     :param v_duration: YouTube video duration in seconds
+    :param live_status: YouTube live broadcast content status ('none', 'upcoming', 'live')
     :param max_duration: duration threshold in minutes (default: 10)
     :return: appropriate YouTube playlist ID or special string ('shorts', 'none')
     """
+    # Upcoming streams -> route to stream playlists
+    if live_status == 'upcoming':
+        if channel_id in music:
+            return music_lives
+        return regular_streams
+
     if is_shorts:
         return 'shorts'
 
@@ -255,14 +267,19 @@ def main(historical_data: pd.DataFrame) -> None:
         history_main.info('Add statistics for %s video(s).', len(new_videos))
         new_data = youtube.add_stats(service=youtube_oauth, video_list=new_videos)
 
-        # Prepare data for storing
+        # Filter out upcoming streams from stats storage (don't track stats for scheduled content)
+        upcoming_mask = new_data['live_status'] == 'upcoming'
+        if upcoming_mask.any():
+            history_main.info('Filtered %d upcoming stream(s) from stats tracking.', upcoming_mask.sum())
+
+        # Prepare data for storing (excluding upcoming streams)
         to_keep = ['video_id', 'channel_id', 'release_date', 'status', 'is_shorts', 'duration', 'channel_name',
                    'video_title']
 
         stats_list = ['views_w1', 'views_w4', 'views_w12', 'views_w24', 'likes_w1', 'likes_w4', 'likes_w12',
                       'likes_w24', 'comments_w1', 'comments_w4', 'comments_w12', 'comments_w24']
 
-        stored = new_data[to_keep]
+        stored = new_data[~upcoming_mask][to_keep]
         stored.loc[:, stats_list] = [pd.NA] * len(stats_list)
         stored = stored[to_keep[:-2] + stats_list + to_keep[-2:]]
 
@@ -280,7 +297,8 @@ def main(historical_data: pd.DataFrame) -> None:
         # Define destination playlist (use source_channel_id to handle YouTube's auto-generated artist channels)
         new_data['dest_playlist'] = new_data.apply(lambda row: dest_playlist(row.source_channel_id,
                                                                              row.is_shorts,
-                                                                             row.duration), axis=1)
+                                                                             row.duration,
+                                                                             row.live_status), axis=1)
 
         # Reformat
         to_add = new_data.groupby('dest_playlist')['video_id'].apply(list).to_dict()
@@ -293,6 +311,10 @@ def main(historical_data: pd.DataFrame) -> None:
         add_apprentissage = to_add.get(playlists['apprentissage']['id'], [])
         add_divert_gaming = to_add.get(playlists['divertissement_gaming']['id'], [])
         add_asmr = to_add.get(playlists['asmr']['id'], [])
+
+        # Stream playlists
+        add_music_lives = to_add.get(music_lives, [])
+        add_regular_streams = to_add.get(regular_streams, [])
 
         # Addition by priority (Favorites > Music releases > Category videos)
         if add_banger:
@@ -318,11 +340,23 @@ def main(historical_data: pd.DataFrame) -> None:
             youtube.add_to_playlist(youtube_oauth, playlists['asmr']['id'],
                                     add_asmr, prog_bar=prog_bar)
 
+        # Stream playlists
+        if add_music_lives:
+            history_main.info('Addition to "Music Lives": %s video(s).', len(add_music_lives))
+            youtube.add_to_playlist(youtube_oauth, music_lives, add_music_lives, prog_bar=prog_bar)
+
+        if add_regular_streams:
+            history_main.info('Addition to "My streams": %s video(s).', len(add_regular_streams))
+            youtube.add_to_playlist(youtube_oauth, regular_streams, add_regular_streams, prog_bar=prog_bar)
+
     # Fill the Release Radar playlist
     youtube.fill_release_radar(youtube_oauth, release, re_listening, legacy, lmt=40, prog_bar=prog_bar)
 
     # Cleanup expired videos from category playlists
     youtube.cleanup_expired_videos(youtube_oauth, playlists, prog_bar=prog_bar)
+
+    # Cleanup ended streams from stream playlists
+    youtube.cleanup_ended_streams(youtube_oauth, playlists, prog_bar=prog_bar)
 
     if exe_mode == 'local':  # Credentials in base64 update - Local option
         youtube.encode_key(json_path=str(paths.CREDENTIALS_JSON))

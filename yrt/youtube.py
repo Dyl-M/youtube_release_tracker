@@ -809,6 +809,93 @@ def cleanup_expired_videos(service: pyt.Client, playlist_config: dict, prog_bar:
             history.info('No expired videos in "%s"', playlist_name)
 
 
+def cleanup_ended_streams(service: pyt.Client, playlist_config: dict, prog_bar: bool = True):
+    """Remove ended streams from playlists with cleanup_on_end=True.
+
+    For each playlist with 'cleanup_on_end' configured:
+    1. Fetch all items from the playlist
+    2. Check each video's current liveBroadcastContent status
+    3. Delete items where stream has ended (status is 'none')
+
+    :param service: A Python YouTube Client.
+    :param playlist_config: Dictionary of playlist configurations from playlists.json.
+                           Each playlist entry may have 'cleanup_on_end' key.
+    :param prog_bar: To use tqdm progress bar or not.
+    """
+    for config in playlist_config.values():
+        # Skip playlists without cleanup_on_end rule
+        if not config.get('cleanup_on_end', False):
+            continue
+
+        playlist_id = config['id']
+        playlist_name = config['name']
+
+        history.info('Checking ended streams for playlist "%s"', playlist_name)
+
+        # Fetch all items with pagination
+        all_items = []
+        next_page_token = None
+
+        while True:
+            try:
+                response = service.playlistItems.list(
+                    parts=['snippet', 'contentDetails'],
+                    playlist_id=playlist_id,
+                    count=50,
+                    page_token=next_page_token
+                )
+
+                for item in response.items:
+                    all_items.append({
+                        'item_id': item.id,
+                        'video_id': item.contentDetails.videoId
+                    })
+
+                next_page_token = response.nextPageToken
+                if not next_page_token:
+                    break
+
+            except pyt.error.PyYouTubeException as error:
+                if error.status_code == 403:
+                    history.warning('API quota exceeded while checking streams for %s', playlist_name)
+                else:
+                    history.warning('Error fetching items from %s: %s', playlist_name, error.message)
+                break
+
+        if not all_items:
+            history.info('No videos in "%s"', playlist_name)
+            continue
+
+        # Get current live status for all videos in batches
+        video_ids = [item['video_id'] for item in all_items]
+        ended_items = []
+
+        # Batch video status checks (50 per request)
+        for i in range(0, len(video_ids), 50):
+            chunk = video_ids[i:i + 50]
+            try:
+                videos_response = get_videos(service=service, videos_list=chunk)
+                live_statuses = {video.id: video.snippet.liveBroadcastContent for video in videos_response}
+
+                # Check which videos have ended (status is 'none')
+                for item in all_items:
+                    if item['video_id'] in live_statuses:
+                        if live_statuses[item['video_id']] == 'none':
+                            ended_items.append(item)
+
+            except pyt.error.PyYouTubeException as error:
+                history.warning('Error checking stream status: %s', error.message)
+                continue
+
+        # Delete ended streams
+        if ended_items:
+            history.info('Removing %d ended stream(s) from "%s"', len(ended_items), playlist_name)
+            del_from_playlist(service, playlist_id, ended_items, prog_bar)
+
+        else:
+            history.info('No ended streams in "%s"', playlist_name)
+
+
 def add_api_fail(service: pyt.Client, prog_bar: bool = True):
     """Add missing videos to a targeted playlist following API failures on a previous run
     :param service: a Python YouTube Client
@@ -824,7 +911,9 @@ def add_api_fail(service: pyt.Client, prog_bar: bool = True):
                          len(videos_to_retry), info['name'])
             api_failure[p_id]['failure'] = []  # Clear before retry so add_to_playlist can re-add failures
             file_utils.save_json(str(paths.API_FAILURE_JSON), api_failure)  # Save cleared state
-            add_to_playlist(service, p_id, videos_to_retry, prog_bar=prog_bar)  # Failed videos get re-added here
+
+            # Failed videos get re-added here
+            add_to_playlist(service, p_id, videos_to_retry, prog_bar=prog_bar)
             addition += 1
 
     if addition > 0:

@@ -1,8 +1,14 @@
 {
-  "lives": {
+  "music_lives": {
     "name": "🎧🔴 Music Lives",
     "description": "Music radios on YouTube.",
     "id": "PLOMUdQFdS-XNaPVSol9qCUJvQvN5hO4hJ"
+  },
+  "regular_streams": {
+    "name": "🍿🔴 My streams (Private)",
+    "description": "Streams of creators outside the “MUSIQUE” category.",
+    "id": "PLOMUdQFdS-XPxmSrgGQjJg-AH-wEEEx-7",
+    "cleanup_on_end": true
   },
   "mixes": {
     "name": "🎧 Mixes - Podcasts - Live performances",
