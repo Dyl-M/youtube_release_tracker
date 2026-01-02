@@ -9,7 +9,8 @@ on:
         default: 'warning'
 
   schedule:
-    - cron: "0 7 * * *"  # Runs at 7:00 AM UTC, waits until midnight PT (auto-adjusts for PST/PDT)
+    - cron: "0 7 * * *"  # Midnight PDT (during daylight saving time)
+    - cron: "0 8 * * *"  # Midnight PST (during standard time)
 
 jobs:
   build-linux:
@@ -27,75 +28,70 @@ jobs:
       PAT: '${{ secrets.PAT }}'
 
     steps:
-      - id: check-event
-        name: Check Trigger Event
+      - id: check-schedule
+        name: Validate Schedule for Current Timezone
         run: |
-          # Check if the event is 'schedule' or 'workflow_dispatch'
-          if [ "${{ github.event_name }}" == "schedule" ]; then
-            echo "This is a scheduled run. Performing the midnight PST check."
-            echo "proceed_with_check=true" >> $GITHUB_ENV
-          else
-            echo "This is a manual run. Skipping the midnight PST check."
-            echo "proceed_with_check=false" >> $GITHUB_ENV
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "Manual run. Proceeding."
+            echo "should_run=true" >> $GITHUB_ENV
+            exit 0
           fi
 
-      - id: set-up-tz
-        name: Set Up Timezone
-        if: env.proceed_with_check == 'true'
-        run: |
-          # Install timezone data
-          sudo apt-get update && sudo apt-get install -y tzdata
-          echo "Timezone data installed"
+          # Get which cron triggered this run
+          trigger="${{ github.event.schedule }}"
+          pt_offset=$(TZ="America/Los_Angeles" date +%z)
 
-      - id: wait-0000-pst
-        name: Wait Until Midnight PT (PST/PDT)
-        if: env.proceed_with_check == 'true'
-        run: |
-          while true; do
-            # Get the current hour and minute in Pacific Time (handles PST/PDT automatically)
-            current_hour=$(TZ="America/Los_Angeles" date +'%H')
-            current_minute=$(TZ="America/Los_Angeles" date +'%M')
-          
-            # Check if it's midnight hour (00:00-00:59) or later
-            if [ "$current_hour" -eq 0 ]; then
-              echo "It's midnight PT or later! Current time: $current_hour:$current_minute PT. Proceeding."
-              break
-            else
-              echo "Not midnight PT yet. Current time: $current_hour:$current_minute PT. Waiting..."
-              sleep 60 # Wait for 1 minute before checking again
-            fi
-          done
+          echo "Triggered by: $trigger"
+          echo "Pacific Time offset: $pt_offset"
+
+          if [ "$trigger" = "0 7 * * *" ] && [ "$pt_offset" = "-0700" ]; then
+            echo "7 AM UTC trigger + PDT = midnight PDT. Proceeding."
+            echo "should_run=true" >> $GITHUB_ENV
+          elif [ "$trigger" = "0 8 * * *" ] && [ "$pt_offset" = "-0800" ]; then
+            echo "8 AM UTC trigger + PST = midnight PST. Proceeding."
+            echo "should_run=true" >> $GITHUB_ENV
+          else
+            echo "Wrong schedule for current timezone. Skipping."
+            echo "should_run=false" >> $GITHUB_ENV
+          fi
 
       - id: git-checkout
         name: Checkout repository
+        if: env.should_run == 'true'
         uses: actions/checkout@v6
 
       - id: uv-setup
         name: Set up uv
+        if: env.should_run == 'true'
         uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
 
       - id: python-setup
         name: Set up Python 3.12
+        if: env.should_run == 'true'
         run: uv python install 3.12
 
       - id: dependencies
         name: Install dependencies
+        if: env.should_run == 'true'
         run: uv sync --extra dev
 
       - id: ruff
         name: Lint with ruff
+        if: env.should_run == 'true'
         run: |
           uv run ruff check . --select=E9,F63,F7,F82
           uv run ruff check . --exit-zero
 
       - id: main
         name: Main process execution
+        if: env.should_run == 'true'
         run: uv run python -m yrt.main action
 
       - id: commit
         name: Commit changes (Log and historical data)
+        if: env.should_run == 'true'
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "github-actions"
@@ -103,13 +99,14 @@ jobs:
 
       - id: push
         name: Push changes
+        if: env.should_run == 'true'
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - id: notify-failure
         name: Create issue on workflow failure
-        if: failure()
+        if: failure() && env.should_run == 'true'
         uses: actions/github-script@v7
         with:
           script: |
