@@ -22,6 +22,7 @@ POCKET_TUBE_JSON = DATA_DIR / 'pocket_tube.json'
 PLAYLISTS_JSON = DATA_DIR / 'playlists.json'
 ADD_ON_JSON = DATA_DIR / 'add-on.json'
 API_FAILURE_JSON = DATA_DIR / 'api_failure.json'
+CONFIG_JSON = DATA_DIR / 'config.json'
 STATS_CSV = DATA_DIR / 'stats.csv'
 
 # Log files

@@ -95,13 +95,14 @@ class TestErrorConstants:
 
     @staticmethod
     def test_retry_constants_defined():
-        """Test retry configuration constants are defined."""
-        assert hasattr(youtube, 'MAX_RETRIES')
-        assert hasattr(youtube, 'BASE_DELAY')
-        assert hasattr(youtube, 'MAX_BACKOFF')
-        assert youtube.MAX_RETRIES >= 3
-        assert youtube.BASE_DELAY >= 1
-        assert youtube.MAX_BACKOFF >= youtube.BASE_DELAY
+        """Test retry configuration constants are defined in config module."""
+        from yrt import config
+        assert hasattr(config, 'MAX_RETRIES')
+        assert hasattr(config, 'BASE_DELAY')
+        assert hasattr(config, 'MAX_BACKOFF')
+        assert config.MAX_RETRIES >= 3
+        assert config.BASE_DELAY >= 1
+        assert config.MAX_BACKOFF >= config.BASE_DELAY
 
 
 @pytest.mark.unit

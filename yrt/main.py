@@ -9,6 +9,7 @@ import pandas as pd
 import re
 import sys
 
+from . import config
 from . import file_utils
 from . import paths
 from . import youtube
@@ -122,7 +123,7 @@ def copy_last_exe_log():
 
 
 def dest_playlist(channel_id: str, is_shorts: bool, v_duration: int,
-                  live_status: str = 'none', max_duration: int = 10):
+                  live_status: str = 'none', max_duration: int | None = None):
     """Return destination playlist for addition based on channel category and video properties.
 
     Routing logic:
@@ -131,8 +132,8 @@ def dest_playlist(channel_id: str, is_shorts: bool, v_duration: int,
     3. Non-music channels route to category playlists by priority:
        APPRENTISSAGE > DIVERTISSEMENT/GAMING > ASMR
     4. Music channels:
-       - Long videos (>10min) from dual-category channels -> their non-music category playlist
-       - Long videos (>10min) from music-only channels -> 'none' (skipped)
+       - Long videos (>threshold) from dual-category channels -> their non-music category playlist
+       - Long videos (>threshold) from music-only channels -> 'none' (skipped)
        - Favorites -> Banger Radar
        - Others -> Release Radar
 
@@ -140,9 +141,11 @@ def dest_playlist(channel_id: str, is_shorts: bool, v_duration: int,
     :param is_shorts: boolean indicating whether the video is a YouTube Short
     :param v_duration: YouTube video duration in seconds
     :param live_status: YouTube live broadcast content status ('none', 'upcoming', 'live')
-    :param max_duration: duration threshold in minutes (default: 10)
+    :param max_duration: duration threshold in minutes (uses config.LONG_VIDEO_THRESHOLD_MINUTES by default)
     :return: appropriate YouTube playlist ID or special string ('shorts', 'none')
     """
+    if max_duration is None:
+        max_duration = config.LONG_VIDEO_THRESHOLD_MINUTES
     # Upcoming streams -> route to stream playlists
     if live_status == 'upcoming':
         if channel_id in music:
@@ -252,10 +255,12 @@ def main(historical_data: pd.DataFrame) -> None:
         history_main.info('No addition to perform.')
 
         # Get stats for already retrieved videos
-        historical_data = youtube.weekly_stats(service=youtube_oauth, histo_data=historical_data, week_delta=1)
-        historical_data = youtube.weekly_stats(service=youtube_oauth, histo_data=historical_data, week_delta=4)
-        historical_data = youtube.weekly_stats(service=youtube_oauth, histo_data=historical_data, week_delta=12)
-        historical_data = youtube.weekly_stats(service=youtube_oauth, histo_data=historical_data, week_delta=24)
+        for week_delta in config.STATS_WEEK_DELTAS:
+            historical_data = youtube.weekly_stats(
+                service=youtube_oauth,
+                histo_data=historical_data,
+                week_delta=week_delta
+            )
 
         # Store
         historical_data.drop_duplicates(inplace=True)
@@ -284,10 +289,12 @@ def main(historical_data: pd.DataFrame) -> None:
         stored = stored[to_keep[:-2] + stats_list + to_keep[-2:]]
 
         # Get stats for already retrieved videos
-        historical_data = youtube.weekly_stats(service=youtube_oauth, histo_data=historical_data, week_delta=1)
-        historical_data = youtube.weekly_stats(service=youtube_oauth, histo_data=historical_data, week_delta=4)
-        historical_data = youtube.weekly_stats(service=youtube_oauth, histo_data=historical_data, week_delta=12)
-        historical_data = youtube.weekly_stats(service=youtube_oauth, histo_data=historical_data, week_delta=24)
+        for week_delta in config.STATS_WEEK_DELTAS:
+            historical_data = youtube.weekly_stats(
+                service=youtube_oauth,
+                histo_data=historical_data,
+                week_delta=week_delta
+            )
 
         # Sort and store (drop all-NA columns before concat to avoid FutureWarning)
         dfs_to_concat = [df.dropna(axis=1, how='all') for df in [historical_data, stored] if not df.empty]
@@ -343,14 +350,30 @@ def main(historical_data: pd.DataFrame) -> None:
         # Stream playlists
         if add_music_lives:
             history_main.info('Addition to "Music Lives": %s video(s).', len(add_music_lives))
-            youtube.add_to_playlist(youtube_oauth, music_lives, add_music_lives, prog_bar=prog_bar)
+            youtube.add_to_playlist(
+                youtube_oauth,
+                music_lives,
+                add_music_lives,
+                prog_bar=prog_bar
+            )
 
         if add_regular_streams:
             history_main.info('Addition to "My streams": %s video(s).', len(add_regular_streams))
-            youtube.add_to_playlist(youtube_oauth, regular_streams, add_regular_streams, prog_bar=prog_bar)
+            youtube.add_to_playlist(
+                youtube_oauth,
+                regular_streams,
+                add_regular_streams,
+                prog_bar=prog_bar
+            )
 
-    # Fill the Release Radar playlist
-    youtube.fill_release_radar(youtube_oauth, release, re_listening, legacy, lmt=40, prog_bar=prog_bar)
+    # Fill the Release Radar playlist (uses config.RELEASE_RADAR_TARGET by default)
+    youtube.fill_release_radar(
+        youtube_oauth,
+        release,
+        re_listening,
+        legacy,
+        prog_bar=prog_bar
+    )
 
     # Cleanup expired videos from category playlists
     youtube.cleanup_expired_videos(youtube_oauth, playlists, prog_bar=prog_bar)

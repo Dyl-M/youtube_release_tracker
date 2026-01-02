@@ -11,6 +11,7 @@ __author__ = 'Dylan "dyl-m" Monfret'
 # Package metadata
 __all__ = [
     'analytics',
+    'config',
     'exceptions',
     'file_utils',
     'main',

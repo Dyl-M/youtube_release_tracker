@@ -25,6 +25,7 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow  # type: ignore[import-untyped]
 
+from . import config
 from . import file_utils
 from . import paths
 from .exceptions import CredentialsError, YouTubeServiceError, APIError, FileAccessError
@@ -45,9 +46,6 @@ pd.set_option('display.max_columns', None)  # pd.set_option('display.max_rows', 
 TRANSIENT_ERRORS = {'serviceunavailable', 'backenderror', 'internalerror'}
 PERMANENT_ERRORS = {'videonotfound', 'forbidden', 'playlistoperationunsupported', 'duplicate'}
 QUOTA_ERRORS = {'quotaexceeded'}
-MAX_RETRIES = 3
-BASE_DELAY = 1  # Base delay in seconds for exponential backoff
-MAX_BACKOFF = 32  # Maximum backoff delay in seconds
 
 # Date format for YouTube API responses
 ISO_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S%z'
@@ -293,7 +291,7 @@ def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int | Non
             request = service.playlistItems.list(
                 part=['snippet', 'contentDetails', 'status'],
                 playlist_id=playlist_id,
-                max_results=50,
+                max_results=config.API_BATCH_SIZE,
                 pageToken=next_page_token
             )
 
@@ -305,7 +303,7 @@ def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int | Non
             next_page_token = request.nextPageToken
 
             # No need for more requests (the playlist must be ordered chronologically!)
-            if len(p_items) <= 50 or next_page_token is None:
+            if len(p_items) <= config.API_BATCH_SIZE or next_page_token is None:
                 break
 
         except pyt.error.PyYouTubeException as error:
@@ -323,7 +321,7 @@ def get_videos(service: pyt.Client, videos_list: list):
     """
     return service.videos.list(part=['snippet', 'contentDetails', 'statistics', 'status'],
                                video_id=videos_list,
-                               max_results=50).items
+                               max_results=config.API_BATCH_SIZE).items
 
 
 def get_subs(service: pyt.Client, channel_list: list):
@@ -334,12 +332,13 @@ def get_subs(service: pyt.Client, channel_list: list):
     """
     ch_filter = [channel_id for channel_id in channel_list if channel_id is not None]
 
-    # Split task in chunks of size 50 to request on a maximum of 50 channels at each iteration.
-    channels_chunks = [ch_filter[i:i + min(50, len(ch_filter))] for i in range(0, len(ch_filter), 50)]
+    # Split task in chunks to request on a maximum of API_BATCH_SIZE channels at each iteration.
+    batch_size = config.API_BATCH_SIZE
+    channels_chunks = [ch_filter[i:i + min(batch_size, len(ch_filter))] for i in range(0, len(ch_filter), batch_size)]
     raw_chunk = []
 
     for chunk in channels_chunks:
-        req = service.channels.list(part=['statistics'], channel_id=chunk, max_results=50).items
+        req = service.channels.list(part=['statistics'], channel_id=chunk, max_results=config.API_BATCH_SIZE).items
         raw_chunk += req
 
     items = [{'channel_id': item.id, 'subscribers': item.statistics.subscriberCount} for item in raw_chunk]
@@ -355,8 +354,10 @@ def check_if_live(service: pyt.Client, videos_list: list):
     """
     items = []
 
-    # Split tasks in chunks of size 50 to request a maximum of 50 videos at each iteration.
-    videos_chunks = [videos_list[i:i + min(50, len(videos_list))] for i in range(0, len(videos_list), 50)]
+    # Split tasks in chunks to request a maximum of API_BATCH_SIZE videos at each iteration.
+    batch_size = config.API_BATCH_SIZE
+    videos_chunks = [videos_list[i:i + min(batch_size, len(videos_list))]
+                     for i in range(0, len(videos_list), batch_size)]
 
     for chunk in videos_chunks:
         try:
@@ -387,8 +388,9 @@ def get_stats(service: pyt.Client, videos_list: list, check_shorts: bool = True)
     except TypeError:
         videos_ids = videos_list
 
-    # Split tasks in chunks of size 50 to request a maximum of 50 videos at each iteration.
-    videos_chunks = [videos_ids[i:i + min(50, len(videos_ids))] for i in range(0, len(videos_ids), 50)]
+    # Split tasks in chunks to request a maximum of API_BATCH_SIZE videos at each iteration.
+    batch_size = config.API_BATCH_SIZE
+    videos_chunks = [videos_ids[i:i + min(batch_size, len(videos_ids))] for i in range(0, len(videos_ids), batch_size)]
 
     for chunk in videos_chunks:
         try:
@@ -483,7 +485,7 @@ def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list, pr
     for video_id in add_iterator:
         r_body = {'snippet': {'playlistId': playlist_id, 'resourceId': {'kind': 'youtube#video', 'videoId': video_id}}}
 
-        for attempt in range(MAX_RETRIES):
+        for attempt in range(config.MAX_RETRIES):
             try:
                 service.playlistItems.insert(parts='snippet', body=r_body)
                 break  # Success, exit retry loop
@@ -498,12 +500,12 @@ def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list, pr
                 error_reason_normalized = error_reason.lower().replace('_', '')
 
                 # Handle transient errors with exponential backoff + jitter
-                if error_reason_normalized in TRANSIENT_ERRORS and attempt < MAX_RETRIES - 1:
+                if error_reason_normalized in TRANSIENT_ERRORS and attempt < config.MAX_RETRIES - 1:
                     # Calculate exponential backoff with equal jitter to prevent thundering herd
-                    delay = min(MAX_BACKOFF, int(BASE_DELAY * math.exp(attempt)))
+                    delay = min(config.MAX_BACKOFF, int(config.BASE_DELAY * math.exp(attempt)))
                     wait_time = delay / 2 + random.uniform(0, delay / 2)
                     history.warning('Transient error (%s) for video %s, retrying in %.2fs (attempt %s/%s)',
-                                    error_reason, video_id, wait_time, attempt + 1, MAX_RETRIES)
+                                    error_reason, video_id, wait_time, attempt + 1, config.MAX_RETRIES)
                     time.sleep(wait_time)
                     continue
 
@@ -541,7 +543,7 @@ def del_from_playlist(service: pyt.Client, playlist_id: str, items_list: list, p
         try:
             service.playlistItems.delete(playlist_item_id=item['item_id'])
 
-        except pyt.error.PyYouTubeException as http_error:  # skipcq: PYL-W0703
+        except pyt.error.PyYouTubeException as http_error:
             history.warning('Deletion Request Failure: (%s) - %s', item['video_id'], http_error.message)
 
 
@@ -558,13 +560,16 @@ def sort_db(service: pyt.Client):
         """
         information = []
 
-        # Split task in chunks of size 50 to request on a maximum of 50 channels at each iteration.
-        channels_chunks = [_channel_list[i:i + min(50, len(_channel_list))] for i in range(0, len(_channel_list), 50)]
+        # Split task in chunks to request on a maximum of API_BATCH_SIZE channels at each iteration.
+        batch_size = config.API_BATCH_SIZE
+        channels_chunks = [_channel_list[i:i + min(batch_size, len(_channel_list))]
+                           for i in range(0, len(_channel_list), batch_size)]
 
         for chunk in channels_chunks:
             try:
                 # Request channels
-                request = _service.channels.list(part=['snippet'], channel_id=chunk, max_results=50).items
+                request = _service.channels.list(part=['snippet'], channel_id=chunk,
+                                                 max_results=config.API_BATCH_SIZE).items
 
                 # Extract upload playlists, channel names and their ID.
                 information += [{'title': an_item.snippet.title, 'id': an_item.id} for an_item in request]
@@ -599,7 +604,7 @@ def is_shorts(video_id: str):
     try:
         response = requests.head(
             f'https://www.youtube.com/shorts/{video_id}',
-            timeout=5,
+            timeout=config.NETWORK_TIMEOUT,
             allow_redirects=False
         )
         return response.status_code == 200
@@ -663,17 +668,19 @@ def get_items_count(service: pyt.Client, playlist_ids: list) -> tuple:
     return tuple(pl.contentDetails.itemCount for pl in playlists)
 
 
-def fill_release_radar(service: pyt.Client, target_playlist: str, re_listening_id: str, legacy_id: str, lmt: int = 30,
-                       prog_bar: bool = True):
+def fill_release_radar(service: pyt.Client, target_playlist: str, re_listening_id: str, legacy_id: str,
+                       lmt: int | None = None, prog_bar: bool = True):
     """Fill the Release Radar playlist with videos from re-listening playlists.
     :param service: A Python YouTube Client.
     :param target_playlist: YouTube playlist ID where videos need to be added.
     :param re_listening_id: YouTube playlist ID for music to re-listen to.
     :param legacy_id: An older YouTube playlist to clear out.
-    :param lmt: The addition threshold (30 by default).
+    :param lmt: The addition threshold (uses config.RELEASE_RADAR_TARGET by default).
     :param prog_bar: To use tqdm progress bar or not.
     """
-    week_ago = NOW - dt.timedelta(weeks=1)
+    if lmt is None:
+        lmt = config.RELEASE_RADAR_TARGET
+    week_ago = NOW - dt.timedelta(weeks=config.RELISTENING_AGE_WEEKS)
 
     # Compute how many videos are necessary to fill the target playlist
     try:
@@ -711,7 +718,10 @@ def fill_release_radar(service: pyt.Client, target_playlist: str, re_listening_i
 
         # Format list for treatment
         to_re_listen_raw = [{'video_id': item.contentDetails.videoId,
-                             'add_date': dt.datetime.strptime(item.snippet.publishedAt, ISO_DATE_FORMAT),
+                             'add_date': dt.datetime.strptime(
+                                 item.snippet.publishedAt,
+                                 ISO_DATE_FORMAT
+                             ),
                              'item_id': item.id} for item in to_re_listen_items]
 
         legacy_raw = [{'video_id': item.contentDetails.videoId, 'item_id': item.id} for item in legacy_items]
@@ -732,12 +742,22 @@ def fill_release_radar(service: pyt.Client, target_playlist: str, re_listening_i
         # Perform updates on playlist
         if addition_rel:  # If any addition from re-listening
             history.info('%s addition(s) from Re-listening playlist.', len(addition_rel))
-            add_to_playlist(service, target_playlist, [it['video_id'] for it in addition_rel], prog_bar)
+            add_to_playlist(
+                service,
+                target_playlist,
+                [it['video_id'] for it in addition_rel],
+                prog_bar
+            )
             del_from_playlist(service, re_listening_id, addition_rel, prog_bar)
 
         if addition_leg:  # If any addition from Legacy
             history.info('%s addition(s) from Legacy playlist.', len(addition_leg))
-            add_to_playlist(service, target_playlist, [it['video_id'] for it in addition_leg], prog_bar)
+            add_to_playlist(
+                service,
+                target_playlist,
+                [it['video_id'] for it in addition_leg],
+                prog_bar
+            )
             del_from_playlist(service, legacy_id, addition_leg, prog_bar)
 
 
@@ -754,17 +774,21 @@ def cleanup_expired_videos(service: pyt.Client, playlist_config: dict, prog_bar:
                            Each playlist entry may have 'retention_days' key.
     :param prog_bar: To use tqdm progress bar or not.
     """
-    for config in playlist_config.values():
+    for playlist_cfg in playlist_config.values():
         # Skip playlists without retention rules
-        if 'retention_days' not in config:
+        if 'retention_days' not in playlist_cfg:
             continue
 
-        playlist_id = config['id']
-        retention_days = config['retention_days']
-        playlist_name = config['name']
+        playlist_id = playlist_cfg['id']
+        retention_days = playlist_cfg['retention_days']
+        playlist_name = playlist_cfg['name']
         cutoff_date = NOW - dt.timedelta(days=retention_days)
 
-        history.info('Checking retention for playlist "%s" (retention: %d days)', playlist_name, retention_days)
+        history.info(
+            'Checking retention for playlist "%s" (retention: %d days)',
+            playlist_name,
+            retention_days
+        )
 
         # Fetch all items with pagination
         expired_items = []
@@ -775,7 +799,7 @@ def cleanup_expired_videos(service: pyt.Client, playlist_config: dict, prog_bar:
                 response = service.playlistItems.list(
                     part=['snippet', 'contentDetails'],
                     playlist_id=playlist_id,
-                    max_results=50,
+                    max_results=config.API_BATCH_SIZE,
                     pageToken=next_page_token
                 )
 
@@ -805,6 +829,7 @@ def cleanup_expired_videos(service: pyt.Client, playlist_config: dict, prog_bar:
         if expired_items:
             history.info('Removing %d expired video(s) from "%s"', len(expired_items), playlist_name)
             del_from_playlist(service, playlist_id, expired_items, prog_bar)
+
         else:
             history.info('No expired videos in "%s"', playlist_name)
 
@@ -825,7 +850,7 @@ def _fetch_stream_playlist_items(service: pyt.Client, playlist_id: str, playlist
             response = service.playlistItems.list(
                 parts=['snippet', 'contentDetails'],
                 playlist_id=playlist_id,
-                count=50,
+                count=config.API_BATCH_SIZE,
                 page_token=next_page_token
             )
 
@@ -857,9 +882,10 @@ def _find_ended_streams(service: pyt.Client, all_items: list) -> list:
     video_id_to_item = {item['video_id']: item for item in all_items}
     ended_items = []
 
-    # Batch video status checks (50 per request)
-    for i in range(0, len(video_ids), 50):
-        chunk = video_ids[i:i + 50]
+    # Batch video status checks
+    batch_size = config.API_BATCH_SIZE
+    for i in range(0, len(video_ids), batch_size):
+        chunk = video_ids[i:i + batch_size]
         try:
             videos_response = get_videos(service=service, videos_list=chunk)
             for video in videos_response:
@@ -885,12 +911,12 @@ def cleanup_ended_streams(service: pyt.Client, playlist_config: dict, prog_bar: 
                            Each playlist entry may have 'cleanup_on_end' key.
     :param prog_bar: To use tqdm progress bar or not.
     """
-    for config in playlist_config.values():
-        if not config.get('cleanup_on_end', False):
+    for playlist_cfg in playlist_config.values():
+        if not playlist_cfg.get('cleanup_on_end', False):
             continue
 
-        playlist_id = config['id']
-        playlist_name = config['name']
+        playlist_id = playlist_cfg['id']
+        playlist_name = playlist_cfg['name']
 
         history.info('Checking ended streams for playlist "%s"', playlist_name)
 
