@@ -110,20 +110,23 @@ class TestErrorConstants:
 class TestDurationParsing:
     """Test ISO 8601 duration parsing."""
 
+    @staticmethod
     @pytest.mark.skip("Not yet implemented")
-    def test_parse_short_duration(self):
+    def test_parse_short_duration():
         """Test parsing short video duration (< 1 minute)."""
         # PT30S = 30 seconds
         # This test assumes a helper function exists or we test via get_stats
         # If no helper exists, this documents expected behavior
 
+    @staticmethod
     @pytest.mark.skip("Not yet implemented")
-    def test_parse_medium_duration(self):
+    def test_parse_medium_duration():
         """Test parsing medium video duration (minutes)."""
         # PT3M30S = 3 minutes 30 seconds
 
+    @staticmethod
     @pytest.mark.skip("Not yet implemented")
-    def test_parse_long_duration(self):
+    def test_parse_long_duration():
         """Test parsing long video duration (hours)."""
         # PT1H30M = 1 hour 30 minutes
 
