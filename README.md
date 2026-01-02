@@ -50,12 +50,14 @@ Repository structure
 │   │   └── main_workflow.yml
 │   └── dependabot.yml
 │
-├── _data
+├── _config
 │   ├── add-on.json
 │   ├── api_failure.json
 │   ├── constants.json
 │   ├── playlists.json
-│   ├── pocket_tube.json
+│   └── pocket_tube.json
+│
+├── _data
 │   └── stats.csv
 │
 ├── _docs

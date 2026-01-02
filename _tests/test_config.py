@@ -54,9 +54,9 @@ class TestDeepMerge:
 
 
 class TestLoadConfig:
-    """Tests for the load_config function."""
+    """Tests for the load_constants function."""
 
-    def test_load_config_with_valid_file(self, tmp_path, monkeypatch):
+    def test_load_constants_with_valid_file(self, tmp_path, monkeypatch):
         """Test loading a valid config file."""
         # Create a test config file
         config_data = {
@@ -67,40 +67,40 @@ class TestLoadConfig:
         with open(config_file, 'w') as f:
             json.dump(config_data, f)
 
-        # Patch paths.CONFIG_JSON and file_utils.ALLOWED_DIRS
+        # Patch paths.CONSTANTS_JSON and file_utils.ALLOWED_DIRS
         from yrt import paths, file_utils
-        monkeypatch.setattr(paths, 'CONFIG_JSON', config_file)
+        monkeypatch.setattr(paths, 'CONSTANTS_JSON', config_file)
         extended_allowed = file_utils.ALLOWED_DIRS + [str(tmp_path)]
         monkeypatch.setattr(file_utils, 'ALLOWED_DIRS', extended_allowed)
 
         # Import and test
-        from yrt.config import load_config, DEFAULTS, _deep_merge
-        result = load_config()
+        from yrt.config import load_constants, DEFAULTS, _deep_merge
+        result = load_constants()
 
         # Verify merge happened correctly
-        expected = _deep_merge(DEFAULTS, config_data)
+        _expected = _deep_merge(DEFAULTS, config_data)
         assert result['api']['batch_size'] == 100
         assert result['network']['timeout_seconds'] == 10
         # Defaults should be preserved for missing keys
         assert result['api']['max_retries'] == DEFAULTS['api']['max_retries']
 
-    def test_load_config_with_missing_file_uses_defaults(self, tmp_path, monkeypatch):
+    def test_load_constants_with_missing_file_uses_defaults(self, tmp_path, monkeypatch):
         """Test that missing config file falls back to defaults."""
         from yrt import paths, file_utils
         from yrt.config import DEFAULTS
 
         # Point to non-existent file
         nonexistent_file = tmp_path / 'nonexistent.json'
-        monkeypatch.setattr(paths, 'CONFIG_JSON', nonexistent_file)
+        monkeypatch.setattr(paths, 'CONSTANTS_JSON', nonexistent_file)
         extended_allowed = file_utils.ALLOWED_DIRS + [str(tmp_path)]
         monkeypatch.setattr(file_utils, 'ALLOWED_DIRS', extended_allowed)
 
-        from yrt.config import load_config
-        result = load_config()
+        from yrt.config import load_constants
+        result = load_constants()
 
         assert result == DEFAULTS
 
-    def test_load_config_partial_override(self, tmp_path, monkeypatch):
+    def test_load_constants_partial_override(self, tmp_path, monkeypatch):
         """Test partial config override preserves other defaults."""
         # Create config with only some values
         config_data = {
@@ -111,12 +111,12 @@ class TestLoadConfig:
             json.dump(config_data, f)
 
         from yrt import paths, file_utils
-        monkeypatch.setattr(paths, 'CONFIG_JSON', config_file)
+        monkeypatch.setattr(paths, 'CONSTANTS_JSON', config_file)
         extended_allowed = file_utils.ALLOWED_DIRS + [str(tmp_path)]
         monkeypatch.setattr(file_utils, 'ALLOWED_DIRS', extended_allowed)
 
-        from yrt.config import load_config, DEFAULTS
-        result = load_config()
+        from yrt.config import load_constants, DEFAULTS
+        result = load_constants()
 
         # Overridden value
         assert result['playlists']['release_radar_target_size'] == 60

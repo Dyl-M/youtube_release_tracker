@@ -13,16 +13,19 @@ allowing the project to run from any directory.
 BASE_DIR = Path(__file__).parent.parent.resolve()
 
 # Directory paths
+CONFIG_DIR = BASE_DIR / '_config'
 DATA_DIR = BASE_DIR / '_data'
 LOG_DIR = BASE_DIR / '_log'
 TOKENS_DIR = BASE_DIR / '_tokens'
 
-# Data files
-POCKET_TUBE_JSON = DATA_DIR / 'pocket_tube.json'
-PLAYLISTS_JSON = DATA_DIR / 'playlists.json'
-ADD_ON_JSON = DATA_DIR / 'add-on.json'
-API_FAILURE_JSON = DATA_DIR / 'api_failure.json'
-CONFIG_JSON = DATA_DIR / 'constants.json'
+# Config files (in _config/)
+POCKET_TUBE_JSON = CONFIG_DIR / 'pocket_tube.json'
+PLAYLISTS_JSON = CONFIG_DIR / 'playlists.json'
+ADD_ON_JSON = CONFIG_DIR / 'add-on.json'
+API_FAILURE_JSON = CONFIG_DIR / 'api_failure.json'
+CONSTANTS_JSON = CONFIG_DIR / 'constants.json'
+
+# Data files (in _data/)
 STATS_CSV = DATA_DIR / 'stats.csv'
 
 # Log files
@@ -34,7 +37,7 @@ OAUTH_JSON = TOKENS_DIR / 'oauth.json'
 CREDENTIALS_JSON = TOKENS_DIR / 'credentials.json'
 
 # Allowed directories for file_utils validation (as strings for compatibility)
-ALLOWED_DIRS = [str(DATA_DIR), str(LOG_DIR), str(TOKENS_DIR)]
+ALLOWED_DIRS = [str(CONFIG_DIR), str(DATA_DIR), str(LOG_DIR), str(TOKENS_DIR)]
 
 # Allowed file extensions
 ALLOWED_EXTENSIONS = ['.json', '.csv', '.log', '.txt']

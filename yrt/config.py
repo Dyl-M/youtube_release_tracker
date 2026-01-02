@@ -1,4 +1,4 @@
-    # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 from __future__ import annotations
 
@@ -76,14 +76,14 @@ def _deep_merge(defaults: dict, overrides: dict) -> dict:
     return result
 
 
-def load_config() -> dict:
+def load_constants() -> dict:
     """Load configuration from constants.json with defaults fallback.
 
     :return: Configuration dictionary (merged with defaults)
     """
     try:
-        user_config = file_utils.load_json(str(paths.CONFIG_JSON))
-        logger.info('Loaded configuration from %s', paths.CONFIG_JSON)
+        user_config = file_utils.load_json(str(paths.CONSTANTS_JSON))
+        logger.info('Loaded configuration from %s', paths.CONSTANTS_JSON)
         return _deep_merge(DEFAULTS, user_config)
 
     except ConfigurationError:
@@ -95,7 +95,7 @@ def load_config() -> dict:
 "CONFIGURATION"
 
 # Load configuration at module import
-_config = load_config()
+_config = load_constants()
 
 # API configuration
 API_BATCH_SIZE: int = _config['api']['batch_size']

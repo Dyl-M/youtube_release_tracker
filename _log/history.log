@@ -5680,3 +5680,17 @@
 2026-01-02 08:01:54+0000 [INFO] - No ended streams in "🍿🔴 My streams (Private)"
 2026-01-02 08:01:55+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
 2026-01-02 08:01:55+0000 [INFO] - Process ended.
+2026-01-02 14:45:00+0100 [INFO] - Loaded configuration from C:\Users\dylmp\Documents\[D�v] Projets personnels\youtube_release_tracker\_config\constants.json
+2026-01-02 14:45:00+0100 [INFO] - Loaded configuration from C:\Users\dylmp\AppData\Local\Temp\pytest-of-dylmp\pytest-213\test_load_constants_with_valid0\constants.json
+2026-01-02 14:45:00+0100 [CRITICAL] - nonexistent.json not found. Expected location: C:\Users\dylmp\AppData\Local\Temp\pytest-of-dylmp\pytest-213\test_load_constants_with_missi0\nonexistent.json
+2026-01-02 14:45:00+0100 [CRITICAL] - Please ensure all required files exist.
+2026-01-02 14:45:00+0100 [WARNING] - Config file not found or invalid, using defaults
+2026-01-02 14:45:00+0100 [INFO] - Loaded configuration from C:\Users\dylmp\AppData\Local\Temp\pytest-of-dylmp\pytest-213\test_load_constants_partial_ov0\constants.json
+2026-01-02 14:45:00+0100 [CRITICAL] - missing_key.json missing required keys: key2
+2026-01-02 14:45:00+0100 [CRITICAL] - nonexistent.json not found. Expected location: C:\Users\dylmp\AppData\Local\Temp\pytest-of-dylmp\pytest-213\test_load_json_file_not_found0\nonexistent.json
+2026-01-02 14:45:00+0100 [CRITICAL] - Please ensure all required files exist.
+2026-01-02 14:45:00+0100 [CRITICAL] - invalid.json is malformed: Expecting property name enclosed in double quotes: line 1 column 3 (char 2)
+2026-01-02 14:45:00+0100 [CRITICAL] - Please check the JSON syntax.
+2026-01-02 14:45:00+0100 [CRITICAL] - test.json missing key in path: missing_key
+2026-01-02 14:45:00+0100 [CRITICAL] - test.json missing key in path: level1.level2.missing
+2026-01-02 14:45:00+0100 [WARNING] - Failed to check shorts status for video dQw4w9WgXcQ: Network error
