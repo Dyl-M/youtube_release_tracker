@@ -39,9 +39,14 @@ ALLOWED_EXTENSIONS = paths.ALLOWED_EXTENSIONS
 def validate_file_path(file_path: str) -> str:
     """Validate and sanitize file path to prevent path traversal attacks.
 
-    :param file_path: Path to validate (can be relative or absolute)
-    :return: Normalized absolute path if valid
-    :raises FileAccessError: If path is invalid or outside allowed directories
+    Args:
+        file_path: Path to validate (can be relative or absolute).
+
+    Returns:
+        Normalized absolute path if valid.
+
+    Raises:
+        FileAccessError: If path is invalid or outside allowed directories.
     """
     # Get the file name from the path (handle both / and \ separators)
     file_name = os.path.basename(file_path)
@@ -69,10 +74,15 @@ def validate_file_path(file_path: str) -> str:
 def load_json(file_path: str, required_keys: list[str] | None = None) -> dict[str, Any]:
     """Load a JSON file with comprehensive error handling.
 
-    :param file_path: Path to the JSON file
-    :param required_keys: Optional list of keys that must exist in the JSON
-    :return: Parsed JSON data as dictionary
-    :raises ConfigurationError: If file is missing, malformed, or missing required keys
+    Args:
+        file_path: Path to the JSON file.
+        required_keys: Optional list of keys that must exist in the JSON.
+
+    Returns:
+        Parsed JSON data as dictionary.
+
+    Raises:
+        ConfigurationError: If file is missing, malformed, or missing required keys.
     """
     # Validate path for security
     validated_path = validate_file_path(file_path)
@@ -109,10 +119,13 @@ def load_json(file_path: str, required_keys: list[str] | None = None) -> dict[st
 def save_json(file_path: str, data: dict[str, Any], indent: int = 2) -> None:
     """Save data to a JSON file with error handling.
 
-    :param file_path: Path to save the JSON file
-    :param data: Dictionary to save as JSON
-    :param indent: Indentation level for pretty printing (default: 2)
-    :raises ConfigurationError: If file cannot be written
+    Args:
+        file_path: Path to save the JSON file.
+        data: Dictionary to save as JSON.
+        indent: Indentation level for pretty printing (default: 2).
+
+    Raises:
+        ConfigurationError: If file cannot be written.
     """
     # Validate path for security
     validated_path = validate_file_path(file_path)
@@ -134,11 +147,14 @@ def save_json(file_path: str, data: dict[str, Any], indent: int = 2) -> None:
 def validate_nested_keys(data: dict[str, Any], key_path: list[str], file_name: str) -> None:
     """Validate nested dictionary keys exist.
 
-    :param data: Dictionary to validate
-    :param key_path: List of keys to validate. Each key can use dot notation for nested paths (e.g., ['key1', 'key2']
-                     validates two top-level keys, ['level1.level2.key'] validates a nested path)
-    :param file_name: Name of file for error messages
-    :raises ConfigurationError: If a key in the path is missing
+    Args:
+        data: Dictionary to validate.
+        key_path: List of keys to validate. Each key can use dot notation for nested paths (e.g., ['key1', 'key2']
+            validates two top-level keys, ['level1.level2.key'] validates a nested path).
+        file_name: Name of file for error messages.
+
+    Raises:
+        ConfigurationError: If a key in the path is missing.
     """
     for key in key_path:
         # Split on dot to support nested paths

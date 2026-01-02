@@ -54,9 +54,12 @@ DEFAULTS = {
 def _deep_merge(defaults: dict, overrides: dict) -> dict:
     """Recursively merge overrides into defaults.
 
-    :param defaults: Base configuration dictionary
-    :param overrides: User configuration to merge on top
-    :return: Merged configuration dictionary
+    Args:
+        defaults: Base configuration dictionary.
+        overrides: User configuration to merge on top.
+
+    Returns:
+        Merged configuration dictionary.
     """
     result = defaults.copy()
     for key, value in overrides.items():
@@ -70,7 +73,8 @@ def _deep_merge(defaults: dict, overrides: dict) -> dict:
 def load_constants() -> dict:
     """Load configuration from constants.json with defaults fallback.
 
-    :return: Configuration dictionary (merged with defaults)
+    Returns:
+        Configuration dictionary (merged with defaults).
     """
     try:
         user_config = file_utils.load_json(str(paths.CONSTANTS_JSON))

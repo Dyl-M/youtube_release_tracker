@@ -47,7 +47,9 @@ ISO_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S%z'
 
 def last_exe_date() -> dt.datetime:
     """Get the last execution datetime from a log file.
-    :return: Last execution date, or 24 hours ago if log is missing/empty.
+
+    Returns:
+        Last execution date, or 24 hours ago if log is missing/empty.
     """
     try:
         with open(paths.LAST_EXE_LOG, 'r', encoding='utf8') as log_file:
@@ -95,10 +97,15 @@ history.addHandler(history_file)
 
 
 def encode_key(json_path: str, export_dir: str | None = None, export_name: str | None = None) -> None:
-    """Encode a JSON authentication file to base64
-    :param json_path: file's path to authentication JSON file
-    :param export_dir: export directory
-    :param export_name: export file name.
+    """Encode a JSON authentication file to base64.
+
+    Args:
+        json_path: File path to authentication JSON file.
+        export_dir: Export directory.
+        export_name: Export file name.
+
+    Raises:
+        FileAccessError: If the file path is invalid or the file does not exist.
     """
     path_split = json_path.split('/')
     file_name = path_split[-1].removesuffix('.json')
@@ -129,9 +136,17 @@ def encode_key(json_path: str, export_dir: str | None = None, export_name: str |
 
 def create_service_local(log: bool = True) -> pyt.Client:
     """Create a GCP service for YouTube API V3.
+
     Mostly inspired by this: https://learndataanalysis.org/google-py-file-source-code/
-    :param log: to apply logging or not
-    :return service: a Google API service object build with 'googleapiclient.discovery.build'.
+
+    Args:
+        log: Whether to apply logging or not.
+
+    Returns:
+        A Google API service object build with 'googleapiclient.discovery.build'.
+
+    Raises:
+        YouTubeServiceError: If the service creation fails.
     """
     oauth_file = paths.OAUTH_JSON  # OAUTH 2.0 ID path
     scopes = ['https://www.googleapis.com/auth/youtube', 'https://www.googleapis.com/auth/youtube.force-ssl']
@@ -175,14 +190,27 @@ def create_service_local(log: bool = True) -> pyt.Client:
 
 
 def create_service_workflow() -> tuple[pyt.Client, str]:
-    """Create a GCP service for YouTube API V3, for usage in GitHub Actions workflow
-    :return service: a Google's API service object build with 'googleapiclient.discovery.build'.
+    """Create a GCP service for YouTube API V3, for usage in GitHub Actions workflow.
+
+    Returns:
+        Tuple of (service, creds_b64) where service is a Google API service object.
+
+    Raises:
+        CredentialsError: If credentials are missing or cannot be refreshed.
+        YouTubeServiceError: If the service creation fails.
     """
 
     def import_env_var(var_name: str) -> dict[str, Any]:
-        """Import variable environment and perform base64 decoding
-        :param var_name: environment variable name
-        :return value: decoded value
+        """Import environment variable and perform base64 decoding.
+
+        Args:
+            var_name: Environment variable name.
+
+        Returns:
+            Decoded value as a dictionary.
+
+        Raises:
+            CredentialsError: If the environment variable is not found.
         """
         v_b64 = os.environ.get(var_name)  # Get environment variable
         if v_b64 is None:
@@ -225,9 +253,13 @@ def create_service_workflow() -> tuple[pyt.Client, str]:
 
 def _parse_playlist_item(item: Any, date_format: str) -> dict[str, Any] | None:
     """Parse a playlist item into a dict, returns None if no release date.
-    :param item: A playlist item from YouTube API response.
-    :param date_format: Date format string for parsing.
-    :return: Parsed item dict or None if no release date.
+
+    Args:
+        item: A playlist item from YouTube API response.
+        date_format: Date format string for parsing.
+
+    Returns:
+        Parsed item dict or None if no release date.
     """
     if item.contentDetails.videoPublishedAt is None:
         return None
@@ -248,11 +280,18 @@ def _handle_playlist_error(
         playlist_id: str,
         add_on: dict[str, Any] | None = None
 ) -> bool:
-    """Handle playlist API errors. Exits program for fatal errors.
-    :param error: The PyYouTubeException that was raised.
-    :param playlist_id: The playlist ID that caused the error.
-    :param add_on: Configuration dict containing playlistNotFoundPass list. Defaults to global ADD_ON.
-    :return: True if should break loop, False otherwise. Exits program for fatal errors.
+    """Handle playlist API errors. Raises APIError for fatal errors.
+
+    Args:
+        error: The PyYouTubeException that was raised.
+        playlist_id: The playlist ID that caused the error.
+        add_on: Configuration dict containing playlistNotFoundPass list. Defaults to global ADD_ON.
+
+    Returns:
+        True if should break loop, False otherwise.
+
+    Raises:
+        APIError: For unrecognized API errors.
     """
     if add_on is None:
         add_on = ADD_ON
@@ -274,11 +313,15 @@ def _filter_items_by_date_range(
         day_ago: int | None = None
 ) -> list[dict[str, Any]]:
     """Filter videos on a date range.
-    :param p_items: Playlist items as a list.
-    :param latest_d: The latest reference date.
-    :param oldest_d: Latest execution date.
-    :param day_ago: Day difference with a reference date, delimits items' collection field.
-    :return: Filtered items.
+
+    Args:
+        p_items: Playlist items as a list.
+        latest_d: The latest reference date.
+        oldest_d: Latest execution date.
+        day_ago: Day difference with a reference date, delimits items' collection field.
+
+    Returns:
+        Filtered items.
     """
     if oldest_d:
         return [item for item in p_items if oldest_d < item['release_date'] < latest_d]
@@ -295,11 +338,15 @@ def get_playlist_items(
         latest_d: dt.datetime = NOW
 ) -> list[dict[str, Any]]:
     """Get the videos in a YouTube playlist.
-    :param service: A Python YouTube Client.
-    :param playlist_id: A YouTube playlist ID.
-    :param day_ago: Day difference with a reference date, delimits items' collection field.
-    :param latest_d: The latest reference date.
-    :return p_items: Playlist items (videos) as a list.
+
+    Args:
+        service: A Python YouTube Client.
+        playlist_id: A YouTube playlist ID.
+        day_ago: Day difference with a reference date, delimits items' collection field.
+        latest_d: The latest reference date.
+
+    Returns:
+        Playlist items (videos) as a list.
     """
     p_items = []
     next_page_token = None
@@ -335,10 +382,14 @@ def get_playlist_items(
 
 
 def get_videos(service: pyt.Client, videos_list: list[str]) -> list[Any]:
-    """Get information from YouTube videos
-    :param service: a Python YouTube Client
-    :param videos_list: list of YouTube video IDs
-    :return: request results.
+    """Get information from YouTube videos.
+
+    Args:
+        service: A Python YouTube Client.
+        videos_list: List of YouTube video IDs.
+
+    Returns:
+        Request results.
     """
     return service.videos.list(  # type: ignore[no-any-return]
         part=['snippet', 'contentDetails', 'statistics', 'status'],
@@ -348,10 +399,14 @@ def get_videos(service: pyt.Client, videos_list: list[str]) -> list[Any]:
 
 
 def get_subs(service: pyt.Client, channel_list: list[str]) -> list[dict[str, Any]]:
-    """Get the number of subscribers for several YouTube channels
-    :param service: a Python YouTube Client
-    :param channel_list: list of YouTube channel IDs
-    :return: playlist items (channels' information) as a list.
+    """Get the number of subscribers for several YouTube channels.
+
+    Args:
+        service: A Python YouTube Client.
+        channel_list: List of YouTube channel IDs.
+
+    Returns:
+        Playlist items (channels' information) as a list.
     """
     ch_filter = [channel_id for channel_id in channel_list if channel_id is not None]
 
@@ -370,10 +425,17 @@ def get_subs(service: pyt.Client, channel_list: list[str]) -> list[dict[str, Any
 
 
 def check_if_live(service: pyt.Client, videos_list: list[str]) -> list[dict[str, Any]]:
-    """Get broadcast status with YouTube video IDs
-    :param service: a Python YouTube Client
-    :param videos_list: list of YouTube video IDs
-    :return items: playlist items (videos) as a list.
+    """Get broadcast status with YouTube video IDs.
+
+    Args:
+        service: A Python YouTube Client.
+        videos_list: List of YouTube video IDs.
+
+    Returns:
+        Playlist items (videos) as a list.
+
+    Raises:
+        APIError: If API error occurs while checking live status.
     """
     items = []
 
@@ -397,11 +459,18 @@ def check_if_live(service: pyt.Client, videos_list: list[str]) -> list[dict[str,
 
 
 def get_stats(service: pyt.Client, videos_list: list[Any], check_shorts: bool = True) -> list[dict[str, Any]]:
-    """Get duration, views and live status of YouTube video with their ID
-    :param service: a Python YouTube Client
-    :param videos_list: list of YouTube video IDs
-    :param check_shorts: whether to check if videos are shorts (skip for historical stats updates)
-    :return items: playlist items (videos) as a list.
+    """Get duration, views and live status of YouTube video with their ID.
+
+    Args:
+        service: A Python YouTube Client.
+        videos_list: List of YouTube video IDs.
+        check_shorts: Whether to check if videos are shorts (skip for historical stats updates).
+
+    Returns:
+        Playlist items (videos) as a list.
+
+    Raises:
+        APIError: If API error occurs while getting stats.
     """
     items = []
 
@@ -450,10 +519,14 @@ def get_stats(service: pyt.Client, videos_list: list[Any], check_shorts: bool = 
 
 
 def add_stats(service: pyt.Client, video_list: list[dict[str, Any]]) -> pd.DataFrame:
-    """Apply 'get_playlist_items' for a collection of YouTube playlists
-    :param service: a Python YouTube Client
-    :param video_list: list of videos formatted by iter_channels functions
-    :return: dataframe with every information necessary
+    """Apply 'get_playlist_items' for a collection of YouTube playlists.
+
+    Args:
+        service: A Python YouTube Client.
+        video_list: List of videos formatted by iter_channels functions.
+
+    Returns:
+        DataFrame with every information necessary.
     """
     video_first_data = pd.DataFrame(video_list)
     additional_data = pd.DataFrame(get_stats(service, video_first_data.video_id.tolist()))
@@ -468,12 +541,16 @@ def iter_channels(
         prog_bar: bool = True
 ) -> list[dict[str, Any]]:
     """Apply 'get_playlist_items' for a collection of YouTube playlists.
-    :param channels: List of YouTube channel IDs.
-    :param service: A Python YouTube Client.
-    :param day_ago: Day difference with a reference date, delimits items' collection field.
-    :param latest_d: The latest reference date.
-    :param prog_bar: To use tqdm progress bar or not.
-    :return: Videos retrieved in playlists, each with source_channel_id added.
+
+    Args:
+        service: A Python YouTube Client.
+        channels: List of YouTube channel IDs.
+        day_ago: Day difference with a reference date, delimits items' collection field.
+        latest_d: The latest reference date.
+        prog_bar: Whether to use tqdm progress bar.
+
+    Returns:
+        Videos retrieved in playlists, each with source_channel_id added.
     """
     # Create pairs of (channel_id, playlist_id) to track source channel
     channel_playlist_pairs = [(ch_id, f'UU{ch_id[2:]}') for ch_id in channels if ch_id not in ADD_ON['toPass']]
@@ -501,11 +578,13 @@ def add_to_playlist(
         videos_list: list[str],
         prog_bar: bool = True
 ) -> None:
-    """Add a list of video to a YouTube playlist
-    :param service: a Python YouTube Client
-    :param playlist_id: a YouTube playlist ID
-    :param videos_list: list of YouTube video IDs
-    :param prog_bar: to use tqdm progress bar or not.
+    """Add a list of video to a YouTube playlist.
+
+    Args:
+        service: A Python YouTube Client.
+        playlist_id: A YouTube playlist ID.
+        videos_list: List of YouTube video IDs.
+        prog_bar: Whether to use tqdm progress bar.
     """
     api_failure = file_utils.load_json(str(paths.API_FAILURE_JSON))
     api_fail = False
@@ -565,11 +644,13 @@ def del_from_playlist(
         items_list: list[dict[str, Any]],
         prog_bar: bool = True
 ) -> None:
-    """Delete videos inside a YouTube playlist
-    :param service: a Python YouTube Client
-    :param playlist_id: a YouTube playlist ID
-    :param items_list: list of YouTube playlist items [{"item_id": ..., "video_id": ...}]
-    :param prog_bar: to use tqdm progress bar or not.
+    """Delete videos inside a YouTube playlist.
+
+    Args:
+        service: A Python YouTube Client.
+        playlist_id: A YouTube playlist ID.
+        items_list: List of YouTube playlist items [{"item_id": ..., "video_id": ...}].
+        prog_bar: Whether to use tqdm progress bar.
     """
     if prog_bar:
         del_iterator = tqdm.tqdm(items_list, desc=f'Deleting videos from the playlist ({playlist_id})')
@@ -586,15 +667,24 @@ def del_from_playlist(
 
 
 def sort_db(service: pyt.Client) -> None:
-    """Sort and save the PocketTube database file
-    :param service: a Python YouTube Client
+    """Sort and save the PocketTube database file.
+
+    Args:
+        service: A Python YouTube Client.
     """
 
     def get_channels(_service: pyt.Client, _channel_list: list[str]) -> list[str]:
-        """Get YouTube channels basic information
-        :param _service: a YouTube's service build with 'googleapiclient.discovery'
-        :param _channel_list: list of YouTube channel ID
-        :return information: a dictionary with channels names, IDs and uploads playlist IDs.
+        """Get YouTube channels basic information.
+
+        Args:
+            _service: A YouTube service build with 'googleapiclient.discovery'.
+            _channel_list: List of YouTube channel IDs.
+
+        Returns:
+            A list of channel IDs sorted alphabetically by channel name.
+
+        Raises:
+            APIError: If API error occurs while sorting database.
         """
         information = []
 
@@ -635,9 +725,13 @@ def sort_db(service: pyt.Client) -> None:
 
 
 def is_shorts(video_id: str) -> bool:
-    """Check if a YouTube video is a short or not
-    :param video_id: YouTube video ID
-    :return: True if the video is short, False otherwise. Returns False on network errors.
+    """Check if a YouTube video is a short or not.
+
+    Args:
+        video_id: YouTube video ID.
+
+    Returns:
+        True if the video is short, False otherwise. Returns False on network errors.
     """
     try:
         response = requests.head(
@@ -659,11 +753,15 @@ def weekly_stats(
         ref_date: dt.datetime = dt.datetime.now(dt.timezone.utc)
 ) -> pd.DataFrame:
     """Add weekly statistics to historical data retrieved from YouTube for each run.
-    :param service: A Python YouTube Client.
-    :param histo_data: Data with statistics retrieved throughout the weeks.
-    :param week_delta: How far we should get stats for videos (1, 4, 13 or 26 weeks).
-    :param ref_date: A reference date (midnight UTC by default).
-    :return histo_data: Historical data enhanced with new statistics.
+
+    Args:
+        service: A Python YouTube Client.
+        histo_data: Data with statistics retrieved throughout the weeks.
+        week_delta: How far we should get stats for videos (1, 4, 13 or 26 weeks).
+        ref_date: A reference date (midnight UTC by default).
+
+    Returns:
+        Historical data enhanced with new statistics.
     """
     # Get the date from "x week ago"
     x_week_ago = ref_date.replace(hour=0, minute=0, second=0, microsecond=0) - dt.timedelta(weeks=week_delta)
@@ -701,10 +799,14 @@ def weekly_stats(
 
 
 def get_items_count(service: pyt.Client, playlist_ids: list) -> tuple:
-    """Get the number of videos in YouTube Playlists
-    :param service: a Python YouTube Client
-    :param playlist_ids: list of YouTube playlist ID
-    :return: Number of videos by playlist (ordered)
+    """Get the number of videos in YouTube Playlists.
+
+    Args:
+        service: A Python YouTube Client.
+        playlist_ids: List of YouTube playlist IDs.
+
+    Returns:
+        Number of videos by playlist (ordered).
     """
     playlists = service.playlists.list(part=['contentDetails'], playlist_id=playlist_ids).items
     return tuple(pl.contentDetails.itemCount for pl in playlists)
@@ -713,10 +815,13 @@ def get_items_count(service: pyt.Client, playlist_ids: list) -> tuple:
 def _get_videos_to_add_count(service: pyt.Client, target_playlist: str, lmt: int) -> int:
     """Calculate how many videos are needed to fill the target playlist.
 
-    :param service: YouTube API client.
-    :param target_playlist: Target playlist ID.
-    :param lmt: Target playlist size limit.
-    :return: Number of videos to add (0 if error or already full).
+    Args:
+        service: YouTube API client.
+        target_playlist: Target playlist ID.
+        lmt: Target playlist size limit.
+
+    Returns:
+        Number of videos to add (0 if error or already full).
     """
     try:
         current_count = len(service.playlistItems.list(
@@ -737,10 +842,13 @@ def _get_videos_to_add_count(service: pyt.Client, target_playlist: str, lmt: int
 def _calculate_allocation(n_add: int, count_a: int, count_b: int) -> tuple[int, int]:
     """Calculate proportional allocation between two sources.
 
-    :param n_add: Total number to add.
-    :param count_a: Item count in source A.
-    :param count_b: Item count in source B.
-    :return: Tuple of (allocation_a, allocation_b).
+    Args:
+        n_add: Total number to add.
+        count_a: Item count in source A.
+        count_b: Item count in source B.
+
+    Returns:
+        Tuple of (allocation_a, allocation_b).
     """
     total = count_a + count_b
 
@@ -766,12 +874,13 @@ def _transfer_videos(
 ) -> None:
     """Transfer videos from source to target playlist.
 
-    :param service: YouTube API client.
-    :param target_playlist: Destination playlist ID.
-    :param source_playlist: Source playlist ID.
-    :param videos: List of video dicts with 'video_id' and 'item_id'.
-    :param source_name: Name for logging.
-    :param prog_bar: Whether to display progress bar.
+    Args:
+        service: YouTube API client.
+        target_playlist: Destination playlist ID.
+        source_playlist: Source playlist ID.
+        videos: List of video dicts with 'video_id' and 'item_id'.
+        source_name: Name for logging.
+        prog_bar: Whether to display progress bar.
     """
     if not videos:
         return
@@ -800,12 +909,14 @@ def fill_release_radar(
         prog_bar: bool = True
 ) -> None:
     """Fill the Release Radar playlist with videos from re-listening playlists.
-    :param service: A Python YouTube Client.
-    :param target_playlist: YouTube playlist ID where videos need to be added.
-    :param re_listening_id: YouTube playlist ID for music to re-listen to.
-    :param legacy_id: An older YouTube playlist to clear out.
-    :param lmt: The addition threshold (uses config.RELEASE_RADAR_TARGET by default).
-    :param prog_bar: To use tqdm progress bar or not.
+
+    Args:
+        service: A Python YouTube Client.
+        target_playlist: YouTube playlist ID where videos need to be added.
+        re_listening_id: YouTube playlist ID for music to re-listen to.
+        legacy_id: An older YouTube playlist to clear out.
+        lmt: The addition threshold (uses config.RELEASE_RADAR_TARGET by default).
+        prog_bar: Whether to use tqdm progress bar.
     """
     if lmt is None:
         lmt = config.RELEASE_RADAR_TARGET
@@ -875,14 +986,15 @@ def cleanup_expired_videos(service: pyt.Client, playlist_config: dict[str, Any],
     """Remove expired videos from playlists with retention rules.
 
     For each playlist with 'retention_days' configured:
-    1. Fetch all items from the playlist
-    2. Filter items where snippet.publishedAt < (NOW - retention_days)
-    3. Delete expired items using del_from_playlist()
+        1. Fetch all items from the playlist.
+        2. Filter items where snippet.publishedAt < (NOW - retention_days).
+        3. Delete expired items using del_from_playlist().
 
-    :param service: A Python YouTube Client.
-    :param playlist_config: Dictionary of playlist configurations from playlists.json.
-                           Each playlist entry may have 'retention_days' key.
-    :param prog_bar: To use tqdm progress bar or not.
+    Args:
+        service: A Python YouTube Client.
+        playlist_config: Dictionary of playlist configurations from playlists.json.
+            Each playlist entry may have 'retention_days' key.
+        prog_bar: Whether to use tqdm progress bar.
     """
     for playlist_cfg in playlist_config.values():
         # Skip playlists without retention rules
@@ -947,10 +1059,13 @@ def cleanup_expired_videos(service: pyt.Client, playlist_config: dict[str, Any],
 def _fetch_stream_playlist_items(service: pyt.Client, playlist_id: str, playlist_name: str) -> list[dict[str, Any]]:
     """Fetch all items from a stream playlist with pagination.
 
-    :param service: A Python YouTube Client.
-    :param playlist_id: The playlist ID to fetch items from.
-    :param playlist_name: The playlist name for logging.
-    :return: List of items with item_id and video_id.
+    Args:
+        service: A Python YouTube Client.
+        playlist_id: The playlist ID to fetch items from.
+        playlist_name: The playlist name for logging.
+
+    Returns:
+        List of items with item_id and video_id.
     """
     all_items: list[dict[str, Any]] = []
     next_page_token = None
@@ -984,9 +1099,12 @@ def _fetch_stream_playlist_items(service: pyt.Client, playlist_id: str, playlist
 def _find_ended_streams(service: pyt.Client, all_items: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Find streams that have ended by checking their live status.
 
-    :param service: A Python YouTube Client.
-    :param all_items: List of playlist items with item_id and video_id.
-    :return: List of items where the stream has ended.
+    Args:
+        service: A Python YouTube Client.
+        all_items: List of playlist items with item_id and video_id.
+
+    Returns:
+        List of items where the stream has ended.
     """
     video_ids = [item['video_id'] for item in all_items]
     video_id_to_item = {item['video_id']: item for item in all_items}
@@ -1012,14 +1130,15 @@ def cleanup_ended_streams(service: pyt.Client, playlist_config: dict[str, Any], 
     """Remove ended streams from playlists with cleanup_on_end=True.
 
     For each playlist with 'cleanup_on_end' configured:
-    1. Fetch all items from the playlist
-    2. Check each video's current liveBroadcastContent status
-    3. Delete items where stream has ended (status is 'none')
+        1. Fetch all items from the playlist.
+        2. Check each video's current liveBroadcastContent status.
+        3. Delete items where stream has ended (status is 'none').
 
-    :param service: A Python YouTube Client.
-    :param playlist_config: Dictionary of playlist configurations from playlists.json.
-                           Each playlist entry may have 'cleanup_on_end' key.
-    :param prog_bar: To use tqdm progress bar or not.
+    Args:
+        service: A Python YouTube Client.
+        playlist_config: Dictionary of playlist configurations from playlists.json.
+            Each playlist entry may have 'cleanup_on_end' key.
+        prog_bar: Whether to use tqdm progress bar.
     """
     for playlist_cfg in playlist_config.values():
         if not playlist_cfg.get('cleanup_on_end', False):
@@ -1047,9 +1166,11 @@ def cleanup_ended_streams(service: pyt.Client, playlist_config: dict[str, Any], 
 
 
 def add_api_fail(service: pyt.Client, prog_bar: bool = True) -> None:
-    """Add missing videos to a targeted playlist following API failures on a previous run
-    :param service: a Python YouTube Client
-    :param prog_bar: to use tqdm progress bar or not.
+    """Add missing videos to a targeted playlist following API failures on a previous run.
+
+    Args:
+        service: A Python YouTube Client.
+        prog_bar: Whether to use tqdm progress bar.
     """
     api_failure = file_utils.load_json(str(paths.API_FAILURE_JSON))
     addition = 0

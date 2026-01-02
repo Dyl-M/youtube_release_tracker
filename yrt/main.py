@@ -29,8 +29,11 @@ except IndexError:
 def _get_env_variables() -> tuple[str, str]:
     """Get and validate environment variables for GitHub Actions mode.
 
-    :return: Tuple of (github_repo, PAT) values
-    :raises ConfigurationError: If required environment variables are missing/empty in 'action' mode
+    Returns:
+        Tuple of (github_repo, PAT) values.
+
+    Raises:
+        ConfigurationError: If required environment variables are missing/empty in 'action' mode.
     """
     from .exceptions import ConfigurationError
 
@@ -154,7 +157,8 @@ def copy_last_exe_log() -> None:
 def _create_logger() -> logging.Logger:
     """Create and configure the main process logger.
 
-    :return: Configured Logger instance for history logging.
+    Returns:
+        Configured Logger instance for history logging.
     """
     logger = logging.Logger(name='history_main', level=0)
     handler = logging.FileHandler(filename=paths.HISTORY_LOG)
@@ -169,9 +173,12 @@ def _create_logger() -> logging.Logger:
 def _update_historical_stats(service: youtube.pyt.Client, historical_data: pd.DataFrame) -> pd.DataFrame:
     """Collect weekly stats for videos in historical data.
 
-    :param service: YouTube API client.
-    :param historical_data: DataFrame with video statistics.
-    :return: Updated DataFrame with collected stats.
+    Args:
+        service: YouTube API client.
+        historical_data: DataFrame with video statistics.
+
+    Returns:
+        Updated DataFrame with collected stats.
     """
     for week_delta in config.STATS_WEEK_DELTAS:
         historical_data = youtube.weekly_stats(
@@ -190,10 +197,11 @@ def _add_videos_to_playlists(
 ) -> None:
     """Add videos to their destination playlists.
 
-    :param service: YouTube API client.
-    :param to_add: Dictionary mapping playlist IDs to lists of video IDs.
-    :param logger: Logger instance for logging additions.
-    :param prog_bar: Whether to display progress bar.
+    Args:
+        service: YouTube API client.
+        to_add: Dictionary mapping playlist IDs to lists of video IDs.
+        logger: Logger instance for logging additions.
+        prog_bar: Whether to display progress bar.
     """
     for playlist_id, log_name in PLAYLIST_ADDITIONS:
         videos = to_add.get(playlist_id, [])
@@ -207,22 +215,25 @@ def dest_playlist(channel_id: str, is_shorts: bool, v_duration: int,
     """Return destination playlist for addition based on channel category and video properties.
 
     Routing logic:
-    1. Upcoming streams -> route to stream playlists (music_lives or regular_streams)
-    2. Shorts are always excluded (return 'shorts')
-    3. Non-music channels route to category playlists by priority:
-       APPRENTISSAGE > DIVERTISSEMENT/GAMING > ASMR
-    4. Music channels:
-       - Long videos (>threshold) from dual-category channels -> their non-music category playlist
-       - Long videos (>threshold) from music-only channels -> 'none' (skipped)
-       - Favorites -> Banger Radar
-       - Others -> Release Radar
+        1. Upcoming streams -> route to stream playlists (music_lives or regular_streams).
+        2. Shorts are always excluded (return 'shorts').
+        3. Non-music channels route to category playlists by priority:
+           APPRENTISSAGE > DIVERTISSEMENT/GAMING > ASMR.
+        4. Music channels:
+           - Long videos (>threshold) from dual-category channels -> their non-music category playlist.
+           - Long videos (>threshold) from music-only channels -> 'none' (skipped).
+           - Favorites -> Banger Radar.
+           - Others -> Release Radar.
 
-    :param channel_id: YouTube channel ID
-    :param is_shorts: boolean indicating whether the video is a YouTube Short
-    :param v_duration: YouTube video duration in seconds
-    :param live_status: YouTube live broadcast content status ('none', 'upcoming', 'live')
-    :param max_duration: duration threshold in minutes (uses config.LONG_VIDEO_THRESHOLD_MINUTES by default)
-    :return: appropriate YouTube playlist ID or special string ('shorts', 'none')
+    Args:
+        channel_id: YouTube channel ID.
+        is_shorts: Boolean indicating whether the video is a YouTube Short.
+        v_duration: YouTube video duration in seconds.
+        live_status: YouTube live broadcast content status ('none', 'upcoming', 'live').
+        max_duration: Duration threshold in minutes (uses config.LONG_VIDEO_THRESHOLD_MINUTES by default).
+
+    Returns:
+        Appropriate YouTube playlist ID or special string ('shorts', 'none').
     """
     if max_duration is None:
         max_duration = config.LONG_VIDEO_THRESHOLD_MINUTES
@@ -270,10 +281,15 @@ def dest_playlist(channel_id: str, is_shorts: bool, v_duration: int,
 
 
 def update_repo_secrets(secret_name: str, new_value: str, logger: logging.Logger | None = None) -> None:
-    """Update a GitHub repository Secret value
-    :param secret_name: GH repository Secret name
-    :param new_value: new value for the selected Secret
-    :param logger: object for logging
+    """Update a GitHub repository Secret value.
+
+    Args:
+        secret_name: GitHub repository Secret name.
+        new_value: New value for the selected Secret.
+        logger: Optional Logger instance for logging.
+
+    Raises:
+        GitHubError: If the secret update fails.
     """
     repo = github.Github(auth=github.Auth.Token(PAT)).get_repo(github_repo)
     try:
@@ -295,7 +311,9 @@ def update_repo_secrets(secret_name: str, new_value: str, logger: logging.Logger
 
 def main(historical_data: pd.DataFrame) -> None:
     """Main process execution.
-    :param historical_data: Historical data DataFrame with video statistics.
+
+    Args:
+        historical_data: Historical data DataFrame with video statistics.
     """
     history_main = _create_logger()
     history_main.info('Process started.')
