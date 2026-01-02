@@ -1,14 +1,15 @@
-# -*- coding: utf-8 -*-
+"""Tests for file utility functions."""
 
+# Standard library
 import json
-import pytest
-
 from pathlib import Path
 
+# Third-party
+import pytest
+
+# Local
 from yrt import file_utils
 from yrt.exceptions import ConfigurationError
-
-"""Tests for file utility functions."""
 
 
 @pytest.mark.unit

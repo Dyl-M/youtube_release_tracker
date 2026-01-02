@@ -1,21 +1,14 @@
-# -*- coding: utf-8 -*-
+"""Utility functions for file operations with error handling."""
 
-from __future__ import annotations
-
+# Standard library
 import json
 import logging
 import os
+from typing import Any
 
+# Local
 from . import paths
 from .exceptions import ConfigurationError, FileAccessError
-
-"""File Information
-@file_name: file_utils.py
-@author: Dylan "dyl-m" Monfret
-Utility functions for file operations with error handling.
-"""
-
-"LOGGER"
 
 # Create logger
 logger = logging.Logger(name='file_utils', level=0)
@@ -33,16 +26,17 @@ log_file.setLevel(logging.DEBUG)
 log_file.setFormatter(formatter)
 logger.addHandler(log_file)
 
-"CONSTANTS"
+# Constants
 
 # Import allowed directories and extensions from centralized paths module
 ALLOWED_DIRS = paths.ALLOWED_DIRS
 ALLOWED_EXTENSIONS = paths.ALLOWED_EXTENSIONS
 
-"FUNCTIONS"
+
+# Functions
 
 
-def validate_file_path(file_path: str):
+def validate_file_path(file_path: str) -> str:
     """Validate and sanitize file path to prevent path traversal attacks.
 
     :param file_path: Path to validate (can be relative or absolute)
@@ -72,7 +66,7 @@ def validate_file_path(file_path: str):
     return normalized_path
 
 
-def load_json(file_path: str, required_keys: list | None = None):
+def load_json(file_path: str, required_keys: list[str] | None = None) -> dict[str, Any]:
     """Load a JSON file with comprehensive error handling.
 
     :param file_path: Path to the JSON file
@@ -109,10 +103,10 @@ def load_json(file_path: str, required_keys: list | None = None):
             logger.critical('%s missing required keys: %s', file_name, ', '.join(missing_keys))
             raise ConfigurationError(f'{file_name} missing required keys: {", ".join(missing_keys)}')
 
-    return data
+    return data  # type: ignore[no-any-return]
 
 
-def save_json(file_path: str, data: dict, indent: int = 2):
+def save_json(file_path: str, data: dict[str, Any], indent: int = 2) -> None:
     """Save data to a JSON file with error handling.
 
     :param file_path: Path to save the JSON file
@@ -137,7 +131,7 @@ def save_json(file_path: str, data: dict, indent: int = 2):
         raise ConfigurationError(f'Unexpected error saving {file_name}: {e}')
 
 
-def validate_nested_keys(data: dict, key_path: list, file_name: str):
+def validate_nested_keys(data: dict[str, Any], key_path: list[str], file_name: str) -> None:
     """Validate nested dictionary keys exist.
 
     :param data: Dictionary to validate
@@ -149,7 +143,7 @@ def validate_nested_keys(data: dict, key_path: list, file_name: str):
     for key in key_path:
         # Split on dot to support nested paths
         nested_keys = key.split('.')
-        current = data
+        current: Any = data
 
         for nested_key in nested_keys:
             if not isinstance(current, dict):

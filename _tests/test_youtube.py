@@ -1,12 +1,13 @@
-# -*- coding: utf-8 -*-
+"""Tests for YouTube API interaction functions."""
 
-import pytest
-
+# Standard library
 from unittest.mock import Mock, patch
 
-from yrt import youtube
+# Third-party
+import pytest
 
-"""Tests for YouTube API interaction functions."""
+# Local
+from yrt import youtube
 
 
 @pytest.mark.unit
@@ -95,33 +96,37 @@ class TestErrorConstants:
 
     @staticmethod
     def test_retry_constants_defined():
-        """Test retry configuration constants are defined."""
-        assert hasattr(youtube, 'MAX_RETRIES')
-        assert hasattr(youtube, 'BASE_DELAY')
-        assert hasattr(youtube, 'MAX_BACKOFF')
-        assert youtube.MAX_RETRIES >= 3
-        assert youtube.BASE_DELAY >= 1
-        assert youtube.MAX_BACKOFF >= youtube.BASE_DELAY
+        """Test retry configuration constants are defined in config module."""
+        from yrt import config
+        assert hasattr(config, 'MAX_RETRIES')
+        assert hasattr(config, 'BASE_DELAY')
+        assert hasattr(config, 'MAX_BACKOFF')
+        assert config.MAX_RETRIES >= 3
+        assert config.BASE_DELAY >= 1
+        assert config.MAX_BACKOFF >= config.BASE_DELAY
 
 
 @pytest.mark.unit
 class TestDurationParsing:
     """Test ISO 8601 duration parsing."""
 
+    @staticmethod
     @pytest.mark.skip("Not yet implemented")
-    def test_parse_short_duration(self):
+    def test_parse_short_duration():
         """Test parsing short video duration (< 1 minute)."""
         # PT30S = 30 seconds
         # This test assumes a helper function exists or we test via get_stats
         # If no helper exists, this documents expected behavior
 
+    @staticmethod
     @pytest.mark.skip("Not yet implemented")
-    def test_parse_medium_duration(self):
+    def test_parse_medium_duration():
         """Test parsing medium video duration (minutes)."""
         # PT3M30S = 3 minutes 30 seconds
 
+    @staticmethod
     @pytest.mark.skip("Not yet implemented")
-    def test_parse_long_duration(self):
+    def test_parse_long_duration():
         """Test parsing long video duration (hours)."""
         # PT1H30M = 1 hour 30 minutes
 

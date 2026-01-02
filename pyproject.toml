@@ -66,3 +66,15 @@ Issues = "https://github.com/Dyl-M/youtube_release_tracker/issues"
 
 [tool.ruff]
 extend-exclude = ["*.ipynb"]
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+warn_no_return = true
+warn_unreachable = true
+strict_optional = true
+
+[[tool.mypy.overrides]]
+module = ["isodate.*", "pyyoutube.*", "tqdm.*", "google_auth_oauthlib.*", "tzlocal.*"]
+ignore_missing_imports = true

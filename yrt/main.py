@@ -1,36 +1,23 @@
-# -*- coding: utf-8 -*-
+"""Main process for YouTube Release Tracker."""
 
-from __future__ import annotations
-
-import github
+# Standard library
 import logging
 import os
-import pandas as pd
 import re
 import sys
 
+# Third-party
+import github
+import pandas as pd
+
+# Local
+from . import config
 from . import file_utils
 from . import paths
 from . import youtube
 from .exceptions import YouTubeTrackerError, GitHubError
 
-"""File Information
-@file_name: main.py
-@author: Dylan "dyl-m" Monfret
-Main process.
-"""
-
-"ENVIRONMENT"
-
-try:
-    github_repo = os.environ['GITHUB_REPOSITORY']
-    PAT = os.environ['PAT']
-
-except KeyError:
-    github_repo = 'Dyl-M/auto_youtube_playlist'
-    PAT = 'PAT'
-
-"SYSTEM"
+# System
 
 try:
     exe_mode = sys.argv[1]
@@ -38,7 +25,38 @@ try:
 except IndexError:
     exe_mode = 'local'
 
-"PARAMETER FILES"
+
+def _get_env_variables() -> tuple[str, str]:
+    """Get and validate environment variables for GitHub Actions mode.
+
+    :return: Tuple of (github_repo, PAT) values
+    :raises ConfigurationError: If required environment variables are missing/empty in 'action' mode
+    """
+    from .exceptions import ConfigurationError
+
+    try:
+        repo = os.environ['GITHUB_REPOSITORY']
+        pat = os.environ['PAT']
+
+        # Validate that the values are not empty
+        if not repo or not pat:
+            raise ValueError("Environment variables are empty")
+
+        return repo, pat
+
+    except (KeyError, ValueError) as er:
+        if exe_mode == 'action':
+            missing_var = str(er).replace("'", "") if isinstance(er, KeyError) else "GITHUB_REPOSITORY or PAT"
+            raise ConfigurationError(
+                f"Required environment variable {missing_var} not set or empty. "
+                f"Please configure GitHub repository secrets."
+            )
+        # Fall back to local mode defaults
+        return 'Dyl-M/auto_youtube_playlist', 'PAT'
+
+
+# Environment
+github_repo, PAT = _get_env_variables()
 
 # Load configuration files with validation
 pocket_tube = file_utils.load_json(
@@ -69,22 +87,33 @@ other = list(set(other_raw))
 all_channels = list(set(music + other))
 
 # YouTube playlists
-release = playlists['release']['id']
-banger = playlists['banger']['id']
-re_listening = playlists['re_listening']['id']
-legacy = playlists['legacy']['id']
-music_lives = playlists['music_lives']['id']
-regular_streams = playlists['regular_streams']['id']
+release: str = playlists['release']['id']
+banger: str = playlists['banger']['id']
+re_listening: str = playlists['re_listening']['id']
+legacy: str = playlists['legacy']['id']
+music_lives: str = playlists['music_lives']['id']
+regular_streams: str = playlists['regular_streams']['id']
 
 # Category priority order and playlist mapping (for non-music channels)
-CATEGORY_PRIORITY = ['APPRENTISSAGE', 'DIVERTISSEMENT', 'GAMING', 'ASMR']
+CATEGORY_PRIORITY: list[str] = ['APPRENTISSAGE', 'DIVERTISSEMENT', 'GAMING', 'ASMR']
 
-CATEGORY_PLAYLISTS = {
+CATEGORY_PLAYLISTS: dict[str, str] = {
     'APPRENTISSAGE': playlists['apprentissage']['id'],
     'DIVERTISSEMENT': playlists['divertissement_gaming']['id'],
     'GAMING': playlists['divertissement_gaming']['id'],
     'ASMR': playlists['asmr']['id'],
 }
+
+# Playlist addition mapping: (playlist_id, log_name)
+PLAYLIST_ADDITIONS: list[tuple[str, str]] = [
+    (banger, 'Banger Radar'),
+    (release, 'Release Radar'),
+    (playlists['apprentissage']['id'], 'Educational content'),
+    (playlists['divertissement_gaming']['id'], 'Entertainment & Gaming'),
+    (playlists['asmr']['id'], 'ASMR & Relaxation'),
+    (music_lives, 'Music Lives'),
+    (regular_streams, 'My streams'),
+]
 
 category_channels = {
     'APPRENTISSAGE': set(pocket_tube['APPRENTISSAGE']),
@@ -105,10 +134,11 @@ else:
                'comments_w12', 'comments_w24', 'channel_name', 'video_title']
     histo_data = pd.DataFrame(columns=columns)
 
-"FUNCTIONS"
+
+# Functions
 
 
-def copy_last_exe_log():
+def copy_last_exe_log() -> None:
     """Copy the last execution logging from the main history file."""
     with open(paths.HISTORY_LOG, 'r', encoding='utf8') as history_file:
         history = history_file.read()
@@ -121,8 +151,59 @@ def copy_last_exe_log():
         last_exe_file.write(last_exe_log)
 
 
+def _create_logger() -> logging.Logger:
+    """Create and configure the main process logger.
+
+    :return: Configured Logger instance for history logging.
+    """
+    logger = logging.Logger(name='history_main', level=0)
+    handler = logging.FileHandler(filename=paths.HISTORY_LOG)
+    handler.setLevel(logging.DEBUG)
+    handler.setFormatter(
+        logging.Formatter(fmt='%(asctime)s [%(levelname)s] - %(message)s', datefmt='%Y-%m-%d %H:%M:%S%z')
+    )
+    logger.addHandler(handler)
+    return logger
+
+
+def _update_historical_stats(service: youtube.pyt.Client, historical_data: pd.DataFrame) -> pd.DataFrame:
+    """Collect weekly stats for videos in historical data.
+
+    :param service: YouTube API client.
+    :param historical_data: DataFrame with video statistics.
+    :return: Updated DataFrame with collected stats.
+    """
+    for week_delta in config.STATS_WEEK_DELTAS:
+        historical_data = youtube.weekly_stats(
+            service=service,
+            histo_data=historical_data,
+            week_delta=week_delta
+        )
+    return historical_data
+
+
+def _add_videos_to_playlists(
+        service: youtube.pyt.Client,
+        to_add: dict[str, list[str]],
+        logger: logging.Logger,
+        prog_bar: bool
+) -> None:
+    """Add videos to their destination playlists.
+
+    :param service: YouTube API client.
+    :param to_add: Dictionary mapping playlist IDs to lists of video IDs.
+    :param logger: Logger instance for logging additions.
+    :param prog_bar: Whether to display progress bar.
+    """
+    for playlist_id, log_name in PLAYLIST_ADDITIONS:
+        videos = to_add.get(playlist_id, [])
+        if videos:
+            logger.info('Addition to "%s": %s video(s).', log_name, len(videos))
+            youtube.add_to_playlist(service, playlist_id, videos, prog_bar=prog_bar)
+
+
 def dest_playlist(channel_id: str, is_shorts: bool, v_duration: int,
-                  live_status: str = 'none', max_duration: int = 10):
+                  live_status: str = 'none', max_duration: int | None = None) -> str:
     """Return destination playlist for addition based on channel category and video properties.
 
     Routing logic:
@@ -131,8 +212,8 @@ def dest_playlist(channel_id: str, is_shorts: bool, v_duration: int,
     3. Non-music channels route to category playlists by priority:
        APPRENTISSAGE > DIVERTISSEMENT/GAMING > ASMR
     4. Music channels:
-       - Long videos (>10min) from dual-category channels -> their non-music category playlist
-       - Long videos (>10min) from music-only channels -> 'none' (skipped)
+       - Long videos (>threshold) from dual-category channels -> their non-music category playlist
+       - Long videos (>threshold) from music-only channels -> 'none' (skipped)
        - Favorites -> Banger Radar
        - Others -> Release Radar
 
@@ -140,9 +221,12 @@ def dest_playlist(channel_id: str, is_shorts: bool, v_duration: int,
     :param is_shorts: boolean indicating whether the video is a YouTube Short
     :param v_duration: YouTube video duration in seconds
     :param live_status: YouTube live broadcast content status ('none', 'upcoming', 'live')
-    :param max_duration: duration threshold in minutes (default: 10)
+    :param max_duration: duration threshold in minutes (uses config.LONG_VIDEO_THRESHOLD_MINUTES by default)
     :return: appropriate YouTube playlist ID or special string ('shorts', 'none')
     """
+    if max_duration is None:
+        max_duration = config.LONG_VIDEO_THRESHOLD_MINUTES
+
     # Upcoming streams -> route to stream playlists
     if live_status == 'upcoming':
         if channel_id in music:
@@ -185,7 +269,7 @@ def dest_playlist(channel_id: str, is_shorts: bool, v_duration: int,
     return release
 
 
-def update_repo_secrets(secret_name: str, new_value: str, logger: logging.Logger | None = None):
+def update_repo_secrets(secret_name: str, new_value: str, logger: logging.Logger | None = None) -> None:
     """Update a GitHub repository Secret value
     :param secret_name: GH repository Secret name
     :param new_value: new value for the selected Secret
@@ -213,33 +297,16 @@ def main(historical_data: pd.DataFrame) -> None:
     """Main process execution.
     :param historical_data: Historical data DataFrame with video statistics.
     """
-    # Create loggers
-    history_main = logging.Logger(name='history_main', level=0)
-
-    # Create file handlers
-    history_main_file = logging.FileHandler(filename=paths.HISTORY_LOG)  # mode='a'
-
-    # Create formatter
-    formatter_main = logging.Formatter(fmt='%(asctime)s [%(levelname)s] - %(message)s', datefmt='%Y-%m-%d %H:%M:%S%z')
-
-    # Set file handlers' level
-    history_main_file.setLevel(logging.DEBUG)
-
-    # Assign file handlers and formatter to loggers
-    history_main_file.setFormatter(formatter_main)
-    history_main.addHandler(history_main_file)
-
-    # Start
+    history_main = _create_logger()
     history_main.info('Process started.')
 
-    if exe_mode == 'local':  # YouTube service creation
-        youtube_oauth, creds_b64 = youtube.create_service_local(), None  # YouTube service in local mode
-        prog_bar = True  # Display progress bar
-
+    # YouTube service creation based on execution mode
+    if exe_mode == 'local':
+        youtube_oauth, creds_b64 = youtube.create_service_local(), None
+        prog_bar = True
     else:
-        # YouTube service with GitHub workflow and Credentials
         youtube_oauth, creds_b64 = youtube.create_service_workflow()
-        prog_bar = False  # Do not display the progress bar
+        prog_bar = False
 
     # Add missing videos due to quota exceeded on previous run
     youtube.add_api_fail(service=youtube_oauth, prog_bar=prog_bar)
@@ -248,16 +315,12 @@ def main(historical_data: pd.DataFrame) -> None:
     history_main.info('Iterative research for %s YouTube channels.', len(all_channels))
     new_videos = youtube.iter_channels(youtube_oauth, all_channels, prog_bar=prog_bar)
 
+    # Update historical stats (common to both branches)
+    historical_data = _update_historical_stats(youtube_oauth, historical_data)
+
     if not new_videos:
         history_main.info('No addition to perform.')
-
-        # Get stats for already retrieved videos
-        historical_data = youtube.weekly_stats(service=youtube_oauth, histo_data=historical_data, week_delta=1)
-        historical_data = youtube.weekly_stats(service=youtube_oauth, histo_data=historical_data, week_delta=4)
-        historical_data = youtube.weekly_stats(service=youtube_oauth, histo_data=historical_data, week_delta=12)
-        historical_data = youtube.weekly_stats(service=youtube_oauth, histo_data=historical_data, week_delta=24)
-
-        # Store
+        # Store historical data only
         historical_data.drop_duplicates(inplace=True)
         historical_data.sort_values(['release_date', 'video_id'], inplace=True)
         historical_data.to_csv(paths.STATS_CSV, encoding='utf-8', index=False)
@@ -275,19 +338,12 @@ def main(historical_data: pd.DataFrame) -> None:
         # Prepare data for storing (excluding upcoming streams)
         to_keep = ['video_id', 'channel_id', 'release_date', 'status', 'is_shorts', 'duration', 'channel_name',
                    'video_title']
-
         stats_list = ['views_w1', 'views_w4', 'views_w12', 'views_w24', 'likes_w1', 'likes_w4', 'likes_w12',
                       'likes_w24', 'comments_w1', 'comments_w4', 'comments_w12', 'comments_w24']
 
         stored = new_data[~upcoming_mask][to_keep]
-        stored.loc[:, stats_list] = [pd.NA] * len(stats_list)
+        stored.loc[:, stats_list] = [pd.NA] * len(stats_list)  # type: ignore[assignment]
         stored = stored[to_keep[:-2] + stats_list + to_keep[-2:]]
-
-        # Get stats for already retrieved videos
-        historical_data = youtube.weekly_stats(service=youtube_oauth, histo_data=historical_data, week_delta=1)
-        historical_data = youtube.weekly_stats(service=youtube_oauth, histo_data=historical_data, week_delta=4)
-        historical_data = youtube.weekly_stats(service=youtube_oauth, histo_data=historical_data, week_delta=12)
-        historical_data = youtube.weekly_stats(service=youtube_oauth, histo_data=historical_data, week_delta=24)
 
         # Sort and store (drop all-NA columns before concat to avoid FutureWarning)
         dfs_to_concat = [df.dropna(axis=1, how='all') for df in [historical_data, stored] if not df.empty]
@@ -300,57 +356,18 @@ def main(historical_data: pd.DataFrame) -> None:
                                                                              row.duration,
                                                                              row.live_status), axis=1)
 
-        # Reformat
+        # Add videos to playlists
         to_add = new_data.groupby('dest_playlist')['video_id'].apply(list).to_dict()
+        _add_videos_to_playlists(youtube_oauth, to_add, history_main, prog_bar)
 
-        # Selection by playlist
-        add_banger = to_add.get(banger, [])
-        add_release = to_add.get(release, [])
-
-        # Category playlists
-        add_apprentissage = to_add.get(playlists['apprentissage']['id'], [])
-        add_divert_gaming = to_add.get(playlists['divertissement_gaming']['id'], [])
-        add_asmr = to_add.get(playlists['asmr']['id'], [])
-
-        # Stream playlists
-        add_music_lives = to_add.get(music_lives, [])
-        add_regular_streams = to_add.get(regular_streams, [])
-
-        # Addition by priority (Favorites > Music releases > Category videos)
-        if add_banger:
-            history_main.info('Addition to "Banger Radar": %s video(s).', len(add_banger))
-            youtube.add_to_playlist(youtube_oauth, banger, add_banger, prog_bar=prog_bar)
-
-        if add_release:
-            history_main.info('Addition to "Release Radar": %s video(s).', len(add_release))
-            youtube.add_to_playlist(youtube_oauth, release, add_release, prog_bar=prog_bar)
-
-        if add_apprentissage:
-            history_main.info('Addition to "Educational content": %s video(s).', len(add_apprentissage))
-            youtube.add_to_playlist(youtube_oauth, playlists['apprentissage']['id'],
-                                    add_apprentissage, prog_bar=prog_bar)
-
-        if add_divert_gaming:
-            history_main.info('Addition to "Entertainment & Gaming": %s video(s).', len(add_divert_gaming))
-            youtube.add_to_playlist(youtube_oauth, playlists['divertissement_gaming']['id'],
-                                    add_divert_gaming, prog_bar=prog_bar)
-
-        if add_asmr:
-            history_main.info('Addition to "ASMR & Relaxation": %s video(s).', len(add_asmr))
-            youtube.add_to_playlist(youtube_oauth, playlists['asmr']['id'],
-                                    add_asmr, prog_bar=prog_bar)
-
-        # Stream playlists
-        if add_music_lives:
-            history_main.info('Addition to "Music Lives": %s video(s).', len(add_music_lives))
-            youtube.add_to_playlist(youtube_oauth, music_lives, add_music_lives, prog_bar=prog_bar)
-
-        if add_regular_streams:
-            history_main.info('Addition to "My streams": %s video(s).', len(add_regular_streams))
-            youtube.add_to_playlist(youtube_oauth, regular_streams, add_regular_streams, prog_bar=prog_bar)
-
-    # Fill the Release Radar playlist
-    youtube.fill_release_radar(youtube_oauth, release, re_listening, legacy, lmt=40, prog_bar=prog_bar)
+    # Fill the Release Radar playlist (uses config.RELEASE_RADAR_TARGET by default)
+    youtube.fill_release_radar(
+        youtube_oauth,
+        release,
+        re_listening,
+        legacy,
+        prog_bar=prog_bar
+    )
 
     # Cleanup expired videos from category playlists
     youtube.cleanup_expired_videos(youtube_oauth, playlists, prog_bar=prog_bar)

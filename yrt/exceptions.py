@@ -1,10 +1,4 @@
-# -*- coding: utf-8 -*-
-
-"""File Information
-@file_name: exceptions.py
-@author: Dylan "dyl-m" Monfret
-Custom exceptions for the YouTube Release Tracker application.
-"""
+"""Custom exceptions for the YouTube Release Tracker application."""
 
 
 class YouTubeTrackerError(Exception):

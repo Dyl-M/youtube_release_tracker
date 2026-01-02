@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
-
-import pytest
-
 """Tests for main module routing and orchestration logic."""
+
+# Third-party
+import pytest
 
 
 @pytest.mark.unit

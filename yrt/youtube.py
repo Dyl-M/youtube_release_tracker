@@ -1,76 +1,78 @@
-# -*- coding: utf-8 -*-
+"""YouTube API interactions and web scraping methods."""
 
-from __future__ import annotations
-
+# Standard library
 import ast
 import base64
 import datetime as dt
-import isodate  # type: ignore[import-untyped]
 import itertools
 import json
 import logging
 import math
 import os
-import pandas as pd
-import pyyoutube as pyt  # type: ignore[import-untyped]
 import random
 import re
-import requests
 import time
+from typing import Any
+
+# Third-party
+import isodate  # type: ignore[import-untyped]
+import pandas as pd
+import pyyoutube as pyt  # type: ignore[import-untyped]
+import requests
 import tqdm  # type: ignore[import-untyped]
 import tzlocal
-
 from google.auth.exceptions import RefreshError
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow  # type: ignore[import-untyped]
 
+# Local
+from . import config
 from . import file_utils
 from . import paths
 from .exceptions import CredentialsError, YouTubeServiceError, APIError, FileAccessError
 
-"""File Information
-@file_name: youtube.py
-@author: Dylan "dyl-m" Monfret
-Script containing methods using YouTube API or doing scrapping / GET-requests on youtube.com.
-"""
-
-"OPTIONS"
+# Options
 
 pd.set_option('display.max_columns', None)  # pd.set_option('display.max_rows', None)
-
-"GLOBAL"
 
 # Error categorization for API retry logic (normalized to lowercase for comparison)
 TRANSIENT_ERRORS = {'serviceunavailable', 'backenderror', 'internalerror'}
 PERMANENT_ERRORS = {'videonotfound', 'forbidden', 'playlistoperationunsupported', 'duplicate'}
 QUOTA_ERRORS = {'quotaexceeded'}
-MAX_RETRIES = 3
-BASE_DELAY = 1  # Base delay in seconds for exponential backoff
-MAX_BACKOFF = 32  # Maximum backoff delay in seconds
 
 # Date format for YouTube API responses
 ISO_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S%z'
 
 
-def last_exe_date():
-    """Get the last execution datetime from a log file (supposing the first line is containing the right datetime).
-    :return date: Last execution date.
+def last_exe_date() -> dt.datetime:
+    """Get the last execution datetime from a log file.
+    :return: Last execution date, or 24 hours ago if log is missing/empty.
     """
-    with open(paths.LAST_EXE_LOG, 'r', encoding='utf8') as log_file:
-        first_log = log_file.readlines()[0]  # Get first log
+    try:
+        with open(paths.LAST_EXE_LOG, 'r', encoding='utf8') as log_file:
+            lines = log_file.readlines()
+            if not lines:
+                # Empty file - default to 24 hours ago (daily workflow)
+                return dt.datetime.now(tz=tzlocal.get_localzone()) - dt.timedelta(days=1)
+            first_log = lines[0]
 
-    d_str = re.search(r'(\d{4}(-\d{2}){2})\s(\d{2}:?){3}.[\d:]+', first_log).group()  # Extract date
-    date = dt.datetime.strptime(d_str, '%Y-%m-%d %H:%M:%S%z')  # Parse to datetime object
-    return date
+        match = re.search(r'(\d{4}(-\d{2}){2})\s(\d{2}:?){3}.[\d:]+', first_log)
+        if match is None:
+            raise ValueError(f'Could not parse date from log line: {first_log}')
+
+        d_str = match.group()
+        return dt.datetime.strptime(d_str, '%Y-%m-%d %H:%M:%S%z')
+
+    except (FileNotFoundError, IndexError):
+        # On first run or corrupted file, default to 24 hours ago (daily workflow)
+        return dt.datetime.now(tz=tzlocal.get_localzone()) - dt.timedelta(days=1)
 
 
 ADD_ON = file_utils.load_json(str(paths.ADD_ON_JSON))
 
 NOW = dt.datetime.now(tz=tzlocal.get_localzone())
 LAST_EXE = last_exe_date()
-
-"LOGGERS"
 
 # Create loggers
 history = logging.Logger(name='history', level=0)
@@ -88,10 +90,11 @@ history_file.setLevel(logging.DEBUG)
 history_file.setFormatter(formatter)
 history.addHandler(history_file)
 
-"FUNCTIONS"
+
+# Functions
 
 
-def encode_key(json_path: str, export_dir: str | None = None, export_name: str | None = None):
+def encode_key(json_path: str, export_dir: str | None = None, export_name: str | None = None) -> None:
     """Encode a JSON authentication file to base64
     :param json_path: file's path to authentication JSON file
     :param export_dir: export directory
@@ -124,7 +127,7 @@ def encode_key(json_path: str, export_dir: str | None = None, export_name: str |
         key_file.write(key_b64)
 
 
-def create_service_local(log: bool = True):
+def create_service_local(log: bool = True) -> pyt.Client:
     """Create a GCP service for YouTube API V3.
     Mostly inspired by this: https://learndataanalysis.org/google-py-file-source-code/
     :param log: to apply logging or not
@@ -171,12 +174,12 @@ def create_service_local(log: bool = True):
         raise YouTubeServiceError(f'{instance_fail_message}: {error}')
 
 
-def create_service_workflow():
+def create_service_workflow() -> tuple[pyt.Client, str]:
     """Create a GCP service for YouTube API V3, for usage in GitHub Actions workflow
     :return service: a Google's API service object build with 'googleapiclient.discovery.build'.
     """
 
-    def import_env_var(var_name: str):
+    def import_env_var(var_name: str) -> dict[str, Any]:
         """Import variable environment and perform base64 decoding
         :param var_name: environment variable name
         :return value: decoded value
@@ -186,7 +189,7 @@ def create_service_workflow():
             raise CredentialsError(f'Environment variable {var_name} not found')
         v_str = base64.urlsafe_b64decode(v_b64).decode(encoding='utf8')  # Decode
         value = ast.literal_eval(v_str)  # Eval
-        return value
+        return value  # type: ignore[no-any-return]
 
     creds_b64 = os.environ.get('CREDS_B64')  # Initiate the Base64 version of the Credentials object
     creds_dict = import_env_var(var_name='CREDS_B64')  # Import pre-registered credentials
@@ -211,6 +214,8 @@ def create_service_workflow():
     try:
         service = pyt.Client(client_id=creds.client_id, client_secret=creds.client_secret, access_token=creds.token)
         history.info('YouTube service created successfully.')
+        # creds_b64 is guaranteed to be str at this point (import_env_var raises if missing)
+        assert creds_b64 is not None
         return service, creds_b64
 
     except (pyt.error.PyYouTubeException, ValueError, AttributeError) as error:
@@ -218,7 +223,7 @@ def create_service_workflow():
         raise YouTubeServiceError(f'{instance_fail_message}: {error}')
 
 
-def _parse_playlist_item(item, date_format: str):
+def _parse_playlist_item(item: Any, date_format: str) -> dict[str, Any] | None:
     """Parse a playlist item into a dict, returns None if no release date.
     :param item: A playlist item from YouTube API response.
     :param date_format: Date format string for parsing.
@@ -226,6 +231,7 @@ def _parse_playlist_item(item, date_format: str):
     """
     if item.contentDetails.videoPublishedAt is None:
         return None
+
     return {
         'video_id': item.contentDetails.videoId,
         'video_title': item.snippet.title,
@@ -237,7 +243,11 @@ def _parse_playlist_item(item, date_format: str):
     }
 
 
-def _handle_playlist_error(error: pyt.error.PyYouTubeException, playlist_id: str, add_on: dict | None = None):
+def _handle_playlist_error(
+        error: pyt.error.PyYouTubeException,
+        playlist_id: str,
+        add_on: dict[str, Any] | None = None
+) -> bool:
     """Handle playlist API errors. Exits program for fatal errors.
     :param error: The PyYouTubeException that was raised.
     :param playlist_id: The playlist ID that caused the error.
@@ -257,8 +267,12 @@ def _handle_playlist_error(error: pyt.error.PyYouTubeException, playlist_id: str
     raise APIError(f'[{playlist_id}] Unknown error: {error.message}')
 
 
-def _filter_items_by_date_range(p_items: list, latest_d: dt.datetime,
-                                oldest_d: dt.datetime | None = None, day_ago: int | None = None):
+def _filter_items_by_date_range(
+        p_items: list[dict[str, Any]],
+        latest_d: dt.datetime,
+        oldest_d: dt.datetime | None = None,
+        day_ago: int | None = None
+) -> list[dict[str, Any]]:
     """Filter videos on a date range.
     :param p_items: Playlist items as a list.
     :param latest_d: The latest reference date.
@@ -274,7 +288,12 @@ def _filter_items_by_date_range(p_items: list, latest_d: dt.datetime,
     return p_items
 
 
-def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int | None = None, latest_d: dt.datetime = NOW):
+def get_playlist_items(
+        service: pyt.Client,
+        playlist_id: str,
+        day_ago: int | None = None,
+        latest_d: dt.datetime = NOW
+) -> list[dict[str, Any]]:
     """Get the videos in a YouTube playlist.
     :param service: A Python YouTube Client.
     :param playlist_id: A YouTube playlist ID.
@@ -293,7 +312,7 @@ def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int | Non
             request = service.playlistItems.list(
                 part=['snippet', 'contentDetails', 'status'],
                 playlist_id=playlist_id,
-                max_results=50,
+                max_results=config.API_BATCH_SIZE,
                 pageToken=next_page_token
             )
 
@@ -305,7 +324,7 @@ def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int | Non
             next_page_token = request.nextPageToken
 
             # No need for more requests (the playlist must be ordered chronologically!)
-            if len(p_items) <= 50 or next_page_token is None:
+            if len(p_items) <= config.API_BATCH_SIZE or next_page_token is None:
                 break
 
         except pyt.error.PyYouTubeException as error:
@@ -315,18 +334,20 @@ def get_playlist_items(service: pyt.Client, playlist_id: str, day_ago: int | Non
     return p_items
 
 
-def get_videos(service: pyt.Client, videos_list: list):
+def get_videos(service: pyt.Client, videos_list: list[str]) -> list[Any]:
     """Get information from YouTube videos
     :param service: a Python YouTube Client
     :param videos_list: list of YouTube video IDs
     :return: request results.
     """
-    return service.videos.list(part=['snippet', 'contentDetails', 'statistics', 'status'],
-                               video_id=videos_list,
-                               max_results=50).items
+    return service.videos.list(  # type: ignore[no-any-return]
+        part=['snippet', 'contentDetails', 'statistics', 'status'],
+        video_id=videos_list,
+        max_results=config.API_BATCH_SIZE
+    ).items
 
 
-def get_subs(service: pyt.Client, channel_list: list):
+def get_subs(service: pyt.Client, channel_list: list[str]) -> list[dict[str, Any]]:
     """Get the number of subscribers for several YouTube channels
     :param service: a Python YouTube Client
     :param channel_list: list of YouTube channel IDs
@@ -334,12 +355,13 @@ def get_subs(service: pyt.Client, channel_list: list):
     """
     ch_filter = [channel_id for channel_id in channel_list if channel_id is not None]
 
-    # Split task in chunks of size 50 to request on a maximum of 50 channels at each iteration.
-    channels_chunks = [ch_filter[i:i + min(50, len(ch_filter))] for i in range(0, len(ch_filter), 50)]
+    # Split task in chunks to request on a maximum of API_BATCH_SIZE channels at each iteration.
+    batch_size = config.API_BATCH_SIZE
+    channels_chunks = [ch_filter[i:i + min(batch_size, len(ch_filter))] for i in range(0, len(ch_filter), batch_size)]
     raw_chunk = []
 
     for chunk in channels_chunks:
-        req = service.channels.list(part=['statistics'], channel_id=chunk, max_results=50).items
+        req = service.channels.list(part=['statistics'], channel_id=chunk, max_results=config.API_BATCH_SIZE).items
         raw_chunk += req
 
     items = [{'channel_id': item.id, 'subscribers': item.statistics.subscriberCount} for item in raw_chunk]
@@ -347,7 +369,7 @@ def get_subs(service: pyt.Client, channel_list: list):
     return items
 
 
-def check_if_live(service: pyt.Client, videos_list: list):
+def check_if_live(service: pyt.Client, videos_list: list[str]) -> list[dict[str, Any]]:
     """Get broadcast status with YouTube video IDs
     :param service: a Python YouTube Client
     :param videos_list: list of YouTube video IDs
@@ -355,8 +377,10 @@ def check_if_live(service: pyt.Client, videos_list: list):
     """
     items = []
 
-    # Split tasks in chunks of size 50 to request a maximum of 50 videos at each iteration.
-    videos_chunks = [videos_list[i:i + min(50, len(videos_list))] for i in range(0, len(videos_list), 50)]
+    # Split tasks in chunks to request a maximum of API_BATCH_SIZE videos at each iteration.
+    batch_size = config.API_BATCH_SIZE
+    videos_chunks = [videos_list[i:i + min(batch_size, len(videos_list))]
+                     for i in range(0, len(videos_list), batch_size)]
 
     for chunk in videos_chunks:
         try:
@@ -372,7 +396,7 @@ def check_if_live(service: pyt.Client, videos_list: list):
     return items
 
 
-def get_stats(service: pyt.Client, videos_list: list, check_shorts: bool = True):
+def get_stats(service: pyt.Client, videos_list: list[Any], check_shorts: bool = True) -> list[dict[str, Any]]:
     """Get duration, views and live status of YouTube video with their ID
     :param service: a Python YouTube Client
     :param videos_list: list of YouTube video IDs
@@ -387,8 +411,9 @@ def get_stats(service: pyt.Client, videos_list: list, check_shorts: bool = True)
     except TypeError:
         videos_ids = videos_list
 
-    # Split tasks in chunks of size 50 to request a maximum of 50 videos at each iteration.
-    videos_chunks = [videos_ids[i:i + min(50, len(videos_ids))] for i in range(0, len(videos_ids), 50)]
+    # Split tasks in chunks to request a maximum of API_BATCH_SIZE videos at each iteration.
+    batch_size = config.API_BATCH_SIZE
+    videos_chunks = [videos_ids[i:i + min(batch_size, len(videos_ids))] for i in range(0, len(videos_ids), batch_size)]
 
     for chunk in videos_chunks:
         try:
@@ -424,7 +449,7 @@ def get_stats(service: pyt.Client, videos_list: list, check_shorts: bool = True)
     return items
 
 
-def add_stats(service: pyt.Client, video_list: list):
+def add_stats(service: pyt.Client, video_list: list[dict[str, Any]]) -> pd.DataFrame:
     """Apply 'get_playlist_items' for a collection of YouTube playlists
     :param service: a Python YouTube Client
     :param video_list: list of videos formatted by iter_channels functions
@@ -435,8 +460,13 @@ def add_stats(service: pyt.Client, video_list: list):
     return video_first_data.merge(additional_data)
 
 
-def iter_channels(service: pyt.Client, channels: list, day_ago: int | None = None, latest_d: dt.datetime = NOW,
-                  prog_bar: bool = True):
+def iter_channels(
+        service: pyt.Client,
+        channels: list[str],
+        day_ago: int | None = None,
+        latest_d: dt.datetime = NOW,
+        prog_bar: bool = True
+) -> list[dict[str, Any]]:
     """Apply 'get_playlist_items' for a collection of YouTube playlists.
     :param channels: List of YouTube channel IDs.
     :param service: A Python YouTube Client.
@@ -448,7 +478,7 @@ def iter_channels(service: pyt.Client, channels: list, day_ago: int | None = Non
     # Create pairs of (channel_id, playlist_id) to track source channel
     channel_playlist_pairs = [(ch_id, f'UU{ch_id[2:]}') for ch_id in channels if ch_id not in ADD_ON['toPass']]
 
-    def get_items_with_source(channel_id: str, playlist_id: str):
+    def get_items_with_source(channel_id: str, playlist_id: str) -> list[dict[str, Any]]:
         """Fetch playlist items and add source_channel_id to each."""
         items = get_playlist_items(service=service, playlist_id=playlist_id, day_ago=day_ago, latest_d=latest_d)
         for item in items:
@@ -465,7 +495,12 @@ def iter_channels(service: pyt.Client, channels: list, day_ago: int | None = Non
     return list(itertools.chain.from_iterable(item_it))
 
 
-def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list, prog_bar: bool = True):
+def add_to_playlist(
+        service: pyt.Client,
+        playlist_id: str,
+        videos_list: list[str],
+        prog_bar: bool = True
+) -> None:
     """Add a list of video to a YouTube playlist
     :param service: a Python YouTube Client
     :param playlist_id: a YouTube playlist ID
@@ -483,7 +518,7 @@ def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list, pr
     for video_id in add_iterator:
         r_body = {'snippet': {'playlistId': playlist_id, 'resourceId': {'kind': 'youtube#video', 'videoId': video_id}}}
 
-        for attempt in range(MAX_RETRIES):
+        for attempt in range(config.MAX_RETRIES):
             try:
                 service.playlistItems.insert(parts='snippet', body=r_body)
                 break  # Success, exit retry loop
@@ -498,12 +533,12 @@ def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list, pr
                 error_reason_normalized = error_reason.lower().replace('_', '')
 
                 # Handle transient errors with exponential backoff + jitter
-                if error_reason_normalized in TRANSIENT_ERRORS and attempt < MAX_RETRIES - 1:
+                if error_reason_normalized in TRANSIENT_ERRORS and attempt < config.MAX_RETRIES - 1:
                     # Calculate exponential backoff with equal jitter to prevent thundering herd
-                    delay = min(MAX_BACKOFF, int(BASE_DELAY * math.exp(attempt)))
+                    delay = min(config.MAX_BACKOFF, int(config.BASE_DELAY * math.exp(attempt)))
                     wait_time = delay / 2 + random.uniform(0, delay / 2)
                     history.warning('Transient error (%s) for video %s, retrying in %.2fs (attempt %s/%s)',
-                                    error_reason, video_id, wait_time, attempt + 1, MAX_RETRIES)
+                                    error_reason, video_id, wait_time, attempt + 1, config.MAX_RETRIES)
                     time.sleep(wait_time)
                     continue
 
@@ -524,7 +559,12 @@ def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list, pr
         file_utils.save_json(str(paths.API_FAILURE_JSON), api_failure)
 
 
-def del_from_playlist(service: pyt.Client, playlist_id: str, items_list: list, prog_bar: bool = True):
+def del_from_playlist(
+        service: pyt.Client,
+        playlist_id: str,
+        items_list: list[dict[str, Any]],
+        prog_bar: bool = True
+) -> None:
     """Delete videos inside a YouTube playlist
     :param service: a Python YouTube Client
     :param playlist_id: a YouTube playlist ID
@@ -541,16 +581,16 @@ def del_from_playlist(service: pyt.Client, playlist_id: str, items_list: list, p
         try:
             service.playlistItems.delete(playlist_item_id=item['item_id'])
 
-        except pyt.error.PyYouTubeException as http_error:  # skipcq: PYL-W0703
+        except pyt.error.PyYouTubeException as http_error:
             history.warning('Deletion Request Failure: (%s) - %s', item['video_id'], http_error.message)
 
 
-def sort_db(service: pyt.Client):
+def sort_db(service: pyt.Client) -> None:
     """Sort and save the PocketTube database file
     :param service: a Python YouTube Client
     """
 
-    def get_channels(_service: pyt.Client, _channel_list: list):
+    def get_channels(_service: pyt.Client, _channel_list: list[str]) -> list[str]:
         """Get YouTube channels basic information
         :param _service: a YouTube's service build with 'googleapiclient.discovery'
         :param _channel_list: list of YouTube channel ID
@@ -558,13 +598,16 @@ def sort_db(service: pyt.Client):
         """
         information = []
 
-        # Split task in chunks of size 50 to request on a maximum of 50 channels at each iteration.
-        channels_chunks = [_channel_list[i:i + min(50, len(_channel_list))] for i in range(0, len(_channel_list), 50)]
+        # Split task in chunks to request on a maximum of API_BATCH_SIZE channels at each iteration.
+        batch_size = config.API_BATCH_SIZE
+        channels_chunks = [_channel_list[i:i + min(batch_size, len(_channel_list))]
+                           for i in range(0, len(_channel_list), batch_size)]
 
         for chunk in channels_chunks:
             try:
                 # Request channels
-                request = _service.channels.list(part=['snippet'], channel_id=chunk, max_results=50).items
+                request = _service.channels.list(part=['snippet'], channel_id=chunk,
+                                                 max_results=config.API_BATCH_SIZE).items
 
                 # Extract upload playlists, channel names and their ID.
                 information += [{'title': an_item.snippet.title, 'id': an_item.id} for an_item in request]
@@ -591,7 +634,7 @@ def sort_db(service: pyt.Client):
     file_utils.save_json(str(paths.POCKET_TUBE_JSON), channels_db)
 
 
-def is_shorts(video_id: str):
+def is_shorts(video_id: str) -> bool:
     """Check if a YouTube video is a short or not
     :param video_id: YouTube video ID
     :return: True if the video is short, False otherwise. Returns False on network errors.
@@ -599,7 +642,7 @@ def is_shorts(video_id: str):
     try:
         response = requests.head(
             f'https://www.youtube.com/shorts/{video_id}',
-            timeout=5,
+            timeout=config.NETWORK_TIMEOUT,
             allow_redirects=False
         )
         return response.status_code == 200
@@ -609,8 +652,12 @@ def is_shorts(video_id: str):
         return False  # Default to non-short on error
 
 
-def weekly_stats(service: pyt.Client, histo_data: pd.DataFrame, week_delta: int,
-                 ref_date: dt.datetime = dt.datetime.now(dt.timezone.utc)):
+def weekly_stats(
+        service: pyt.Client,
+        histo_data: pd.DataFrame,
+        week_delta: int,
+        ref_date: dt.datetime = dt.datetime.now(dt.timezone.utc)
+) -> pd.DataFrame:
     """Add weekly statistics to historical data retrieved from YouTube for each run.
     :param service: A Python YouTube Client.
     :param histo_data: Data with statistics retrieved throughout the weeks.
@@ -663,85 +710,168 @@ def get_items_count(service: pyt.Client, playlist_ids: list) -> tuple:
     return tuple(pl.contentDetails.itemCount for pl in playlists)
 
 
-def fill_release_radar(service: pyt.Client, target_playlist: str, re_listening_id: str, legacy_id: str, lmt: int = 30,
-                       prog_bar: bool = True):
+def _get_videos_to_add_count(service: pyt.Client, target_playlist: str, lmt: int) -> int:
+    """Calculate how many videos are needed to fill the target playlist.
+
+    :param service: YouTube API client.
+    :param target_playlist: Target playlist ID.
+    :param lmt: Target playlist size limit.
+    :return: Number of videos to add (0 if error or already full).
+    """
+    try:
+        current_count = len(service.playlistItems.list(
+            part=['snippet'],
+            max_results=lmt,
+            playlist_id=target_playlist
+        ).items)
+        return lmt - current_count
+
+    except pyt.PyYouTubeException as error:
+        if error.status_code == 403:
+            history.warning('API quota exceeded.')
+        else:
+            history.warning('Unknown error: %s', error.message)
+        return 0
+
+
+def _calculate_allocation(n_add: int, count_a: int, count_b: int) -> tuple[int, int]:
+    """Calculate proportional allocation between two sources.
+
+    :param n_add: Total number to add.
+    :param count_a: Item count in source A.
+    :param count_b: Item count in source B.
+    :return: Tuple of (allocation_a, allocation_b).
+    """
+    total = count_a + count_b
+
+    if total == 0:
+        return 0, 0
+
+    ratio_a = count_a / total
+    ratio_b = count_b / total
+
+    if ratio_a < ratio_b:
+        return math.ceil(n_add * ratio_a), math.floor(n_add * ratio_b)
+
+    return math.floor(n_add * ratio_a), math.ceil(n_add * ratio_b)
+
+
+def _transfer_videos(
+        service: pyt.Client,
+        target_playlist: str,
+        source_playlist: str,
+        videos: list[dict],
+        source_name: str,
+        prog_bar: bool
+) -> None:
+    """Transfer videos from source to target playlist.
+
+    :param service: YouTube API client.
+    :param target_playlist: Destination playlist ID.
+    :param source_playlist: Source playlist ID.
+    :param videos: List of video dicts with 'video_id' and 'item_id'.
+    :param source_name: Name for logging.
+    :param prog_bar: Whether to display progress bar.
+    """
+    if not videos:
+        return
+
+    history.info('%s addition(s) from %s playlist.', len(videos), source_name)
+    add_to_playlist(
+        service,
+        target_playlist,
+        [v['video_id'] for v in videos],
+        prog_bar
+    )
+    del_from_playlist(
+        service,
+        source_playlist,
+        videos,
+        prog_bar
+    )
+
+
+def fill_release_radar(
+        service: pyt.Client,
+        target_playlist: str,
+        re_listening_id: str,
+        legacy_id: str,
+        lmt: int | None = None,
+        prog_bar: bool = True
+) -> None:
     """Fill the Release Radar playlist with videos from re-listening playlists.
     :param service: A Python YouTube Client.
     :param target_playlist: YouTube playlist ID where videos need to be added.
     :param re_listening_id: YouTube playlist ID for music to re-listen to.
     :param legacy_id: An older YouTube playlist to clear out.
-    :param lmt: The addition threshold (30 by default).
+    :param lmt: The addition threshold (uses config.RELEASE_RADAR_TARGET by default).
     :param prog_bar: To use tqdm progress bar or not.
     """
-    week_ago = NOW - dt.timedelta(weeks=1)
+    if lmt is None:
+        lmt = config.RELEASE_RADAR_TARGET
 
-    # Compute how many videos are necessary to fill the target playlist
-    try:
-        n_add = lmt - len(service.playlistItems.list(part=['snippet'],
-                                                     max_results=lmt,
-                                                     playlist_id=target_playlist).items)
-    except pyt.PyYouTubeException as error:
-        if error.status_code == 403:
-            history.warning('API quota exceeded.')
-            n_add = 0
-
-        else:
-            history.warning('Unknown error: %s', error.message)
-            n_add = 0
-
-    if n_add == 0:  # Release Radar has too much content already
+    n_add = _get_videos_to_add_count(service, target_playlist, lmt)
+    if n_add <= 0:
         history.info('No addition necessary for Release Radar')
+        return
 
-    else:
-        to_re_listen_count, legacy_count = get_items_count(service, [re_listening_id, legacy_id])
-        re_listen_ratio = to_re_listen_count / (to_re_listen_count + legacy_count)
-        legacy_ratio = legacy_count / (to_re_listen_count + legacy_count)
+    # Calculate proportional allocation from each source
+    to_re_listen_count, legacy_count = get_items_count(service, [re_listening_id, legacy_id])
+    n_add_rel, n_add_leg = _calculate_allocation(n_add, to_re_listen_count, legacy_count)
 
-        if re_listen_ratio < legacy_ratio:
-            n_add_rel, n_add_leg = math.ceil(n_add * re_listen_ratio), math.floor(n_add * legacy_ratio)
-        else:
-            n_add_rel, n_add_leg = math.floor(n_add * re_listen_ratio), math.ceil(n_add * legacy_ratio)
+    # Fetch and format videos from both playlists
+    week_ago = NOW - dt.timedelta(weeks=config.RELISTENING_AGE_WEEKS)
 
-        # Get videos from both playlists
-        to_re_listen_items = service.playlistItems.list(part=['snippet', 'contentDetails'],
-                                                        playlist_id=re_listening_id,
-                                                        max_results=lmt).items
+    to_re_listen_items = service.playlistItems.list(
+        part=['snippet', 'contentDetails'],
+        playlist_id=re_listening_id,
+        max_results=lmt
+    ).items
+    to_re_listen_raw = [{'video_id': item.contentDetails.videoId,
+                         'add_date': dt.datetime.strptime(item.snippet.publishedAt, ISO_DATE_FORMAT),
+                         'item_id': item.id} for item in to_re_listen_items]
 
-        legacy_items = service.playlistItems.list(part=['contentDetails'], playlist_id=legacy_id, max_results=lmt).items
+    to_re_listen_fil = [item for item in to_re_listen_raw if item['add_date'] < week_ago]
 
-        # Format list for treatment
-        to_re_listen_raw = [{'video_id': item.contentDetails.videoId,
-                             'add_date': dt.datetime.strptime(item.snippet.publishedAt, ISO_DATE_FORMAT),
-                             'item_id': item.id} for item in to_re_listen_items]
+    legacy_items = service.playlistItems.list(
+        part=['contentDetails'],
+        playlist_id=legacy_id,
+        max_results=lmt
+    ).items
+    legacy_raw = [{'video_id': item.contentDetails.videoId, 'item_id': item.id} for item in legacy_items]
 
-        legacy_raw = [{'video_id': item.contentDetails.videoId, 'item_id': item.id} for item in legacy_items]
+    # Pre-selection with fallback if one source is insufficient
+    addition_rel = to_re_listen_fil[:n_add_rel]
+    addition_leg = legacy_raw[:n_add_leg]
 
-        # Filter re-listening: keep videos added at least a week ago
-        to_re_listen_fil = [item for item in to_re_listen_raw if item['add_date'] < week_ago]
+    # Adjust allocations if one source doesn't have enough content
+    if len(addition_leg) < n_add_leg:
+        addition_rel = to_re_listen_fil[:n_add - len(addition_leg)]
 
-        # Pre-selection
-        addition_rel = to_re_listen_fil[:n_add_rel]
-        addition_leg = legacy_raw[:n_add_leg]
+    elif len(addition_rel) < n_add_rel:
+        addition_leg = legacy_raw[:n_add - len(addition_rel)]
 
-        if len(addition_leg) < n_add_leg:  # If not enough content in Legacy playlist
-            addition_rel = to_re_listen_fil[:n_add - len(addition_leg)]
+    # Transfer videos from sources to target
+    _transfer_videos(
+        service,
+        target_playlist,
+        re_listening_id,
+        addition_rel,
+        'Re-listening',
+        prog_bar
+    )
 
-        if len(addition_rel) < n_add_rel:  # If not enough content in Re-listening playlist
-            addition_leg = legacy_raw[:n_add - len(addition_rel)]
-
-        # Perform updates on playlist
-        if addition_rel:  # If any addition from re-listening
-            history.info('%s addition(s) from Re-listening playlist.', len(addition_rel))
-            add_to_playlist(service, target_playlist, [it['video_id'] for it in addition_rel], prog_bar)
-            del_from_playlist(service, re_listening_id, addition_rel, prog_bar)
-
-        if addition_leg:  # If any addition from Legacy
-            history.info('%s addition(s) from Legacy playlist.', len(addition_leg))
-            add_to_playlist(service, target_playlist, [it['video_id'] for it in addition_leg], prog_bar)
-            del_from_playlist(service, legacy_id, addition_leg, prog_bar)
+    _transfer_videos(
+        service,
+        target_playlist,
+        legacy_id,
+        addition_leg,
+        'Legacy',
+        prog_bar
+    )
 
 
-def cleanup_expired_videos(service: pyt.Client, playlist_config: dict, prog_bar: bool = True):
+def cleanup_expired_videos(service: pyt.Client, playlist_config: dict[str, Any], prog_bar: bool = True) -> None:
     """Remove expired videos from playlists with retention rules.
 
     For each playlist with 'retention_days' configured:
@@ -754,17 +884,21 @@ def cleanup_expired_videos(service: pyt.Client, playlist_config: dict, prog_bar:
                            Each playlist entry may have 'retention_days' key.
     :param prog_bar: To use tqdm progress bar or not.
     """
-    for config in playlist_config.values():
+    for playlist_cfg in playlist_config.values():
         # Skip playlists without retention rules
-        if 'retention_days' not in config:
+        if 'retention_days' not in playlist_cfg:
             continue
 
-        playlist_id = config['id']
-        retention_days = config['retention_days']
-        playlist_name = config['name']
+        playlist_id = playlist_cfg['id']
+        retention_days = playlist_cfg['retention_days']
+        playlist_name = playlist_cfg['name']
         cutoff_date = NOW - dt.timedelta(days=retention_days)
 
-        history.info('Checking retention for playlist "%s" (retention: %d days)', playlist_name, retention_days)
+        history.info(
+            'Checking retention for playlist "%s" (retention: %d days)',
+            playlist_name,
+            retention_days
+        )
 
         # Fetch all items with pagination
         expired_items = []
@@ -775,7 +909,7 @@ def cleanup_expired_videos(service: pyt.Client, playlist_config: dict, prog_bar:
                 response = service.playlistItems.list(
                     part=['snippet', 'contentDetails'],
                     playlist_id=playlist_id,
-                    max_results=50,
+                    max_results=config.API_BATCH_SIZE,
                     pageToken=next_page_token
                 )
 
@@ -805,11 +939,12 @@ def cleanup_expired_videos(service: pyt.Client, playlist_config: dict, prog_bar:
         if expired_items:
             history.info('Removing %d expired video(s) from "%s"', len(expired_items), playlist_name)
             del_from_playlist(service, playlist_id, expired_items, prog_bar)
+
         else:
             history.info('No expired videos in "%s"', playlist_name)
 
 
-def _fetch_stream_playlist_items(service: pyt.Client, playlist_id: str, playlist_name: str) -> list:
+def _fetch_stream_playlist_items(service: pyt.Client, playlist_id: str, playlist_name: str) -> list[dict[str, Any]]:
     """Fetch all items from a stream playlist with pagination.
 
     :param service: A Python YouTube Client.
@@ -817,7 +952,7 @@ def _fetch_stream_playlist_items(service: pyt.Client, playlist_id: str, playlist
     :param playlist_name: The playlist name for logging.
     :return: List of items with item_id and video_id.
     """
-    all_items = []
+    all_items: list[dict[str, Any]] = []
     next_page_token = None
 
     while True:
@@ -825,7 +960,7 @@ def _fetch_stream_playlist_items(service: pyt.Client, playlist_id: str, playlist
             response = service.playlistItems.list(
                 parts=['snippet', 'contentDetails'],
                 playlist_id=playlist_id,
-                count=50,
+                count=config.API_BATCH_SIZE,
                 page_token=next_page_token
             )
 
@@ -846,7 +981,7 @@ def _fetch_stream_playlist_items(service: pyt.Client, playlist_id: str, playlist
     return all_items
 
 
-def _find_ended_streams(service: pyt.Client, all_items: list) -> list:
+def _find_ended_streams(service: pyt.Client, all_items: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Find streams that have ended by checking their live status.
 
     :param service: A Python YouTube Client.
@@ -855,11 +990,12 @@ def _find_ended_streams(service: pyt.Client, all_items: list) -> list:
     """
     video_ids = [item['video_id'] for item in all_items]
     video_id_to_item = {item['video_id']: item for item in all_items}
-    ended_items = []
+    ended_items: list[dict[str, Any]] = []
 
-    # Batch video status checks (50 per request)
-    for i in range(0, len(video_ids), 50):
-        chunk = video_ids[i:i + 50]
+    # Batch video status checks
+    batch_size = config.API_BATCH_SIZE
+    for i in range(0, len(video_ids), batch_size):
+        chunk = video_ids[i:i + batch_size]
         try:
             videos_response = get_videos(service=service, videos_list=chunk)
             for video in videos_response:
@@ -872,7 +1008,7 @@ def _find_ended_streams(service: pyt.Client, all_items: list) -> list:
     return ended_items
 
 
-def cleanup_ended_streams(service: pyt.Client, playlist_config: dict, prog_bar: bool = True):
+def cleanup_ended_streams(service: pyt.Client, playlist_config: dict[str, Any], prog_bar: bool = True) -> None:
     """Remove ended streams from playlists with cleanup_on_end=True.
 
     For each playlist with 'cleanup_on_end' configured:
@@ -885,12 +1021,12 @@ def cleanup_ended_streams(service: pyt.Client, playlist_config: dict, prog_bar: 
                            Each playlist entry may have 'cleanup_on_end' key.
     :param prog_bar: To use tqdm progress bar or not.
     """
-    for config in playlist_config.values():
-        if not config.get('cleanup_on_end', False):
+    for playlist_cfg in playlist_config.values():
+        if not playlist_cfg.get('cleanup_on_end', False):
             continue
 
-        playlist_id = config['id']
-        playlist_name = config['name']
+        playlist_id = playlist_cfg['id']
+        playlist_name = playlist_cfg['name']
 
         history.info('Checking ended streams for playlist "%s"', playlist_name)
 
@@ -910,7 +1046,7 @@ def cleanup_ended_streams(service: pyt.Client, playlist_config: dict, prog_bar: 
             history.info('No ended streams in "%s"', playlist_name)
 
 
-def add_api_fail(service: pyt.Client, prog_bar: bool = True):
+def add_api_fail(service: pyt.Client, prog_bar: bool = True) -> None:
     """Add missing videos to a targeted playlist following API failures on a previous run
     :param service: a Python YouTube Client
     :param prog_bar: to use tqdm progress bar or not.
