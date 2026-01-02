@@ -53,6 +53,7 @@ Repository structure
 ├── _data
 │   ├── add-on.json
 │   ├── api_failure.json
+│   ├── constants.json
 │   ├── playlists.json
 │   ├── pocket_tube.json
 │   └── stats.csv
@@ -77,6 +78,7 @@ Repository structure
 │   ├── __init__.py
 │   ├── conftest.py
 │   ├── README.md
+│   ├── test_config.py
 │   ├── test_exceptions.py
 │   ├── test_file_utils.py
 │   ├── test_main.py
@@ -87,6 +89,7 @@ Repository structure
 │   ├── __init__.py
 │   ├── _sandbox.py
 │   ├── analytics.py
+│   ├── config.py
 │   ├── exceptions.py
 │   ├── file_utils.py
 │   ├── main.py

@@ -63,7 +63,7 @@ class TestLoadConfig:
             'api': {'batch_size': 100},
             'network': {'timeout_seconds': 10}
         }
-        config_file = tmp_path / 'config.json'
+        config_file = tmp_path / 'constants.json'
         with open(config_file, 'w') as f:
             json.dump(config_data, f)
 
@@ -106,7 +106,7 @@ class TestLoadConfig:
         config_data = {
             'playlists': {'release_radar_target_size': 60}
         }
-        config_file = tmp_path / 'config.json'
+        config_file = tmp_path / 'constants.json'
         with open(config_file, 'w') as f:
             json.dump(config_data, f)
 

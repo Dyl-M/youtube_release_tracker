@@ -34,7 +34,7 @@ logger.addHandler(log_file)
 
 "DEFAULTS"
 
-# Default configuration values (used if config.json is missing or incomplete)
+# Default configuration values (used if constants.json is missing or incomplete)
 DEFAULTS = {
     'api': {
         'batch_size': 50,
@@ -77,7 +77,7 @@ def _deep_merge(defaults: dict, overrides: dict) -> dict:
 
 
 def load_config() -> dict:
-    """Load configuration from config.json with defaults fallback.
+    """Load configuration from constants.json with defaults fallback.
 
     :return: Configuration dictionary (merged with defaults)
     """
