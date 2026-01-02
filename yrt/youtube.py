@@ -46,18 +46,27 @@ ISO_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S%z'
 
 
 def last_exe_date() -> dt.datetime:
-    """Get the last execution datetime from a log file (supposing the first line is containing the right datetime).
-    :return date: Last execution date.
+    """Get the last execution datetime from a log file.
+    :return: Last execution date, or 24 hours ago if log is missing/empty.
     """
-    with open(paths.LAST_EXE_LOG, 'r', encoding='utf8') as log_file:
-        first_log = log_file.readlines()[0]  # Get first log
+    try:
+        with open(paths.LAST_EXE_LOG, 'r', encoding='utf8') as log_file:
+            lines = log_file.readlines()
+            if not lines:
+                # Empty file - default to 24 hours ago (daily workflow)
+                return dt.datetime.now(tz=tzlocal.get_localzone()) - dt.timedelta(days=1)
+            first_log = lines[0]
 
-    match = re.search(r'(\d{4}(-\d{2}){2})\s(\d{2}:?){3}.[\d:]+', first_log)  # Extract date
-    if match is None:
-        raise ValueError(f'Could not parse date from log line: {first_log}')
-    d_str = match.group()
-    date = dt.datetime.strptime(d_str, '%Y-%m-%d %H:%M:%S%z')  # Parse to datetime object
-    return date
+        match = re.search(r'(\d{4}(-\d{2}){2})\s(\d{2}:?){3}.[\d:]+', first_log)
+        if match is None:
+            raise ValueError(f'Could not parse date from log line: {first_log}')
+
+        d_str = match.group()
+        return dt.datetime.strptime(d_str, '%Y-%m-%d %H:%M:%S%z')
+
+    except (FileNotFoundError, IndexError):
+        # On first run or corrupted file, default to 24 hours ago (daily workflow)
+        return dt.datetime.now(tz=tzlocal.get_localzone()) - dt.timedelta(days=1)
 
 
 ADD_ON = file_utils.load_json(str(paths.ADD_ON_JSON))
@@ -331,10 +340,11 @@ def get_videos(service: pyt.Client, videos_list: list[str]) -> list[Any]:
     :param videos_list: list of YouTube video IDs
     :return: request results.
     """
-    return service.videos.list(part=['snippet', 'contentDetails', 'statistics', 'status'],
-                               # type: ignore[no-any-return]
-                               video_id=videos_list,
-                               max_results=config.API_BATCH_SIZE).items
+    return service.videos.list(  # type: ignore[no-any-return]
+        part=['snippet', 'contentDetails', 'statistics', 'status'],
+        video_id=videos_list,
+        max_results=config.API_BATCH_SIZE
+    ).items
 
 
 def get_subs(service: pyt.Client, channel_list: list[str]) -> list[dict[str, Any]]:

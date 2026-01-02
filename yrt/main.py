@@ -17,16 +17,6 @@ from . import paths
 from . import youtube
 from .exceptions import YouTubeTrackerError, GitHubError
 
-# Environment
-
-try:
-    github_repo = os.environ['GITHUB_REPOSITORY']
-    PAT = os.environ['PAT']
-
-except KeyError:
-    github_repo = 'Dyl-M/auto_youtube_playlist'
-    PAT = 'PAT'
-
 # System
 
 try:
@@ -34,6 +24,39 @@ try:
 
 except IndexError:
     exe_mode = 'local'
+
+
+def _get_env_variables() -> tuple[str, str]:
+    """Get and validate environment variables for GitHub Actions mode.
+
+    :return: Tuple of (github_repo, PAT) values
+    :raises ConfigurationError: If required environment variables are missing/empty in 'action' mode
+    """
+    from .exceptions import ConfigurationError
+
+    try:
+        repo = os.environ['GITHUB_REPOSITORY']
+        pat = os.environ['PAT']
+
+        # Validate that the values are not empty
+        if not repo or not pat:
+            raise ValueError("Environment variables are empty")
+
+        return repo, pat
+
+    except (KeyError, ValueError) as er:
+        if exe_mode == 'action':
+            missing_var = str(er).replace("'", "") if isinstance(er, KeyError) else "GITHUB_REPOSITORY or PAT"
+            raise ConfigurationError(
+                f"Required environment variable {missing_var} not set or empty. "
+                f"Please configure GitHub repository secrets."
+            )
+        # Fall back to local mode defaults
+        return 'Dyl-M/auto_youtube_playlist', 'PAT'
+
+
+# Environment
+github_repo, PAT = _get_env_variables()
 
 # Load configuration files with validation
 pocket_tube = file_utils.load_json(

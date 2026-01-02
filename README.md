@@ -89,7 +89,6 @@ Repository structure
 │
 ├── yrt
 │   ├── __init__.py
-│   ├── _sandbox.py
 │   ├── analytics.py
 │   ├── config.py
 │   ├── exceptions.py

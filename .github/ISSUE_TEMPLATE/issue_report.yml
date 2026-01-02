@@ -1,6 +1,6 @@
 name: 🐞 Issue report
 description: Create a report to indicate a problem with the project
-labels: [bug]
+labels: [🐛 bug]
 body:
 
     -   type: textarea

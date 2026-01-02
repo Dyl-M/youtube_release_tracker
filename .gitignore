@@ -143,4 +143,5 @@ _docs/IMPROVEMENTS.md
 CLAUDE.md
 
 # Deprecated content
+yrt/_sandbox.py
 yrt/deprecated_functions.py
