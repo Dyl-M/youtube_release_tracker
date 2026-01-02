@@ -710,6 +710,87 @@ def get_items_count(service: pyt.Client, playlist_ids: list) -> tuple:
     return tuple(pl.contentDetails.itemCount for pl in playlists)
 
 
+def _get_videos_to_add_count(service: pyt.Client, target_playlist: str, lmt: int) -> int:
+    """Calculate how many videos are needed to fill the target playlist.
+
+    :param service: YouTube API client.
+    :param target_playlist: Target playlist ID.
+    :param lmt: Target playlist size limit.
+    :return: Number of videos to add (0 if error or already full).
+    """
+    try:
+        current_count = len(service.playlistItems.list(
+            part=['snippet'],
+            max_results=lmt,
+            playlist_id=target_playlist
+        ).items)
+        return lmt - current_count
+
+    except pyt.PyYouTubeException as error:
+        if error.status_code == 403:
+            history.warning('API quota exceeded.')
+        else:
+            history.warning('Unknown error: %s', error.message)
+        return 0
+
+
+def _calculate_allocation(n_add: int, count_a: int, count_b: int) -> tuple[int, int]:
+    """Calculate proportional allocation between two sources.
+
+    :param n_add: Total number to add.
+    :param count_a: Item count in source A.
+    :param count_b: Item count in source B.
+    :return: Tuple of (allocation_a, allocation_b).
+    """
+    total = count_a + count_b
+
+    if total == 0:
+        return 0, 0
+
+    ratio_a = count_a / total
+    ratio_b = count_b / total
+
+    if ratio_a < ratio_b:
+        return math.ceil(n_add * ratio_a), math.floor(n_add * ratio_b)
+
+    return math.floor(n_add * ratio_a), math.ceil(n_add * ratio_b)
+
+
+def _transfer_videos(
+        service: pyt.Client,
+        target_playlist: str,
+        source_playlist: str,
+        videos: list[dict],
+        source_name: str,
+        prog_bar: bool
+) -> None:
+    """Transfer videos from source to target playlist.
+
+    :param service: YouTube API client.
+    :param target_playlist: Destination playlist ID.
+    :param source_playlist: Source playlist ID.
+    :param videos: List of video dicts with 'video_id' and 'item_id'.
+    :param source_name: Name for logging.
+    :param prog_bar: Whether to display progress bar.
+    """
+    if not videos:
+        return
+
+    history.info('%s addition(s) from %s playlist.', len(videos), source_name)
+    add_to_playlist(
+        service,
+        target_playlist,
+        [v['video_id'] for v in videos],
+        prog_bar
+    )
+    del_from_playlist(
+        service,
+        source_playlist,
+        videos,
+        prog_bar
+    )
+
+
 def fill_release_radar(
         service: pyt.Client,
         target_playlist: str,
@@ -728,85 +809,66 @@ def fill_release_radar(
     """
     if lmt is None:
         lmt = config.RELEASE_RADAR_TARGET
+
+    n_add = _get_videos_to_add_count(service, target_playlist, lmt)
+    if n_add <= 0:
+        history.info('No addition necessary for Release Radar')
+        return
+
+    # Calculate proportional allocation from each source
+    to_re_listen_count, legacy_count = get_items_count(service, [re_listening_id, legacy_id])
+    n_add_rel, n_add_leg = _calculate_allocation(n_add, to_re_listen_count, legacy_count)
+
+    # Fetch and format videos from both playlists
     week_ago = NOW - dt.timedelta(weeks=config.RELISTENING_AGE_WEEKS)
 
-    # Compute how many videos are necessary to fill the target playlist
-    try:
-        n_add = lmt - len(service.playlistItems.list(part=['snippet'],
-                                                     max_results=lmt,
-                                                     playlist_id=target_playlist).items)
-    except pyt.PyYouTubeException as error:
-        if error.status_code == 403:
-            history.warning('API quota exceeded.')
-            n_add = 0
+    to_re_listen_items = service.playlistItems.list(
+        part=['snippet', 'contentDetails'],
+        playlist_id=re_listening_id,
+        max_results=lmt
+    ).items
+    to_re_listen_raw = [{'video_id': item.contentDetails.videoId,
+                         'add_date': dt.datetime.strptime(item.snippet.publishedAt, ISO_DATE_FORMAT),
+                         'item_id': item.id} for item in to_re_listen_items]
 
-        else:
-            history.warning('Unknown error: %s', error.message)
-            n_add = 0
+    to_re_listen_fil = [item for item in to_re_listen_raw if item['add_date'] < week_ago]
 
-    if n_add == 0:  # Release Radar has too much content already
-        history.info('No addition necessary for Release Radar')
+    legacy_items = service.playlistItems.list(
+        part=['contentDetails'],
+        playlist_id=legacy_id,
+        max_results=lmt
+    ).items
+    legacy_raw = [{'video_id': item.contentDetails.videoId, 'item_id': item.id} for item in legacy_items]
 
-    else:
-        to_re_listen_count, legacy_count = get_items_count(service, [re_listening_id, legacy_id])
-        re_listen_ratio = to_re_listen_count / (to_re_listen_count + legacy_count)
-        legacy_ratio = legacy_count / (to_re_listen_count + legacy_count)
+    # Pre-selection with fallback if one source is insufficient
+    addition_rel = to_re_listen_fil[:n_add_rel]
+    addition_leg = legacy_raw[:n_add_leg]
 
-        if re_listen_ratio < legacy_ratio:
-            n_add_rel, n_add_leg = math.ceil(n_add * re_listen_ratio), math.floor(n_add * legacy_ratio)
-        else:
-            n_add_rel, n_add_leg = math.floor(n_add * re_listen_ratio), math.ceil(n_add * legacy_ratio)
+    # Adjust allocations if one source doesn't have enough content
+    if len(addition_leg) < n_add_leg:
+        addition_rel = to_re_listen_fil[:n_add - len(addition_leg)]
 
-        # Get videos from both playlists
-        to_re_listen_items = service.playlistItems.list(part=['snippet', 'contentDetails'],
-                                                        playlist_id=re_listening_id,
-                                                        max_results=lmt).items
+    elif len(addition_rel) < n_add_rel:
+        addition_leg = legacy_raw[:n_add - len(addition_rel)]
 
-        legacy_items = service.playlistItems.list(part=['contentDetails'], playlist_id=legacy_id, max_results=lmt).items
+    # Transfer videos from sources to target
+    _transfer_videos(
+        service,
+        target_playlist,
+        re_listening_id,
+        addition_rel,
+        'Re-listening',
+        prog_bar
+    )
 
-        # Format list for treatment
-        to_re_listen_raw = [{'video_id': item.contentDetails.videoId,
-                             'add_date': dt.datetime.strptime(
-                                 item.snippet.publishedAt,
-                                 ISO_DATE_FORMAT
-                             ),
-                             'item_id': item.id} for item in to_re_listen_items]
-
-        legacy_raw = [{'video_id': item.contentDetails.videoId, 'item_id': item.id} for item in legacy_items]
-
-        # Filter re-listening: keep videos added at least a week ago
-        to_re_listen_fil = [item for item in to_re_listen_raw if item['add_date'] < week_ago]
-
-        # Pre-selection
-        addition_rel = to_re_listen_fil[:n_add_rel]
-        addition_leg = legacy_raw[:n_add_leg]
-
-        if len(addition_leg) < n_add_leg:  # If not enough content in Legacy playlist
-            addition_rel = to_re_listen_fil[:n_add - len(addition_leg)]
-
-        if len(addition_rel) < n_add_rel:  # If not enough content in Re-listening playlist
-            addition_leg = legacy_raw[:n_add - len(addition_rel)]
-
-        # Perform updates on playlist
-        if addition_rel:  # If any addition from re-listening
-            history.info('%s addition(s) from Re-listening playlist.', len(addition_rel))
-            add_to_playlist(
-                service,
-                target_playlist,
-                [it['video_id'] for it in addition_rel],
-                prog_bar
-            )
-            del_from_playlist(service, re_listening_id, addition_rel, prog_bar)
-
-        if addition_leg:  # If any addition from Legacy
-            history.info('%s addition(s) from Legacy playlist.', len(addition_leg))
-            add_to_playlist(
-                service,
-                target_playlist,
-                [it['video_id'] for it in addition_leg],
-                prog_bar
-            )
-            del_from_playlist(service, legacy_id, addition_leg, prog_bar)
+    _transfer_videos(
+        service,
+        target_playlist,
+        legacy_id,
+        addition_leg,
+        'Legacy',
+        prog_bar
+    )
 
 
 def cleanup_expired_videos(service: pyt.Client, playlist_config: dict[str, Any], prog_bar: bool = True) -> None:
