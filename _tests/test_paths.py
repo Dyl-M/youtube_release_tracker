@@ -1,12 +1,13 @@
-# -*- coding: utf-8 -*-
+"""Tests for centralized path definitions."""
 
-import pytest
-
+# Standard library
 from pathlib import Path
 
-from yrt import paths
+# Third-party
+import pytest
 
-"""Tests for centralized path definitions."""
+# Local
+from yrt import paths
 
 
 @pytest.mark.unit

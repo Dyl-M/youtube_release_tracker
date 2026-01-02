@@ -1,27 +1,23 @@
-# -*- coding: utf-8 -*-
+"""Main process for YouTube Release Tracker."""
 
-from __future__ import annotations
-
-import github
+# Standard library
 import logging
 import os
-import pandas as pd
 import re
 import sys
 
+# Third-party
+import github
+import pandas as pd
+
+# Local
 from . import config
 from . import file_utils
 from . import paths
 from . import youtube
 from .exceptions import YouTubeTrackerError, GitHubError
 
-"""File Information
-@file_name: main.py
-@author: Dylan "dyl-m" Monfret
-Main process.
-"""
-
-"ENVIRONMENT"
+# Environment
 
 try:
     github_repo = os.environ['GITHUB_REPOSITORY']
@@ -31,15 +27,13 @@ except KeyError:
     github_repo = 'Dyl-M/auto_youtube_playlist'
     PAT = 'PAT'
 
-"SYSTEM"
+# System
 
 try:
     exe_mode = sys.argv[1]
 
 except IndexError:
     exe_mode = 'local'
-
-"PARAMETER FILES"
 
 # Load configuration files with validation
 pocket_tube = file_utils.load_json(
@@ -70,17 +64,17 @@ other = list(set(other_raw))
 all_channels = list(set(music + other))
 
 # YouTube playlists
-release = playlists['release']['id']
-banger = playlists['banger']['id']
-re_listening = playlists['re_listening']['id']
-legacy = playlists['legacy']['id']
-music_lives = playlists['music_lives']['id']
-regular_streams = playlists['regular_streams']['id']
+release: str = playlists['release']['id']
+banger: str = playlists['banger']['id']
+re_listening: str = playlists['re_listening']['id']
+legacy: str = playlists['legacy']['id']
+music_lives: str = playlists['music_lives']['id']
+regular_streams: str = playlists['regular_streams']['id']
 
 # Category priority order and playlist mapping (for non-music channels)
-CATEGORY_PRIORITY = ['APPRENTISSAGE', 'DIVERTISSEMENT', 'GAMING', 'ASMR']
+CATEGORY_PRIORITY: list[str] = ['APPRENTISSAGE', 'DIVERTISSEMENT', 'GAMING', 'ASMR']
 
-CATEGORY_PLAYLISTS = {
+CATEGORY_PLAYLISTS: dict[str, str] = {
     'APPRENTISSAGE': playlists['apprentissage']['id'],
     'DIVERTISSEMENT': playlists['divertissement_gaming']['id'],
     'GAMING': playlists['divertissement_gaming']['id'],
@@ -106,10 +100,11 @@ else:
                'comments_w12', 'comments_w24', 'channel_name', 'video_title']
     histo_data = pd.DataFrame(columns=columns)
 
-"FUNCTIONS"
+
+# Functions
 
 
-def copy_last_exe_log():
+def copy_last_exe_log() -> None:
     """Copy the last execution logging from the main history file."""
     with open(paths.HISTORY_LOG, 'r', encoding='utf8') as history_file:
         history = history_file.read()
@@ -123,7 +118,7 @@ def copy_last_exe_log():
 
 
 def dest_playlist(channel_id: str, is_shorts: bool, v_duration: int,
-                  live_status: str = 'none', max_duration: int | None = None):
+                  live_status: str = 'none', max_duration: int | None = None) -> str:
     """Return destination playlist for addition based on channel category and video properties.
 
     Routing logic:
@@ -146,6 +141,7 @@ def dest_playlist(channel_id: str, is_shorts: bool, v_duration: int,
     """
     if max_duration is None:
         max_duration = config.LONG_VIDEO_THRESHOLD_MINUTES
+
     # Upcoming streams -> route to stream playlists
     if live_status == 'upcoming':
         if channel_id in music:
@@ -188,7 +184,7 @@ def dest_playlist(channel_id: str, is_shorts: bool, v_duration: int,
     return release
 
 
-def update_repo_secrets(secret_name: str, new_value: str, logger: logging.Logger | None = None):
+def update_repo_secrets(secret_name: str, new_value: str, logger: logging.Logger | None = None) -> None:
     """Update a GitHub repository Secret value
     :param secret_name: GH repository Secret name
     :param new_value: new value for the selected Secret
@@ -285,7 +281,7 @@ def main(historical_data: pd.DataFrame) -> None:
                       'likes_w24', 'comments_w1', 'comments_w4', 'comments_w12', 'comments_w24']
 
         stored = new_data[~upcoming_mask][to_keep]
-        stored.loc[:, stats_list] = [pd.NA] * len(stats_list)
+        stored.loc[:, stats_list] = [pd.NA] * len(stats_list)  # type: ignore[assignment]
         stored = stored[to_keep[:-2] + stats_list + to_keep[-2:]]
 
         # Get stats for already retrieved videos

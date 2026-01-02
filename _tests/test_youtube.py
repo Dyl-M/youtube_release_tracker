@@ -1,12 +1,13 @@
-# -*- coding: utf-8 -*-
+"""Tests for YouTube API interaction functions."""
 
-import pytest
-
+# Standard library
 from unittest.mock import Mock, patch
 
-from yrt import youtube
+# Third-party
+import pytest
 
-"""Tests for YouTube API interaction functions."""
+# Local
+from yrt import youtube
 
 
 @pytest.mark.unit

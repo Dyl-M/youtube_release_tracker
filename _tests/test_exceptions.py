@@ -1,7 +1,9 @@
-# -*- coding: utf-8 -*-
+"""Tests for custom exception hierarchy."""
 
+# Third-party
 import pytest
 
+# Local
 from yrt.exceptions import (
     YouTubeTrackerError,
     ConfigurationError,
@@ -10,8 +12,6 @@ from yrt.exceptions import (
     CredentialsError,
     APIError
 )
-
-"""Tests for custom exception hierarchy."""
 
 
 @pytest.mark.unit

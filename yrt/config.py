@@ -1,20 +1,12 @@
-# -*- coding: utf-8 -*-
+"""Centralized configuration loading with defaults fallback."""
 
-from __future__ import annotations
-
+# Standard library
 import logging
 
+# Local
 from . import paths
 from . import file_utils
 from .exceptions import ConfigurationError
-
-"""File Information
-@file_name: config.py
-@author: Dylan "dyl-m" Monfret
-Centralized configuration loading with defaults fallback.
-"""
-
-"LOGGER"
 
 # Create logger
 logger = logging.Logger(name='config', level=0)
@@ -31,8 +23,6 @@ log_file.setLevel(logging.DEBUG)
 # Assign file handler and formatter to logger
 log_file.setFormatter(formatter)
 logger.addHandler(log_file)
-
-"DEFAULTS"
 
 # Default configuration values (used if constants.json is missing or incomplete)
 DEFAULTS = {
@@ -57,7 +47,8 @@ DEFAULTS = {
     }
 }
 
-"FUNCTIONS"
+
+# Functions
 
 
 def _deep_merge(defaults: dict, overrides: dict) -> dict:
@@ -91,8 +82,6 @@ def load_constants() -> dict:
         logger.warning('Config file not found or invalid, using defaults')
         return DEFAULTS.copy()
 
-
-"CONFIGURATION"
 
 # Load configuration at module import
 _config = load_constants()

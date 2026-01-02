@@ -1,9 +1,10 @@
-# -*- coding: utf-8 -*-
-
-import json
-import pytest
-
 """Tests for yrt/config.py - Centralized configuration loading."""
+
+# Standard library
+import json
+
+# Third-party
+import pytest
 
 
 class TestDeepMerge:

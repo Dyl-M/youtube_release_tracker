@@ -19,16 +19,19 @@ _tests/
 ## Running Tests
 
 ### Run all tests
+
 ```bash
 pytest
 ```
 
 ### Run specific test file
+
 ```bash
 pytest _tests/test_youtube.py
 ```
 
 ### Run tests by marker
+
 ```bash
 # Run only unit tests
 pytest -m unit
@@ -44,16 +47,19 @@ pytest -m "not slow"
 ```
 
 ### Run with coverage
+
 ```bash
 pytest --cov=yrt --cov-report=html --cov-report=term-missing
 ```
 
 ### Run with verbose output
+
 ```bash
 pytest -v
 ```
 
 ### Run specific test
+
 ```bash
 pytest _tests/test_youtube.py::TestIsShorts::test_is_shorts_returns_true_for_shorts
 ```
@@ -88,33 +94,33 @@ Common fixtures are defined in `conftest.py`:
 Current implementation tests:
 
 1. **Exception Hierarchy** (test_exceptions.py)
-   - All custom exceptions
-   - Inheritance relationships
-   - Exception catching behavior
+    - All custom exceptions
+    - Inheritance relationships
+    - Exception catching behavior
 
 2. **Path Management** (test_paths.py)
-   - Path constants existence
-   - Directory structure
-   - Absolute paths
-   - Path validation lists
+    - Path constants existence
+    - Directory structure
+    - Absolute paths
+    - Path validation lists
 
 3. **File Operations** (test_file_utils.py)
-   - JSON loading and saving
-   - Required key validation
-   - Nested key validation
-   - Error handling
+    - JSON loading and saving
+    - Required key validation
+    - Nested key validation
+    - Error handling
 
 4. **YouTube API** (test_youtube.py)
-   - Shorts detection (is_shorts)
-   - Error categorization constants
-   - Retry mechanism configuration
-   - Service creation functions
+    - Shorts detection (is_shorts)
+    - Error categorization constants
+    - Retry mechanism configuration
+    - Service creation functions
 
 5. **Main Logic** (test_main.py)
-   - Video routing (dest_playlist)
-   - Configuration loading
-   - Main orchestration
-   - Workflow modes
+    - Video routing (dest_playlist)
+    - Configuration loading
+    - Main orchestration
+    - Workflow modes
 
 ## Adding New Tests
 
@@ -128,11 +134,13 @@ Current implementation tests:
 ## Dependencies
 
 Tests require:
+
 - pytest
 - pytest-cov (for coverage reports)
 - All project dependencies from requirements.txt
 
 Install test dependencies:
+
 ```bash
 pip install pytest pytest-cov
 ```

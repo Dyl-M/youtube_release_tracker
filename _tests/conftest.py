@@ -1,14 +1,14 @@
-# -*- coding: utf-8 -*-
+"""Pytest configuration and shared fixtures for YouTube Release Tracker tests."""
 
+# Standard library
 import datetime as dt
 import json
-import pytest
-
 from pathlib import Path
-from tzlocal import get_localzone
 from unittest.mock import Mock, MagicMock
 
-"""Pytest configuration and shared fixtures for YouTube Release Tracker tests."""
+# Third-party
+import pytest
+from tzlocal import get_localzone
 
 # Test data directory
 FIXTURES_DIR = Path(__file__).parent / 'fixtures'
