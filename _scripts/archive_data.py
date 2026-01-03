@@ -15,15 +15,15 @@ from pathlib import Path
 os.environ['YRT_NO_LOGGING'] = '1'
 
 # Third-party
-import pandas as pd
-from dateutil.relativedelta import relativedelta
+import pandas as pd  # noqa: E402
+from dateutil.relativedelta import relativedelta  # noqa: E402
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Local (imported after setting YRT_NO_LOGGING)
-from yrt import paths
-from yrt.youtube import create_service_local, sort_db
+from yrt import paths  # noqa: E402
+from yrt.youtube import create_service_local, sort_db  # noqa: E402
 
 # Constants
 MONTHS_TO_ARCHIVE = 6

@@ -16,7 +16,7 @@ os.environ['YRT_NO_LOGGING'] = '1'
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Local (imported after setting YRT_NO_LOGGING)
-from yrt.youtube import create_service_local, sort_db
+from yrt.youtube import create_service_local, sort_db  # noqa: E402
 
 
 def main() -> None:
