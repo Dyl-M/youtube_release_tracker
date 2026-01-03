@@ -2,27 +2,29 @@
 
 # Standard library
 import logging
+import os
 
 # Local
 from . import paths
 from . import file_utils
 from .exceptions import ConfigurationError
 
-# Create logger
+# Create logger (only add file handler if not in standalone mode)
 logger = logging.Logger(name='config', level=0)
 
-# Create file handler
-log_file = logging.FileHandler(filename=paths.HISTORY_LOG)
+if not os.environ.get('YRT_NO_LOGGING'):
+    # Create file handler
+    log_file = logging.FileHandler(filename=paths.HISTORY_LOG)
 
-# Create formatter
-formatter = logging.Formatter(fmt='%(asctime)s [%(levelname)s] - %(message)s', datefmt='%Y-%m-%d %H:%M:%S%z')
+    # Create formatter
+    formatter = logging.Formatter(fmt='%(asctime)s [%(levelname)s] - %(message)s', datefmt='%Y-%m-%d %H:%M:%S%z')
 
-# Set file handler level
-log_file.setLevel(logging.DEBUG)
+    # Set file handler level
+    log_file.setLevel(logging.DEBUG)
 
-# Assign file handler and formatter to logger
-log_file.setFormatter(formatter)
-logger.addHandler(log_file)
+    # Assign file handler and formatter to logger
+    log_file.setFormatter(formatter)
+    logger.addHandler(log_file)
 
 # Default configuration values (used if constants.json is missing or incomplete)
 DEFAULTS = {
