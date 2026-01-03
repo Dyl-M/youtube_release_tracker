@@ -14,6 +14,8 @@ CONFIG_DIR: Path = BASE_DIR / '_config'
 DATA_DIR: Path = BASE_DIR / '_data'
 LOG_DIR: Path = BASE_DIR / '_log'
 TOKENS_DIR: Path = BASE_DIR / '_tokens'
+ARCHIVE_DIR: Path = BASE_DIR / '_archive'
+ARCHIVE_DATA_DIR: Path = ARCHIVE_DIR / '_data'
 
 # Config files (in _config/)
 POCKET_TUBE_JSON: Path = CONFIG_DIR / 'pocket_tube.json'

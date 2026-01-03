@@ -76,21 +76,22 @@ ADD_ON = file_utils.load_json(str(paths.ADD_ON_JSON))
 NOW = dt.datetime.now(tz=tzlocal.get_localzone())
 LAST_EXE = last_exe_date()
 
-# Create loggers
+# Create loggers (only add file handler if not in standalone mode)
 history = logging.Logger(name='history', level=0)
 
-# Create file handlers
-history_file = logging.FileHandler(filename=paths.HISTORY_LOG)  # mode='a'
+if not os.environ.get('YRT_NO_LOGGING'):
+    # Create file handlers
+    history_file = logging.FileHandler(filename=paths.HISTORY_LOG)  # mode='a'
 
-# Create formatter
-formatter = logging.Formatter(fmt='%(asctime)s [%(levelname)s] - %(message)s', datefmt='%Y-%m-%d %H:%M:%S%z')
+    # Create formatter
+    formatter = logging.Formatter(fmt='%(asctime)s [%(levelname)s] - %(message)s', datefmt='%Y-%m-%d %H:%M:%S%z')
 
-# Set file handlers' level
-history_file.setLevel(logging.DEBUG)
+    # Set file handlers' level
+    history_file.setLevel(logging.DEBUG)
 
-# Assign file handlers and formatter to loggers
-history_file.setFormatter(formatter)
-history.addHandler(history_file)
+    # Assign file handlers and formatter to loggers
+    history_file.setFormatter(formatter)
+    history.addHandler(history_file)
 
 
 # Functions
@@ -666,11 +667,12 @@ def del_from_playlist(
             history.warning('Deletion Request Failure: (%s) - %s', item['video_id'], http_error.message)
 
 
-def sort_db(service: pyt.Client) -> None:
+def sort_db(service: pyt.Client, log: bool = True) -> None:
     """Sort and save the PocketTube database file.
 
     Args:
         service: A Python YouTube Client.
+        log: Whether to apply logging or not.
     """
 
     def get_channels(_service: pyt.Client, _channel_list: list[str]) -> list[str]:
@@ -703,7 +705,8 @@ def sort_db(service: pyt.Client) -> None:
                 information += [{'title': an_item.snippet.title, 'id': an_item.id} for an_item in request]
 
             except pyt.error.PyYouTubeException as api_error:
-                history.error(api_error.message)
+                if log:
+                    history.error(api_error.message)
                 raise APIError(f'API error while sorting database: {api_error.message}')
 
         # Sort channels' name by alphabetical order
@@ -716,7 +719,7 @@ def sort_db(service: pyt.Client) -> None:
 
     categories = [db_keys for db_keys in channels_db.keys() if 'ysc' not in db_keys]  # Get PT categories
     db_sorted = {category: get_channels(_service=service, _channel_list=channels_db[category])
-                 for category in categories}  # Get sorted categories
+                 for category in categories}
 
     for category in categories:  # Rewrite categories in the dict object associated with the PT JSON file
         channels_db[category] = db_sorted[category]
@@ -1189,8 +1192,3 @@ def add_api_fail(service: pyt.Client, prog_bar: bool = True) -> None:
 
     if addition > 0:
         history.info('Video recovery from previous API failure(s) complete.')
-
-
-if __name__ == '__main__':
-    serv = create_service_local(log=False)
-    sort_db(service=serv)
