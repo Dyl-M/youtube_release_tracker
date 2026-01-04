@@ -102,28 +102,28 @@ def create_file_logger(
 
 **Location:** `yrt/youtube.py` (1195 lines)
 
-**Status:** Pending
+**Status:** ✅ Fixed
 
 **Issue:** Single file handling too many responsibilities - authentication, API calls, statistics, playlist management,
 cleanup, and utilities.
 
 **Impact:** Hard to navigate, test, and extend. Circular import risks as module grows.
 
-**Proposed structure:**
+**Implemented structure:**
 
 ```
 yrt/
   youtube/
-    __init__.py       # Public API exports
+    __init__.py       # Public API exports, shared logger setup
     auth.py           # Authentication (create_service_local, create_service_workflow, encode_key)
     api.py            # Core API calls (get_playlist_items, get_videos, get_subs, iter_channels)
     stats.py          # Statistics (get_stats, add_stats, weekly_stats)
     playlist.py       # Playlist operations (add_to_playlist, del_from_playlist, fill_release_radar)
     cleanup.py        # Cleanup (cleanup_expired_videos, cleanup_ended_streams)
-    models.py         # Dataclasses (PlaylistItem, VideoStats, enums)
-    retry.py          # Retry decorator and error handling
-    utils.py          # Utilities (is_shorts, last_exe_date, sort_db, parse_iso8601_duration)
+    utils.py          # Utilities (is_shorts, last_exe_date, sort_db, get_items_count, constants)
 ```
+
+Note: `models.py` and `retry.py` deferred to Point 4 and Point 8 respectively (separate concerns).
 
 ### 4. Create Domain Models with Dataclasses
 
@@ -667,13 +667,13 @@ class YouTubeService(Protocol):
 
 ## 📄 Summary
 
-- **☢️ Critical:** 1 bug requiring immediate fix
-- **⚠️ High Priority:** 5 structural improvements for better organization
+- **☢️ Critical:** 1 bug ~~requiring immediate fix~~ ✅ Fixed
+- **⚠️ High Priority:** 5 structural improvements (2 fixed: Logger Factory, Split youtube.py)
 - **🛑 Medium Priority:** 5 code quality improvements
 - **🧪 Test Suite:** 3 test coverage improvements
 - **🛃 Low Priority:** 5 nice-to-have improvements
 
-**Total:** 19 improvement items
+**Total:** 19 improvement items (3 fixed, 16 remaining)
 
 ## Files to Modify
 
