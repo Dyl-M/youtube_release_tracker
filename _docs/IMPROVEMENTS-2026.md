@@ -16,9 +16,9 @@ Pythonic implementation, and readability.
 
 ### 1. BUG: file_utils.py Missing YRT_NO_LOGGING Check
 
-**Location:** `yrt/file_utils.py:14-27`
+**Location:** `yrt/file_utils.py:14-28`
 
-**Status:** Pending
+**Status:** ✅ Fixed
 
 **Issue:** Unlike `config.py:15` and `youtube.py:82`, file_utils.py unconditionally creates a file handler, causing
 scripts to log to `history.log` when they shouldn't (even when `YRT_NO_LOGGING=1` is set).
