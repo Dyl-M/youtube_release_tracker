@@ -139,9 +139,7 @@ gha-creds-*.json
 
 # Claude Code & Claude personal Config
 .claude/
-_docs/IMPROVEMENTS.md
 CLAUDE.md
 
-# Deprecated content
+# Unrelevant content
 yrt/_sandbox.py
-yrt/deprecated_functions.py
