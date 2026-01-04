@@ -6,7 +6,6 @@ import base64
 import datetime as dt
 import itertools
 import json
-import logging
 import math
 import os
 import random
@@ -31,6 +30,7 @@ from . import config
 from . import file_utils
 from . import paths
 from .exceptions import CredentialsError, YouTubeServiceError, APIError, FileAccessError
+from .logging_utils import create_file_logger
 
 # Options
 
@@ -76,22 +76,8 @@ ADD_ON = file_utils.load_json(str(paths.ADD_ON_JSON))
 NOW = dt.datetime.now(tz=tzlocal.get_localzone())
 LAST_EXE = last_exe_date()
 
-# Create loggers (only add file handler if not in standalone mode)
-history = logging.Logger(name='history', level=0)
-
-if not os.environ.get('YRT_NO_LOGGING'):
-    # Create file handlers
-    history_file = logging.FileHandler(filename=paths.HISTORY_LOG)  # mode='a'
-
-    # Create formatter
-    formatter = logging.Formatter(fmt='%(asctime)s [%(levelname)s] - %(message)s', datefmt='%Y-%m-%d %H:%M:%S%z')
-
-    # Set file handlers' level
-    history_file.setLevel(logging.DEBUG)
-
-    # Assign file handlers and formatter to loggers
-    history_file.setFormatter(formatter)
-    history.addHandler(history_file)
+# Create logger (only add file handler if not in standalone mode)
+history = create_file_logger('history', paths.HISTORY_LOG)
 
 
 # Functions

@@ -89,6 +89,7 @@ Repository structure
 │   ├── test_config.py
 │   ├── test_exceptions.py
 │   ├── test_file_utils.py
+│   ├── test_logging_utils.py
 │   ├── test_main.py
 │   ├── test_paths.py
 │   └── test_youtube.py
@@ -99,6 +100,7 @@ Repository structure
 │   ├── config.py
 │   ├── exceptions.py
 │   ├── file_utils.py
+│   ├── logging_utils.py
 │   ├── main.py
 │   ├── paths.py
 │   └── youtube.py

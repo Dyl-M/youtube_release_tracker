@@ -16,6 +16,7 @@ from . import file_utils
 from . import paths
 from . import youtube
 from .exceptions import YouTubeTrackerError, GitHubError
+from .logging_utils import create_file_logger
 
 # System
 
@@ -160,14 +161,7 @@ def _create_logger() -> logging.Logger:
     Returns:
         Configured Logger instance for history logging.
     """
-    logger = logging.Logger(name='history_main', level=0)
-    handler = logging.FileHandler(filename=paths.HISTORY_LOG)
-    handler.setLevel(logging.DEBUG)
-    handler.setFormatter(
-        logging.Formatter(fmt='%(asctime)s [%(levelname)s] - %(message)s', datefmt='%Y-%m-%d %H:%M:%S%z')
-    )
-    logger.addHandler(handler)
-    return logger
+    return create_file_logger('history_main', paths.HISTORY_LOG, respect_no_logging=False)
 
 
 def _update_historical_stats(service: youtube.pyt.Client, historical_data: pd.DataFrame) -> pd.DataFrame:
@@ -406,13 +400,8 @@ def main(historical_data: pd.DataFrame) -> None:
 
 
 if __name__ == '__main__':
-    # Create a basic logger for top-level exception handling
-    top_level_logger = logging.Logger(name='top_level', level=0)
-    top_level_handler = logging.FileHandler(filename=paths.HISTORY_LOG)
-    top_level_handler.setFormatter(
-        logging.Formatter(fmt='%(asctime)s [%(levelname)s] - %(message)s', datefmt='%Y-%m-%d %H:%M:%S%z')
-    )
-    top_level_logger.addHandler(top_level_handler)
+    # Create a basic logger for top-level exception handling (always logs, even in standalone mode)
+    top_level_logger = create_file_logger('top_level', paths.HISTORY_LOG, respect_no_logging=False)
 
     try:
         main(histo_data)

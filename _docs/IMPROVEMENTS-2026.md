@@ -46,7 +46,7 @@ if not os.environ.get('YRT_NO_LOGGING'):
 - `yrt/youtube.py:79-94`
 - `yrt/main.py:157-170`
 
-**Status:** Pending
+**Status:** ✅ Fixed
 
 **Issue:** Same ~15-line logger setup pattern duplicated 4 times across modules.
 
