@@ -94,3 +94,27 @@
 2026-01-04 08:36:49+0000 [INFO] - Removing 2 ended stream(s) from "🍿🔴 My streams (Private)"
 2026-01-04 08:36:50+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
 2026-01-04 08:36:50+0000 [INFO] - Process ended.
+2026-01-05 08:41:50+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-01-05 08:41:51+0000 [INFO] - Process started.
+2026-01-05 08:41:51+0000 [INFO] - API credentials refreshed.
+2026-01-05 08:41:51+0000 [INFO] - YouTube service created successfully.
+2026-01-05 08:41:51+0000 [INFO] - 1 addition(s) to Release Radar playlist from previous API failure.
+2026-01-05 08:41:51+0000 [INFO] - Video recovery from previous API failure(s) complete.
+2026-01-05 08:41:51+0000 [INFO] - Iterative research for 228 YouTube channels.
+2026-01-05 08:42:53+0000 [INFO] - Add statistics for 32 video(s).
+2026-01-05 08:43:01+0000 [INFO] - Addition to "Banger Radar": 2 video(s).
+2026-01-05 08:43:02+0000 [INFO] - Addition to "Release Radar": 18 video(s).
+2026-01-05 08:43:09+0000 [INFO] - Addition to "Educational content": 3 video(s).
+2026-01-05 08:43:11+0000 [INFO] - Addition to "Entertainment & Gaming": 3 video(s).
+2026-01-05 08:43:12+0000 [INFO] - Addition to "ASMR & Relaxation": 2 video(s).
+2026-01-05 08:43:13+0000 [INFO] - 21 addition(s) from Re-listening playlist.
+2026-01-05 08:43:31+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-01-05 08:43:31+0000 [INFO] - No expired videos in "🧠 Educational content (Private)"
+2026-01-05 08:43:31+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-01-05 08:43:31+0000 [INFO] - No expired videos in "🍿🎮 Entertainment & Gaming (Private)"
+2026-01-05 08:43:31+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-01-05 08:43:31+0000 [INFO] - No expired videos in "💤 ASMR & Relaxation (Private)"
+2026-01-05 08:43:31+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-01-05 08:43:31+0000 [INFO] - Removing 1 ended stream(s) from "🍿🔴 My streams (Private)"
+2026-01-05 08:43:33+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-01-05 08:43:33+0000 [INFO] - Process ended.
