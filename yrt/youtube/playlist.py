@@ -15,6 +15,7 @@ import tqdm  # type: ignore[import-untyped]
 from .. import config
 from .. import file_utils
 from .. import paths
+from ..models import PlaylistItemRef
 from . import utils
 
 
@@ -90,7 +91,7 @@ def add_to_playlist(
 def del_from_playlist(
         service: pyt.Client,
         playlist_id: str,
-        items_list: list[dict[str, Any]],
+        items_list: list[PlaylistItemRef] | list[dict[str, Any]],
         prog_bar: bool = True
 ) -> None:
     """Delete videos inside a YouTube playlist.
@@ -98,7 +99,7 @@ def del_from_playlist(
     Args:
         service: A Python YouTube Client.
         playlist_id: A YouTube playlist ID.
-        items_list: List of YouTube playlist items [{"item_id": ..., "video_id": ...}].
+        items_list: List of PlaylistItemRef instances or dicts with 'item_id' and 'video_id'.
         prog_bar: Whether to use tqdm progress bar.
     """
     if prog_bar:
@@ -108,12 +109,20 @@ def del_from_playlist(
         del_iterator = items_list
 
     for item in del_iterator:
+        # Handle both PlaylistItemRef and dict
+        if isinstance(item, PlaylistItemRef):
+            item_id = item.item_id
+            video_id = item.video_id
+        else:
+            item_id = item['item_id']
+            video_id = item['video_id']
+
         try:
-            service.playlistItems.delete(playlist_item_id=item['item_id'])
+            service.playlistItems.delete(playlist_item_id=item_id)
 
         except pyt.error.PyYouTubeException as http_error:
             if utils.history:
-                utils.history.warning('Deletion Request Failure: (%s) - %s', item['video_id'], http_error.message)
+                utils.history.warning('Deletion Request Failure: (%s) - %s', video_id, http_error.message)
 
 
 def _get_videos_to_add_count(service: pyt.Client, target_playlist: str, lmt: int) -> int:

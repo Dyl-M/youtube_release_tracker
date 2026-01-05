@@ -12,11 +12,12 @@ import pyyoutube as pyt  # type: ignore[import-untyped]
 # Local
 from .. import config
 from ..exceptions import APIError
+from ..models import PlaylistItem, VideoStats, VideoData, to_dict_list
 from . import utils
 from .api import get_videos
 
 
-def get_stats(service: pyt.Client, videos_list: list[Any], check_shorts: bool = True) -> list[dict[str, Any]]:
+def get_stats(service: pyt.Client, videos_list: list[Any], check_shorts: bool = True) -> list[VideoStats]:
     """Get duration, views and live status of YouTube video with their ID.
 
     Args:
@@ -25,12 +26,12 @@ def get_stats(service: pyt.Client, videos_list: list[Any], check_shorts: bool = 
         check_shorts: Whether to check if videos are shorts (skip for historical stats updates).
 
     Returns:
-        Playlist items (videos) as a list.
+        Video statistics as list of VideoStats instances.
 
     Raises:
         APIError: If API error occurs while getting stats.
     """
-    items = []
+    items: list[VideoStats] = []
 
     try:
         videos_ids = [video['video_id'] for video in videos_list]
@@ -47,49 +48,72 @@ def get_stats(service: pyt.Client, videos_list: list[Any], check_shorts: bool = 
             request = get_videos(service=service, videos_list=chunk)
 
             # Keep necessary data
-            items += [{'video_id': item.id,
-                       'views': item.statistics.viewCount,
-                       'likes': item.statistics.likeCount,
-                       'comments': item.statistics.commentCount,
-                       'duration': isodate.parse_duration(getattr(item.contentDetails,
-                                                                  'duration', 'PT0S') or 'PT0S').seconds,
-                       'is_shorts': utils.is_shorts(video_id=item.id) if check_shorts else None,
-                       'live_status': item.snippet.liveBroadcastContent,
-                       'latest_status': item.status.privacyStatus} for item in request]
+            items += [
+                VideoStats(
+                    video_id=item.id,
+                    views=item.statistics.viewCount,
+                    likes=item.statistics.likeCount,
+                    comments=item.statistics.commentCount,
+                    duration=isodate.parse_duration(getattr(item.contentDetails, 'duration', 'PT0S') or 'PT0S').seconds,
+                    is_shorts=utils.is_shorts(video_id=item.id) if check_shorts else None,
+                    live_status=item.snippet.liveBroadcastContent,
+                    latest_status=item.status.privacyStatus
+                )
+                for item in request
+            ]
 
         except pyt.error.PyYouTubeException as api_error:
             if utils.history:
                 utils.history.error(api_error.message)
             raise APIError(f'API error while getting stats: {api_error.message}')
 
-    validated = [video['video_id'] for video in items]
-    missing = [vid_id for vid_id in videos_list if vid_id not in validated]
+    validated = [video.video_id for video in items]
+    missing = [vid_id for vid_id in videos_ids if vid_id not in validated]
 
-    items += [{'video_id': item_id,
-               'views': None,
-               'likes': None,
-               'comments': None,
-               'duration': None,
-               'is_shorts': None,
-               'live_status': None,
-               'latest_status': 'deleted'} for item_id in missing]
+    items += [
+        VideoStats(
+            video_id=item_id,
+            views=None,
+            likes=None,
+            comments=None,
+            duration=None,
+            is_shorts=None,
+            live_status=None,
+            latest_status='deleted'
+        )
+        for item_id in missing
+    ]
 
     return items
 
 
-def add_stats(service: pyt.Client, video_list: list[dict[str, Any]]) -> pd.DataFrame:
-    """Apply 'get_playlist_items' for a collection of YouTube playlists.
+def add_stats(service: pyt.Client, playlist_items: list[PlaylistItem]) -> pd.DataFrame:
+    """Add statistics to playlist items and merge into complete video data.
 
     Args:
         service: A Python YouTube Client.
-        video_list: List of videos formatted by iter_channels functions.
+        playlist_items: List of PlaylistItem instances.
 
     Returns:
-        DataFrame with every information necessary.
+        DataFrame with complete video data.
     """
-    video_first_data = pd.DataFrame(video_list)
-    additional_data = pd.DataFrame(get_stats(service, video_first_data.video_id.tolist()))
-    return video_first_data.merge(additional_data)
+    # Get video IDs from playlist items
+    video_ids = [item.video_id for item in playlist_items]
+
+    # Fetch stats for all videos
+    stats_list = get_stats(service, video_ids)
+
+    # Create lookup dict for stats
+    stats_by_id = {stat.video_id: stat for stat in stats_list}
+
+    # Merge PlaylistItem + VideoStats into VideoData
+    video_data_list = [
+        VideoData.from_playlist_item_and_stats(item, stats_by_id[item.video_id])
+        for item in playlist_items
+    ]
+
+    # Convert to DataFrame
+    return pd.DataFrame(to_dict_list(video_data_list))
 
 
 def weekly_stats(
@@ -123,7 +147,8 @@ def weekly_stats(
 
         # Apply get_stats and keep only the three necessary features (skip shorts check for historical data)
         to_keep = ['video_id', 'views', 'likes', 'comments', 'latest_status']
-        stats = pd.DataFrame(get_stats(service, vid_id_list, check_shorts=False))[to_keep]
+        stats_list = get_stats(service, vid_id_list, check_shorts=False)
+        stats = pd.DataFrame(to_dict_list(stats_list))[to_keep]
         histo_data = histo_data.merge(stats, how='left')  # Merge to previous dataframe
 
         # Add values to corresponding week delta and remove redondant columns in dataframe

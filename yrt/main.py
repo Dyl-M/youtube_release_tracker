@@ -17,6 +17,7 @@ from . import paths
 from . import youtube
 from .exceptions import YouTubeTrackerError, GitHubError
 from .logging_utils import create_file_logger
+from .models import PlaylistConfig, AddOnConfig
 
 # System
 
@@ -59,6 +60,54 @@ def _get_env_variables() -> tuple[str, str]:
         return 'Dyl-M/auto_youtube_playlist', 'PAT'
 
 
+# Configuration loading helpers
+
+
+def _load_playlists_config() -> dict[str, PlaylistConfig]:
+    """Load and parse playlists configuration into PlaylistConfig instances.
+
+    Returns:
+        Dictionary mapping playlist names to PlaylistConfig instances.
+    """
+    playlists_data = file_utils.load_json(
+        str(paths.PLAYLISTS_JSON),
+        required_keys=[
+            'release', 'banger', 're_listening', 'legacy', 'apprentissage', 'divertissement_gaming', 'asmr',
+            'music_lives', 'regular_streams'
+        ]
+    )
+
+    return {
+        name: PlaylistConfig(
+            id=data['id'],
+            name=data['name'],
+            description=data['description'],
+            retention_days=data.get('retention_days'),
+            cleanup_on_end=data.get('cleanup_on_end')
+        )
+        for name, data in playlists_data.items()
+    }
+
+
+def _load_addon_config() -> AddOnConfig:
+    """Load and parse add-on configuration into AddOnConfig instance.
+
+    Returns:
+        AddOnConfig instance with configuration data.
+    """
+    add_on_data = file_utils.load_json(
+        str(paths.ADD_ON_JSON),
+        required_keys=['favorites']
+    )
+
+    return AddOnConfig(
+        favorites=add_on_data['favorites'],
+        playlist_not_found_pass=add_on_data.get('playlistNotFoundPass', []),
+        to_pass=add_on_data.get('toPass', []),
+        certified=add_on_data.get('certified', [])
+    )
+
+
 # Environment
 github_repo, PAT = _get_env_variables()
 
@@ -68,20 +117,11 @@ pocket_tube = file_utils.load_json(
     required_keys=['MUSIQUE', 'APPRENTISSAGE', 'DIVERTISSEMENT', 'GAMING']
 )
 
-playlists = file_utils.load_json(
-    str(paths.PLAYLISTS_JSON),
-    required_keys=['release', 'banger', 're_listening', 'legacy',
-                   'apprentissage', 'divertissement_gaming', 'asmr',
-                   'music_lives', 'regular_streams']
-)
-
-add_on_data = file_utils.load_json(
-    str(paths.ADD_ON_JSON),
-    required_keys=['favorites']
-)
+playlists = _load_playlists_config()
+add_on = _load_addon_config()
 
 # Extract configuration values
-favorites = add_on_data['favorites'].values()
+favorites = add_on.favorites.values()
 
 # YouTube Channels list
 music = pocket_tube['MUSIQUE']
@@ -91,30 +131,30 @@ other = list(set(other_raw))
 all_channels = list(set(music + other))
 
 # YouTube playlists
-release: str = playlists['release']['id']
-banger: str = playlists['banger']['id']
-re_listening: str = playlists['re_listening']['id']
-legacy: str = playlists['legacy']['id']
-music_lives: str = playlists['music_lives']['id']
-regular_streams: str = playlists['regular_streams']['id']
+release: str = playlists['release'].id
+banger: str = playlists['banger'].id
+re_listening: str = playlists['re_listening'].id
+legacy: str = playlists['legacy'].id
+music_lives: str = playlists['music_lives'].id
+regular_streams: str = playlists['regular_streams'].id
 
 # Category priority order and playlist mapping (for non-music channels)
 CATEGORY_PRIORITY: list[str] = ['APPRENTISSAGE', 'DIVERTISSEMENT', 'GAMING', 'ASMR']
 
 CATEGORY_PLAYLISTS: dict[str, str] = {
-    'APPRENTISSAGE': playlists['apprentissage']['id'],
-    'DIVERTISSEMENT': playlists['divertissement_gaming']['id'],
-    'GAMING': playlists['divertissement_gaming']['id'],
-    'ASMR': playlists['asmr']['id'],
+    'APPRENTISSAGE': playlists['apprentissage'].id,
+    'DIVERTISSEMENT': playlists['divertissement_gaming'].id,
+    'GAMING': playlists['divertissement_gaming'].id,
+    'ASMR': playlists['asmr'].id,
 }
 
 # Playlist addition mapping: (playlist_id, log_name)
 PLAYLIST_ADDITIONS: list[tuple[str, str]] = [
     (banger, 'Banger Radar'),
     (release, 'Release Radar'),
-    (playlists['apprentissage']['id'], 'Educational content'),
-    (playlists['divertissement_gaming']['id'], 'Entertainment & Gaming'),
-    (playlists['asmr']['id'], 'ASMR & Relaxation'),
+    (playlists['apprentissage'].id, 'Educational content'),
+    (playlists['divertissement_gaming'].id, 'Entertainment & Gaming'),
+    (playlists['asmr'].id, 'ASMR & Relaxation'),
     (music_lives, 'Music Lives'),
     (regular_streams, 'My streams'),
 ]
@@ -204,7 +244,7 @@ def _add_videos_to_playlists(
             youtube.add_to_playlist(service, playlist_id, videos, prog_bar=prog_bar)
 
 
-def dest_playlist(channel_id: str, is_shorts: bool, v_duration: int,
+def dest_playlist(channel_id: str, is_shorts: bool | None, v_duration: int | None,
                   live_status: str = 'none', max_duration: int | None = None) -> str:
     """Return destination playlist for addition based on channel category and video properties.
 
@@ -221,8 +261,8 @@ def dest_playlist(channel_id: str, is_shorts: bool, v_duration: int,
 
     Args:
         channel_id: YouTube channel ID.
-        is_shorts: Boolean indicating whether the video is a YouTube Short.
-        v_duration: YouTube video duration in seconds.
+        is_shorts: Boolean indicating whether the video is a YouTube Short (None if unknown).
+        v_duration: YouTube video duration in seconds (None if unknown).
         live_status: YouTube live broadcast content status ('none', 'upcoming', 'live').
         max_duration: Duration threshold in minutes (uses config.LONG_VIDEO_THRESHOLD_MINUTES by default).
 
@@ -242,7 +282,7 @@ def dest_playlist(channel_id: str, is_shorts: bool, v_duration: int,
         return 'shorts'
 
     is_music_channel = channel_id in music
-    is_long_video = v_duration > max_duration * 60
+    is_long_video = (v_duration or 0) > max_duration * 60
 
     # Determine non-music category (if any) using priority order
     non_music_category = None
@@ -340,7 +380,7 @@ def main(historical_data: pd.DataFrame) -> None:
     else:
         # Add statistics about the videos for selection
         history_main.info('Add statistics for %s video(s).', len(new_videos))
-        new_data = youtube.add_stats(service=youtube_oauth, video_list=new_videos)
+        new_data = youtube.add_stats(service=youtube_oauth, playlist_items=new_videos)
 
         # Filter out upcoming streams from stats storage (don't track stats for scheduled content)
         upcoming_mask = new_data['live_status'] == 'upcoming'

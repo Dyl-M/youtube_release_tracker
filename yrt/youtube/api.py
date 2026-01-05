@@ -12,31 +12,34 @@ import tqdm  # type: ignore[import-untyped]
 # Local
 from .. import config
 from ..exceptions import APIError
+from ..models import PlaylistItem
 from . import utils
 
 
-def _parse_playlist_item(item: Any, date_format: str) -> dict[str, Any] | None:
-    """Parse a playlist item into a dict, returns None if no release date.
+def _parse_playlist_item(item: Any, date_format: str, source_channel_id: str) -> PlaylistItem | None:
+    """Parse a playlist item into a PlaylistItem dataclass, returns None if no release date.
 
     Args:
         item: A playlist item from YouTube API response.
         date_format: Date format string for parsing.
+        source_channel_id: Channel ID being iterated (for artist channel handling).
 
     Returns:
-        Parsed item dict or None if no release date.
+        Parsed PlaylistItem or None if no release date.
     """
     if item.contentDetails.videoPublishedAt is None:
         return None
 
-    return {
-        'video_id': item.contentDetails.videoId,
-        'video_title': item.snippet.title,
-        'item_id': item.id,
-        'release_date': dt.datetime.strptime(item.contentDetails.videoPublishedAt, date_format),
-        'status': item.status.privacyStatus,
-        'channel_id': item.snippet.videoOwnerChannelId,
-        'channel_name': item.snippet.videoOwnerChannelTitle
-    }
+    return PlaylistItem(
+        video_id=item.contentDetails.videoId,
+        video_title=item.snippet.title,
+        item_id=item.id,
+        release_date=dt.datetime.strptime(item.contentDetails.videoPublishedAt, date_format),
+        status=item.status.privacyStatus,
+        channel_id=item.snippet.videoOwnerChannelId,
+        channel_name=item.snippet.videoOwnerChannelTitle,
+        source_channel_id=source_channel_id  # Set at creation - no mutation!
+    )
 
 
 def _handle_playlist_error(
@@ -73,15 +76,15 @@ def _handle_playlist_error(
 
 
 def _filter_items_by_date_range(
-        p_items: list[dict[str, Any]],
+        p_items: list[PlaylistItem],
         latest_d: dt.datetime,
         oldest_d: dt.datetime | None = None,
         day_ago: int | None = None
-) -> list[dict[str, Any]]:
+) -> list[PlaylistItem]:
     """Filter videos on a date range.
 
     Args:
-        p_items: Playlist items as a list.
+        p_items: Playlist items as a list of PlaylistItem dataclasses.
         latest_d: The latest reference date.
         oldest_d: Latest execution date.
         day_ago: Day difference with a reference date, delimits items' collection field.
@@ -90,34 +93,36 @@ def _filter_items_by_date_range(
         Filtered items.
     """
     if oldest_d:
-        return [item for item in p_items if oldest_d < item['release_date'] < latest_d]
+        return [item for item in p_items if oldest_d < item.release_date < latest_d]
     if day_ago:
         date_delta = latest_d - dt.timedelta(days=day_ago)
-        return [item for item in p_items if date_delta < item['release_date'] < latest_d]
+        return [item for item in p_items if date_delta < item.release_date < latest_d]
     return p_items
 
 
 def get_playlist_items(
         service: pyt.Client,
         playlist_id: str,
+        source_channel_id: str,
         day_ago: int | None = None,
         latest_d: dt.datetime | None = None
-) -> list[dict[str, Any]]:
+) -> list[PlaylistItem]:
     """Get the videos in a YouTube playlist.
 
     Args:
         service: A Python YouTube Client.
         playlist_id: A YouTube playlist ID.
+        source_channel_id: Channel ID being iterated (for artist channel handling).
         day_ago: Day difference with a reference date, delimits items' collection field.
         latest_d: The latest reference date. Defaults to NOW.
 
     Returns:
-        Playlist items (videos) as a list.
+        Playlist items as list of PlaylistItem dataclasses.
     """
     if latest_d is None:
         latest_d = utils.NOW
 
-    p_items = []
+    p_items: list[PlaylistItem] = []
     next_page_token = None
 
     latest_d = latest_d.replace(minute=0, second=0, microsecond=0)
@@ -133,8 +138,11 @@ def get_playlist_items(
             )
 
             # Parse items, filtering out those without release date
-            p_items += [parsed for item in request.items
-                        if (parsed := _parse_playlist_item(item, utils.ISO_DATE_FORMAT)) is not None]
+            p_items += [
+                parsed
+                for item in request.items
+                if (parsed := _parse_playlist_item(item, utils.ISO_DATE_FORMAT, source_channel_id)) is not None
+            ]
             p_items = _filter_items_by_date_range(p_items, latest_d, oldest_d=oldest_d, day_ago=day_ago)
 
             next_page_token = request.nextPageToken
@@ -234,7 +242,7 @@ def iter_channels(
         day_ago: int | None = None,
         latest_d: dt.datetime | None = None,
         prog_bar: bool = True
-) -> list[dict[str, Any]]:
+) -> list[PlaylistItem]:
     """Apply 'get_playlist_items' for a collection of YouTube playlists.
 
     Args:
@@ -245,7 +253,7 @@ def iter_channels(
         prog_bar: Whether to use tqdm progress bar.
 
     Returns:
-        Videos retrieved in playlists, each with source_channel_id added.
+        PlaylistItem instances with source_channel_id set at creation (no mutation!).
     """
     if latest_d is None:
         latest_d = utils.NOW
@@ -253,18 +261,16 @@ def iter_channels(
     # Create pairs of (channel_id, playlist_id) to track source channel
     channel_playlist_pairs = [(ch_id, f'UU{ch_id[2:]}') for ch_id in channels if ch_id not in utils.ADD_ON['toPass']]
 
-    def get_items_with_source(channel_id: str, playlist_id: str) -> list[dict[str, Any]]:
-        """Fetch playlist items and add source_channel_id to each."""
-        items = get_playlist_items(service=service, playlist_id=playlist_id, day_ago=day_ago, latest_d=latest_d)
-        for item in items:
-            item['source_channel_id'] = channel_id
-        return items
-
     if prog_bar:
-        item_it = [get_items_with_source(ch_id, pl_id)
-                   for ch_id, pl_id in tqdm.tqdm(channel_playlist_pairs, desc='Looking for videos to add')]
+        item_it = [
+            get_playlist_items(service, pl_id, ch_id, day_ago, latest_d)
+            for ch_id, pl_id in tqdm.tqdm(channel_playlist_pairs, desc='Looking for videos to add')
+        ]
 
     else:
-        item_it = [get_items_with_source(ch_id, pl_id) for ch_id, pl_id in channel_playlist_pairs]
+        item_it = [
+            get_playlist_items(service, pl_id, ch_id, day_ago, latest_d)
+            for ch_id, pl_id in channel_playlist_pairs
+        ]
 
     return list(itertools.chain.from_iterable(item_it))

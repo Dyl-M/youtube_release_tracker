@@ -91,10 +91,19 @@ Repository structure
 │   ├── test_file_utils.py
 │   ├── test_logging_utils.py
 │   ├── test_main.py
+│   ├── test_models.py
 │   ├── test_paths.py
 │   └── test_youtube.py
 │
 ├── yrt
+│   ├── youtube
+│   │   ├── __init__.py
+│   │   ├── api.py
+│   │   ├── auth.py
+│   │   ├── cleanup.py
+│   │   ├── playlist.py
+│   │   ├── stats.py
+│   │   └── utils.py
 │   ├── __init__.py
 │   ├── analytics.py
 │   ├── config.py
@@ -102,8 +111,8 @@ Repository structure
 │   ├── file_utils.py
 │   ├── logging_utils.py
 │   ├── main.py
-│   ├── paths.py
-│   └── youtube.py
+│   ├── models.py
+│   └── paths.py
 │
 ├── .deepsource.toml
 ├── .gitignore

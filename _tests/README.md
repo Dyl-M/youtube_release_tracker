@@ -8,9 +8,14 @@ Comprehensive test suite using pytest for the YouTube Release Tracker project.
 _tests/
 ├── conftest.py              # Shared fixtures and pytest configuration
 ├── fixtures/                # Sample data files for testing
+│   ├── sample_playlist_response.json
+│   └── sample_video_stats.json
+├── test_config.py           # Tests for centralized configuration
 ├── test_exceptions.py       # Tests for custom exception hierarchy
-├── test_file_utils.py       # Tests for file operations
+├── test_file_utils.py       # Tests for file operations and validation
+├── test_logging_utils.py    # Tests for logger factory
 ├── test_main.py             # Tests for main orchestration logic
+├── test_models.py           # Tests for domain models/dataclasses
 ├── test_paths.py            # Tests for centralized path definitions
 ├── test_youtube.py          # Tests for YouTube API functions
 └── README.md                # This file
@@ -18,50 +23,54 @@ _tests/
 
 ## Running Tests
 
+**Important:** This project uses `uv` as the package manager. Always use `uv run` to execute pytest commands.
+
 ### Run all tests
 
 ```bash
-pytest
+uv run pytest _tests/ -v
 ```
 
 ### Run specific test file
 
 ```bash
-pytest _tests/test_youtube.py
+uv run pytest _tests/test_youtube.py -v
+uv run pytest _tests/test_models.py -v
 ```
 
 ### Run tests by marker
 
 ```bash
 # Run only unit tests
-pytest -m unit
+uv run pytest _tests/ -m unit -v
 
 # Run only API tests
-pytest -m api
+uv run pytest _tests/ -m api -v
 
 # Run integration tests
-pytest -m integration
+uv run pytest _tests/ -m integration -v
 
 # Skip slow tests
-pytest -m "not slow"
+uv run pytest _tests/ -m "not slow" -v
 ```
 
 ### Run with coverage
 
 ```bash
-pytest --cov=yrt --cov-report=html --cov-report=term-missing
+uv run pytest _tests/ --cov=yrt --cov-report=html --cov-report=term-missing
 ```
 
 ### Run with verbose output
 
 ```bash
-pytest -v
+uv run pytest _tests/ -v
 ```
 
 ### Run specific test
 
 ```bash
-pytest _tests/test_youtube.py::TestIsShorts::test_is_shorts_returns_true_for_shorts
+uv run pytest _tests/test_youtube.py::TestIsShorts::test_is_shorts_returns_true_for_shorts -v
+uv run pytest _tests/test_models.py::test_playlist_config_creation -v
 ```
 
 ## Test Markers
@@ -93,34 +102,58 @@ Common fixtures are defined in `conftest.py`:
 
 Current implementation tests:
 
-1. **Exception Hierarchy** (test_exceptions.py)
+1. **Configuration** (test_config.py) - 22 tests ✅
+    - Deep merge functionality
+    - Constants loading with defaults
+    - Partial config overrides
+    - All configuration constants validation
+
+2. **Exception Hierarchy** (test_exceptions.py) - 7 tests ✅
     - All custom exceptions
     - Inheritance relationships
     - Exception catching behavior
 
-2. **Path Management** (test_paths.py)
+3. **File Operations** (test_file_utils.py) - 13 tests ✅
+    - JSON loading and saving
+    - Required key validation (flat and nested)
+    - Path validation security
+    - Error handling
+
+4. **Logging Utilities** (test_logging_utils.py) - 10 tests ✅
+    - Logger factory creation
+    - File handler configuration
+    - YRT_NO_LOGGING environment variable
+    - Multiple independent loggers
+
+5. **Main Logic** (test_main.py) - 0/20 tests ⏭️
+    - Video routing (dest_playlist) - skipped
+    - Configuration loading - skipped
+    - Main orchestration - skipped
+    - Workflow modes - skipped
+
+6. **Domain Models** (test_models.py) - 26 tests ✅ NEW
+    - PlaylistConfig validation (5 tests)
+    - AddOnConfig validation (3 tests)
+    - PlaylistItem validation (3 tests)
+    - VideoStats validation (3 tests)
+    - VideoData factory method (3 tests)
+    - PlaylistItemRef validation (4 tests)
+    - Helper functions to_dict/to_dict_list (5 tests)
+
+7. **Path Management** (test_paths.py) - 8 tests ✅
     - Path constants existence
     - Directory structure
     - Absolute paths
     - Path validation lists
 
-3. **File Operations** (test_file_utils.py)
-    - JSON loading and saving
-    - Required key validation
-    - Nested key validation
-    - Error handling
+8. **YouTube API** (test_youtube.py) - 14/17 tests
+    - Shorts detection (is_shorts) ✅
+    - Error categorization constants ✅
+    - Retry mechanism configuration ✅
+    - Service creation functions ✅
+    - Duration parsing - skipped (3 tests)
 
-4. **YouTube API** (test_youtube.py)
-    - Shorts detection (is_shorts)
-    - Error categorization constants
-    - Retry mechanism configuration
-    - Service creation functions
-
-5. **Main Logic** (test_main.py)
-    - Video routing (dest_playlist)
-    - Configuration loading
-    - Main orchestration
-    - Workflow modes
+**Total:** 123 tests | **Passing:** 100 | **Skipped:** 23
 
 ## Adding New Tests
 
@@ -137,12 +170,13 @@ Tests require:
 
 - pytest
 - pytest-cov (for coverage reports)
-- All project dependencies from requirements.txt
+- All project dependencies from `pyproject.toml`
 
 Install test dependencies:
 
 ```bash
-pip install pytest pytest-cov
+# Install all dependencies including dev extras
+uv sync --extra dev
 ```
 
 ## Continuous Integration

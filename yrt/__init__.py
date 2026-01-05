@@ -9,6 +9,7 @@ __all__ = [
     'exceptions',
     'file_utils',
     'main',
+    'models',
     'paths',
     'youtube'
 ]

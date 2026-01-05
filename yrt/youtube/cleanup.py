@@ -2,19 +2,19 @@
 
 # Standard library
 import datetime as dt
-from typing import Any
 
 # Third-party
 import pyyoutube as pyt  # type: ignore[import-untyped]
 
 # Local
 from .. import config
+from ..models import PlaylistConfig, PlaylistItemRef
 from . import utils
 from .api import get_videos
 from .playlist import del_from_playlist
 
 
-def _fetch_stream_playlist_items(service: pyt.Client, playlist_id: str, playlist_name: str) -> list[dict[str, Any]]:
+def _fetch_stream_playlist_items(service: pyt.Client, playlist_id: str, playlist_name: str) -> list[PlaylistItemRef]:
     """Fetch all items from a stream playlist with pagination.
 
     Args:
@@ -23,22 +23,24 @@ def _fetch_stream_playlist_items(service: pyt.Client, playlist_id: str, playlist
         playlist_name: The playlist name for logging.
 
     Returns:
-        List of items with item_id and video_id.
+        List of PlaylistItemRef instances with item_id and video_id.
     """
-    all_items: list[dict[str, Any]] = []
+    all_items: list[PlaylistItemRef] = []
     next_page_token = None
 
     while True:
         try:
             response = service.playlistItems.list(
-                parts=['snippet', 'contentDetails'],
+                part=['snippet', 'contentDetails'],
                 playlist_id=playlist_id,
-                count=config.API_BATCH_SIZE,
-                page_token=next_page_token
+                max_results=config.API_BATCH_SIZE,
+                pageToken=next_page_token
             )
 
-            all_items.extend({'item_id': item.id, 'video_id': item.contentDetails.videoId}
-                             for item in response.items)
+            all_items.extend(
+                PlaylistItemRef(item_id=item.id, video_id=item.contentDetails.videoId)
+                for item in response.items
+            )
 
             next_page_token = response.nextPageToken
             if not next_page_token:
@@ -56,19 +58,19 @@ def _fetch_stream_playlist_items(service: pyt.Client, playlist_id: str, playlist
     return all_items
 
 
-def _find_ended_streams(service: pyt.Client, all_items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def _find_ended_streams(service: pyt.Client, all_items: list[PlaylistItemRef]) -> list[PlaylistItemRef]:
     """Find streams that have ended by checking their live status.
 
     Args:
         service: A Python YouTube Client.
-        all_items: List of playlist items with item_id and video_id.
+        all_items: List of PlaylistItemRef instances.
 
     Returns:
-        List of items where the stream has ended.
+        List of PlaylistItemRef instances where the stream has ended.
     """
-    video_ids = [item['video_id'] for item in all_items]
-    video_id_to_item = {item['video_id']: item for item in all_items}
-    ended_items: list[dict[str, Any]] = []
+    video_ids = [item.video_id for item in all_items]
+    video_id_to_item = {item.video_id: item for item in all_items}
+    ended_items: list[PlaylistItemRef] = []
 
     # Batch video status checks
     batch_size = config.API_BATCH_SIZE
@@ -87,7 +89,11 @@ def _find_ended_streams(service: pyt.Client, all_items: list[dict[str, Any]]) ->
     return ended_items
 
 
-def cleanup_expired_videos(service: pyt.Client, playlist_config: dict[str, Any], prog_bar: bool = True) -> None:
+def cleanup_expired_videos(
+        service: pyt.Client,
+        playlist_config: dict[str, PlaylistConfig],
+        prog_bar: bool = True
+) -> None:
     """Remove expired videos from playlists with retention rules.
 
     For each playlist with 'retention_days' configured:
@@ -97,18 +103,18 @@ def cleanup_expired_videos(service: pyt.Client, playlist_config: dict[str, Any],
 
     Args:
         service: A Python YouTube Client.
-        playlist_config: Dictionary of playlist configurations from playlists.json.
-            Each playlist entry may have 'retention_days' key.
+        playlist_config: Dictionary of PlaylistConfig instances.
+            Each playlist may have retention_days configured.
         prog_bar: Whether to use tqdm progress bar.
     """
     for playlist_cfg in playlist_config.values():
         # Skip playlists without retention rules
-        if 'retention_days' not in playlist_cfg:
+        if playlist_cfg.retention_days is None:
             continue
 
-        playlist_id = playlist_cfg['id']
-        retention_days = playlist_cfg['retention_days']
-        playlist_name = playlist_cfg['name']
+        playlist_id = playlist_cfg.id
+        retention_days = playlist_cfg.retention_days
+        playlist_name = playlist_cfg.name
         cutoff_date = utils.NOW - dt.timedelta(days=retention_days)
 
         if utils.history:
@@ -119,7 +125,7 @@ def cleanup_expired_videos(service: pyt.Client, playlist_config: dict[str, Any],
             )
 
         # Fetch all items with pagination
-        expired_items = []
+        expired_items: list[PlaylistItemRef] = []
         next_page_token = None
 
         while True:
@@ -137,10 +143,13 @@ def cleanup_expired_videos(service: pyt.Client, playlist_config: dict[str, Any],
                     if added_date_str:
                         added_date = dt.datetime.strptime(added_date_str, utils.ISO_DATE_FORMAT)
                         if added_date < cutoff_date:
-                            expired_items.append({
-                                'item_id': item.id,
-                                'video_id': item.contentDetails.videoId
-                            })
+                            expired_items.append(
+                                PlaylistItemRef(
+                                    item_id=item.id,
+                                    video_id=item.contentDetails.videoId,
+                                    add_date=added_date
+                                )
+                            )
 
                 next_page_token = response.nextPageToken
                 if not next_page_token:
@@ -166,7 +175,11 @@ def cleanup_expired_videos(service: pyt.Client, playlist_config: dict[str, Any],
                 utils.history.info('No expired videos in "%s"', playlist_name)
 
 
-def cleanup_ended_streams(service: pyt.Client, playlist_config: dict[str, Any], prog_bar: bool = True) -> None:
+def cleanup_ended_streams(
+        service: pyt.Client,
+        playlist_config: dict[str, PlaylistConfig],
+        prog_bar: bool = True
+) -> None:
     """Remove ended streams from playlists with cleanup_on_end=True.
 
     For each playlist with 'cleanup_on_end' configured:
@@ -176,16 +189,16 @@ def cleanup_ended_streams(service: pyt.Client, playlist_config: dict[str, Any], 
 
     Args:
         service: A Python YouTube Client.
-        playlist_config: Dictionary of playlist configurations from playlists.json.
-            Each playlist entry may have 'cleanup_on_end' key.
+        playlist_config: Dictionary of PlaylistConfig instances.
+            Each playlist may have cleanup_on_end configured.
         prog_bar: Whether to use tqdm progress bar.
     """
     for playlist_cfg in playlist_config.values():
-        if not playlist_cfg.get('cleanup_on_end', False):
+        if not playlist_cfg.cleanup_on_end:
             continue
 
-        playlist_id = playlist_cfg['id']
-        playlist_name = playlist_cfg['name']
+        playlist_id = playlist_cfg.id
+        playlist_name = playlist_cfg.name
 
         if utils.history:
             utils.history.info('Checking ended streams for playlist "%s"', playlist_name)
