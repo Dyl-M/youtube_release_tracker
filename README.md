@@ -93,6 +93,7 @@ Repository structure
 │   ├── test_main.py
 │   ├── test_models.py
 │   ├── test_paths.py
+│   ├── test_router.py
 │   └── test_youtube.py
 │
 ├── yrt
@@ -112,7 +113,8 @@ Repository structure
 │   ├── logging_utils.py
 │   ├── main.py
 │   ├── models.py
-│   └── paths.py
+│   ├── paths.py
+│   └── router.py
 │
 ├── .deepsource.toml
 ├── .gitignore

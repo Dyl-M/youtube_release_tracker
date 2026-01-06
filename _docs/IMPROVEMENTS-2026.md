@@ -160,13 +160,21 @@ checking benefits.
 
 **Location:** `yrt/main.py:213-280`
 
-**Status:** Pending
+**Status:** ✅ Fixed
 
 **Issue:** Complex nested conditions in `dest_playlist()` function. Hard to test, extend, and understand.
 
 **Impact:** Business-critical routing logic buried in complex conditionals.
 
-**Solution:** Create `VideoRouter` class:
+**Solution Implemented:** Created `yrt/router.py` with:
+- `RouterConfig` dataclass for routing configuration with validation
+- `VideoRouter` class with clear routing methods
+- Factory function `create_router_from_config()` for easy instantiation
+- Module-level singleton `video_router` in main.py
+- `dest_playlist()` now delegates to router (backward compatible)
+- 40 comprehensive unit tests covering all routing paths
+
+**Original Solution (reference):** Create `VideoRouter` class:
 
 ```python
 class VideoRouter:
@@ -634,12 +642,12 @@ class YouTubeService(Protocol):
 ## 📄 Summary
 
 - **☢️ Critical:** 1 bug ~~requiring immediate fix~~ ✅ Fixed
-- **⚠️ High Priority:** 5 structural improvements (3 fixed: Logger Factory, Split youtube.py, Domain Models)
+- **⚠️ High Priority:** 5 structural improvements (4 fixed: Logger Factory, Split youtube.py, Domain Models, VideoRouter)
 - **🛑 Medium Priority:** 5 code quality improvements
 - **🧪 Test Suite:** 3 test coverage improvements
 - **🛃 Low Priority:** 5 nice-to-have improvements
 
-**Total:** 19 improvement items (4 fixed, 15 remaining)
+**Total:** 19 improvement items (5 fixed, 14 remaining)
 
 ## Files to Modify
 
@@ -658,20 +666,22 @@ class YouTubeService(Protocol):
 
 ## New Files to Create
 
-| File                           | Purpose                  |
-|--------------------------------|--------------------------|
-| `yrt/logging_utils.py`         | Shared logger factory    |
-| `yrt/constants.py`             | Magic strings/numbers    |
-| `yrt/youtube/__init__.py`      | Package exports          |
-| `yrt/youtube/auth.py`          | Authentication functions |
-| `yrt/youtube/api.py`           | Core API calls           |
-| `yrt/youtube/stats.py`         | Statistics management    |
-| `yrt/youtube/playlist.py`      | Playlist operations      |
-| `yrt/youtube/cleanup.py`       | Cleanup operations       |
-| `yrt/youtube/models.py`        | Dataclasses and enums    |
-| `yrt/youtube/retry.py`         | Retry decorator          |
-| `yrt/youtube/utils.py`         | Utilities                |
-| `_tests/fixtures/error_*.json` | Error response fixtures  |
+| File                           | Purpose                  | Status |
+|--------------------------------|--------------------------|--------|
+| `yrt/logging_utils.py`         | Shared logger factory    | ✅ Created |
+| `yrt/router.py`                | Video routing logic      | ✅ Created |
+| `yrt/constants.py`             | Magic strings/numbers    | Pending |
+| `yrt/youtube/__init__.py`      | Package exports          | ✅ Created |
+| `yrt/youtube/auth.py`          | Authentication functions | ✅ Created |
+| `yrt/youtube/api.py`           | Core API calls           | ✅ Created |
+| `yrt/youtube/stats.py`         | Statistics management    | ✅ Created |
+| `yrt/youtube/playlist.py`      | Playlist operations      | ✅ Created |
+| `yrt/youtube/cleanup.py`       | Cleanup operations       | ✅ Created |
+| `yrt/youtube/models.py`        | Dataclasses and enums    | Deferred (using yrt/models.py) |
+| `yrt/youtube/retry.py`         | Retry decorator          | Pending |
+| `yrt/youtube/utils.py`         | Utilities                | ✅ Created |
+| `_tests/test_router.py`        | Router unit tests        | ✅ Created |
+| `_tests/fixtures/error_*.json` | Error response fixtures  | Pending |
 
 ## Implementation Order
 

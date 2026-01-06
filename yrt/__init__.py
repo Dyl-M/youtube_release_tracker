@@ -11,5 +11,6 @@ __all__ = [
     'main',
     'models',
     'paths',
+    'router',
     'youtube'
 ]

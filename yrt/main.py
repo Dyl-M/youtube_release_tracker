@@ -18,6 +18,7 @@ from . import youtube
 from .exceptions import YouTubeTrackerError, GitHubError
 from .logging_utils import create_file_logger
 from .models import PlaylistConfig, AddOnConfig
+from .router import create_router_from_config, set_default_router, dest_playlist
 
 # System
 
@@ -166,6 +167,10 @@ category_channels = {
     'ASMR': set(pocket_tube.get('ASMR', [])),
 }
 
+# Video router singleton
+video_router = create_router_from_config(pocket_tube, playlists, add_on)
+set_default_router(video_router)
+
 # Historical Data - create if doesn't exist
 if os.path.exists(paths.STATS_CSV):
     histo_data = pd.read_csv(paths.STATS_CSV, encoding='utf-8')
@@ -242,76 +247,6 @@ def _add_videos_to_playlists(
         if videos:
             logger.info('Addition to "%s": %s video(s).', log_name, len(videos))
             youtube.add_to_playlist(service, playlist_id, videos, prog_bar=prog_bar)
-
-
-def dest_playlist(channel_id: str, is_shorts: bool | None, v_duration: int | None,
-                  live_status: str = 'none', max_duration: int | None = None) -> str:
-    """Return destination playlist for addition based on channel category and video properties.
-
-    Routing logic:
-        1. Upcoming streams -> route to stream playlists (music_lives or regular_streams).
-        2. Shorts are always excluded (return 'shorts').
-        3. Non-music channels route to category playlists by priority:
-           APPRENTISSAGE > DIVERTISSEMENT/GAMING > ASMR.
-        4. Music channels:
-           - Long videos (>threshold) from dual-category channels -> their non-music category playlist.
-           - Long videos (>threshold) from music-only channels -> 'none' (skipped).
-           - Favorites -> Banger Radar.
-           - Others -> Release Radar.
-
-    Args:
-        channel_id: YouTube channel ID.
-        is_shorts: Boolean indicating whether the video is a YouTube Short (None if unknown).
-        v_duration: YouTube video duration in seconds (None if unknown).
-        live_status: YouTube live broadcast content status ('none', 'upcoming', 'live').
-        max_duration: Duration threshold in minutes (uses config.LONG_VIDEO_THRESHOLD_MINUTES by default).
-
-    Returns:
-        Appropriate YouTube playlist ID or special string ('shorts', 'none').
-    """
-    if max_duration is None:
-        max_duration = config.LONG_VIDEO_THRESHOLD_MINUTES
-
-    # Upcoming streams -> route to stream playlists
-    if live_status == 'upcoming':
-        if channel_id in music:
-            return music_lives
-        return regular_streams
-
-    if is_shorts:
-        return 'shorts'
-
-    is_music_channel = channel_id in music
-    is_long_video = (v_duration or 0) > max_duration * 60
-
-    # Determine non-music category (if any) using priority order
-    non_music_category = None
-    for category in CATEGORY_PRIORITY:
-        if channel_id in category_channels.get(category, set()):
-            non_music_category = category
-            break
-
-    # Non-music channels -> route to category playlist
-    if not is_music_channel:
-        if non_music_category:
-            return CATEGORY_PLAYLISTS[non_music_category]
-        # Channel not in any known category (should not happen normally)
-        return 'none'
-
-    # Music channel with long video
-    if is_long_video:
-        # Dual-category channel: route to non-music category playlist
-        if non_music_category:
-            return CATEGORY_PLAYLISTS[non_music_category]
-        # Music-only channel: skip long videos
-        return 'none'
-
-    # Short music videos from favorites -> Banger Radar
-    if channel_id in favorites:
-        return banger
-
-    # Regular short music videos -> Release Radar
-    return release
 
 
 def update_repo_secrets(secret_name: str, new_value: str, logger: logging.Logger | None = None) -> None:
