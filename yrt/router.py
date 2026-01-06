@@ -287,7 +287,7 @@ def set_default_router(router: VideoRouter) -> None:
     Args:
         router: VideoRouter instance to use as default.
     """
-    global _default_router  # noqa: PLW0603 - intentional module-level state for dependency injection
+    global _default_router  # noqa: PYL-W0603 - intentional module-level state for dependency injection
     _default_router = router
 
 
