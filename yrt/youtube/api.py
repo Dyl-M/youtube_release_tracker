@@ -65,10 +65,7 @@ def _handle_playlist_error(
 
     if error.status_code == 404:
         channel_id = f'UC{playlist_id[2:]}'
-        if (
-            channel_id not in add_on['playlistNotFoundPass']
-            and utils.history
-        ):
+        if channel_id not in add_on['playlistNotFoundPass'] and utils.history:
             utils.history.warning('Playlist not found: %s', playlist_id)
         return True
 

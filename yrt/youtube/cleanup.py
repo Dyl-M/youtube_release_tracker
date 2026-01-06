@@ -59,6 +59,67 @@ def _fetch_stream_playlist_items(service: pyt.Client, playlist_id: str, playlist
     return all_items
 
 
+def _fetch_expired_items(
+        service: pyt.Client,
+        playlist_id: str,
+        playlist_name: str,
+        cutoff_date: dt.datetime
+) -> list[PlaylistItemRef]:
+    """Fetch items from a playlist that are older than the cutoff date.
+
+    Args:
+        service: A Python YouTube Client.
+        playlist_id: The playlist ID to fetch items from.
+        playlist_name: The playlist name for logging.
+        cutoff_date: Items added before this date are considered expired.
+
+    Returns:
+        List of PlaylistItemRef instances for expired items.
+    """
+    expired_items: list[PlaylistItemRef] = []
+    next_page_token = None
+
+    while True:
+        try:
+            response = service.playlistItems.list(
+                part=['snippet', 'contentDetails'],
+                playlist_id=playlist_id,
+                max_results=config.API_BATCH_SIZE,
+                pageToken=next_page_token
+            )
+
+            for item in response.items:
+                # snippet.publishedAt is when the video was added to the playlist
+                added_date_str = item.snippet.publishedAt
+                if added_date_str:
+                    added_date = dt.datetime.strptime(added_date_str, utils.ISO_DATE_FORMAT)
+                    if added_date < cutoff_date:
+                        expired_items.append(
+                            PlaylistItemRef(
+                                item_id=item.id,
+                                video_id=item.contentDetails.videoId,
+                                add_date=added_date
+                            )
+                        )
+
+            next_page_token = response.nextPageToken
+            if not next_page_token:
+                break
+
+        except pyt.error.PyYouTubeException as error:
+            if error.status_code == 403:
+                if utils.history:
+                    utils.history.warning('API quota exceeded while checking retention for %s', playlist_name)
+
+            else:
+                if utils.history:
+                    utils.history.warning('Error fetching items from %s: %s', playlist_name, error.message)
+
+            break
+
+    return expired_items
+
+
 def _find_ended_streams(service: pyt.Client, all_items: list[PlaylistItemRef]) -> list[PlaylistItemRef]:
     """Find streams that have ended by checking their live status.
 
@@ -109,71 +170,35 @@ def cleanup_expired_videos(
         prog_bar: Whether to use tqdm progress bar.
     """
     for playlist_cfg in playlist_config.values():
-        # Skip playlists without retention rules
         if playlist_cfg.retention_days is None:
             continue
 
         playlist_id = playlist_cfg.id
-        retention_days = playlist_cfg.retention_days
         playlist_name = playlist_cfg.name
-        cutoff_date = utils.NOW - dt.timedelta(days=retention_days)
+        cutoff_date = utils.NOW - dt.timedelta(days=playlist_cfg.retention_days)
 
         if utils.history:
             utils.history.info(
                 'Checking retention for playlist "%s" (retention: %d days)',
                 playlist_name,
-                retention_days
+                playlist_cfg.retention_days
             )
 
-        # Fetch all items with pagination
-        expired_items: list[PlaylistItemRef] = []
-        next_page_token = None
+        expired_items = _fetch_expired_items(
+            service,
+            playlist_id,
+            playlist_name,
+            cutoff_date
+        )
 
-        while True:
-            try:
-                response = service.playlistItems.list(
-                    part=['snippet', 'contentDetails'],
-                    playlist_id=playlist_id,
-                    max_results=config.API_BATCH_SIZE,
-                    pageToken=next_page_token
-                )
-
-                for item in response.items:
-                    # snippet.publishedAt is when the video was added to the playlist
-                    added_date_str = item.snippet.publishedAt
-                    if added_date_str:
-                        added_date = dt.datetime.strptime(added_date_str, utils.ISO_DATE_FORMAT)
-                        if added_date < cutoff_date:
-                            expired_items.append(
-                                PlaylistItemRef(
-                                    item_id=item.id,
-                                    video_id=item.contentDetails.videoId,
-                                    add_date=added_date
-                                )
-                            )
-
-                next_page_token = response.nextPageToken
-                if not next_page_token:
-                    break
-
-            except pyt.error.PyYouTubeException as error:
-                if error.status_code == 403:
-                    if utils.history:
-                        utils.history.warning('API quota exceeded while checking retention for %s', playlist_name)
-                else:
-                    if utils.history:
-                        utils.history.warning('Error fetching items from %s: %s', playlist_name, error.message)
-                break
-
-        # Delete expired items
         if expired_items:
             if utils.history:
                 utils.history.info('Removing %d expired video(s) from "%s"', len(expired_items), playlist_name)
+
             del_from_playlist(service, playlist_id, expired_items, prog_bar)
 
-        else:
-            if utils.history:
-                utils.history.info('No expired videos in "%s"', playlist_name)
+        elif utils.history:
+            utils.history.info('No expired videos in "%s"', playlist_name)
 
 
 def cleanup_ended_streams(
