@@ -6,8 +6,20 @@ from unittest.mock import Mock, patch
 # Third-party
 import pytest
 
-# Local
-from yrt import youtube
+# Local - explicit imports from submodules
+from yrt.youtube.utils import (
+    is_shorts,
+    ISO_DATE_FORMAT,
+    TRANSIENT_ERRORS,
+    PERMANENT_ERRORS,
+    QUOTA_ERRORS,
+)
+from yrt.youtube.auth import (
+    encode_key,
+    create_service_local,
+    create_service_workflow,
+)
+from yrt.youtube.stats import get_stats
 
 
 @pytest.mark.unit
@@ -15,14 +27,14 @@ from yrt import youtube
 class TestIsShorts:
     """Test is_shorts() function for YouTube Shorts detection."""
 
-    @patch('yrt.youtube.requests.head')
+    @patch('yrt.youtube.utils.requests.head')
     def test_is_shorts_returns_true_for_shorts(self, mock_head, sample_video_id):
         """Test is_shorts() returns True for actual shorts (200 status)."""
         mock_response = Mock()
         mock_response.status_code = 200
         mock_head.return_value = mock_response
 
-        result = youtube.is_shorts(sample_video_id)
+        result = is_shorts(sample_video_id)
 
         assert result is True
         mock_head.assert_called_once()
@@ -30,36 +42,36 @@ class TestIsShorts:
         call_kwargs = mock_head.call_args.kwargs
         assert call_kwargs.get('allow_redirects') is False
 
-    @patch('yrt.youtube.requests.head')
+    @patch('yrt.youtube.utils.requests.head')
     def test_is_shorts_returns_false_for_regular_videos(self, mock_head, sample_video_id):
         """Test is_shorts() returns False for regular videos (3xx redirect)."""
         mock_response = Mock()
         mock_response.status_code = 301  # Redirect
         mock_head.return_value = mock_response
 
-        result = youtube.is_shorts(sample_video_id)
+        result = is_shorts(sample_video_id)
 
         assert result is False
 
-    @patch('yrt.youtube.requests.head')
+    @patch('yrt.youtube.utils.requests.head')
     def test_is_shorts_has_timeout(self, mock_head, sample_video_id):
         """Test is_shorts() uses timeout to prevent hanging."""
         mock_response = Mock()
         mock_response.status_code = 200
         mock_head.return_value = mock_response
 
-        youtube.is_shorts(sample_video_id)
+        is_shorts(sample_video_id)
 
         call_kwargs = mock_head.call_args.kwargs
         assert 'timeout' in call_kwargs
         assert call_kwargs['timeout'] > 0
 
-    @patch('yrt.youtube.requests.head')
+    @patch('yrt.youtube.utils.requests.head')
     def test_is_shorts_handles_network_error(self, mock_head, sample_video_id):
         """Test is_shorts() returns False on network errors."""
         mock_head.side_effect = Exception("Network error")
 
-        result = youtube.is_shorts(sample_video_id)
+        result = is_shorts(sample_video_id)
 
         # Should return False as safe default
         assert result is False
@@ -72,27 +84,24 @@ class TestErrorConstants:
     @staticmethod
     def test_transient_errors_defined():
         """Test TRANSIENT_ERRORS constant is defined with normalized lowercase values."""
-        assert hasattr(youtube, 'TRANSIENT_ERRORS')
-        assert isinstance(youtube.TRANSIENT_ERRORS, set)
-        assert 'serviceunavailable' in youtube.TRANSIENT_ERRORS
-        assert 'backenderror' in youtube.TRANSIENT_ERRORS
-        assert 'internalerror' in youtube.TRANSIENT_ERRORS
+        assert isinstance(TRANSIENT_ERRORS, (set, frozenset))
+        assert 'serviceunavailable' in TRANSIENT_ERRORS
+        assert 'backenderror' in TRANSIENT_ERRORS
+        assert 'internalerror' in TRANSIENT_ERRORS
 
     @staticmethod
     def test_permanent_errors_defined():
         """Test PERMANENT_ERRORS constant is defined with normalized lowercase values."""
-        assert hasattr(youtube, 'PERMANENT_ERRORS')
-        assert isinstance(youtube.PERMANENT_ERRORS, set)
-        assert 'videonotfound' in youtube.PERMANENT_ERRORS
-        assert 'forbidden' in youtube.PERMANENT_ERRORS
-        assert 'duplicate' in youtube.PERMANENT_ERRORS
+        assert isinstance(PERMANENT_ERRORS, (set, frozenset))
+        assert 'videonotfound' in PERMANENT_ERRORS
+        assert 'forbidden' in PERMANENT_ERRORS
+        assert 'duplicate' in PERMANENT_ERRORS
 
     @staticmethod
     def test_quota_errors_defined():
         """Test QUOTA_ERRORS constant is defined with normalized lowercase values."""
-        assert hasattr(youtube, 'QUOTA_ERRORS')
-        assert isinstance(youtube.QUOTA_ERRORS, set)
-        assert 'quotaexceeded' in youtube.QUOTA_ERRORS
+        assert isinstance(QUOTA_ERRORS, (set, frozenset))
+        assert 'quotaexceeded' in QUOTA_ERRORS
 
     @staticmethod
     def test_retry_constants_defined():
@@ -140,14 +149,14 @@ class TestGetStats:
     def test_get_stats_has_check_shorts_parameter():
         """Test get_stats() accepts check_shorts parameter."""
         import inspect
-        sig = inspect.signature(youtube.get_stats)
+        sig = inspect.signature(get_stats)
         assert 'check_shorts' in sig.parameters
 
     @staticmethod
     def test_get_stats_check_shorts_default_true():
         """Test check_shorts defaults to True for new videos."""
         import inspect
-        sig = inspect.signature(youtube.get_stats)
+        sig = inspect.signature(get_stats)
         param = sig.parameters['check_shorts']
         assert param.default is True
 
@@ -159,11 +168,10 @@ class TestDateFormatting:
     @staticmethod
     def test_iso_date_format_constant():
         """Test ISO_DATE_FORMAT constant is defined."""
-        assert hasattr(youtube, 'ISO_DATE_FORMAT')
-        assert isinstance(youtube.ISO_DATE_FORMAT, str)
-        assert 'Y' in youtube.ISO_DATE_FORMAT
-        assert 'm' in youtube.ISO_DATE_FORMAT
-        assert 'd' in youtube.ISO_DATE_FORMAT
+        assert isinstance(ISO_DATE_FORMAT, str)
+        assert 'Y' in ISO_DATE_FORMAT
+        assert 'm' in ISO_DATE_FORMAT
+        assert 'd' in ISO_DATE_FORMAT
 
 
 @pytest.mark.integration
@@ -174,14 +182,12 @@ class TestServiceCreation:
     @staticmethod
     def test_create_service_local_function_exists():
         """Test create_service_local() function exists."""
-        assert hasattr(youtube, 'create_service_local')
-        assert callable(youtube.create_service_local)
+        assert callable(create_service_local)
 
     @staticmethod
     def test_create_service_workflow_function_exists():
         """Test create_service_workflow() function exists."""
-        assert hasattr(youtube, 'create_service_workflow')
-        assert callable(youtube.create_service_workflow)
+        assert callable(create_service_workflow)
 
 
 @pytest.mark.unit
@@ -191,5 +197,4 @@ class TestHelperFunctions:
     @staticmethod
     def test_encode_key_function_exists():
         """Test encode_key() function exists for base64 encoding."""
-        assert hasattr(youtube, 'encode_key')
-        assert callable(youtube.encode_key)
+        assert callable(encode_key)

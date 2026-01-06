@@ -3,12 +3,16 @@
 # Standard library
 import datetime as dt
 import json
+import os
 from pathlib import Path
 from unittest.mock import Mock, MagicMock
 
 # Third-party
 import pytest
 from tzlocal import get_localzone
+
+# Disable logging BEFORE importing yrt modules to prevent log file creation
+os.environ['YRT_NO_LOGGING'] = '1'
 
 # Test data directory
 FIXTURES_DIR = Path(__file__).parent / 'fixtures'

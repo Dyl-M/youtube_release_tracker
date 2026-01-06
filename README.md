@@ -87,21 +87,36 @@ Repository structure
 │   ├── conftest.py
 │   ├── README.md
 │   ├── test_config.py
+│   ├── test_constants.py
 │   ├── test_exceptions.py
 │   ├── test_file_utils.py
+│   ├── test_logging_utils.py
 │   ├── test_main.py
+│   ├── test_models.py
 │   ├── test_paths.py
+│   ├── test_router.py
 │   └── test_youtube.py
 │
 ├── yrt
+│   ├── youtube
+│   │   ├── __init__.py
+│   │   ├── api.py
+│   │   ├── auth.py
+│   │   ├── cleanup.py
+│   │   ├── playlist.py
+│   │   ├── stats.py
+│   │   └── utils.py
 │   ├── __init__.py
 │   ├── analytics.py
 │   ├── config.py
+│   ├── constants.py
 │   ├── exceptions.py
 │   ├── file_utils.py
+│   ├── logging_utils.py
 │   ├── main.py
+│   ├── models.py
 │   ├── paths.py
-│   └── youtube.py
+│   └── router.py
 │
 ├── .deepsource.toml
 ├── .gitignore

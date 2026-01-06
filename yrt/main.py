@@ -15,7 +15,11 @@ from . import config
 from . import file_utils
 from . import paths
 from . import youtube
+from .constants import LIVE_STATUS_UPCOMING
 from .exceptions import YouTubeTrackerError, GitHubError
+from .logging_utils import create_file_logger
+from .models import PlaylistConfig, AddOnConfig
+from .router import create_router_from_config, set_default_router, dest_playlist
 
 # System
 
@@ -58,6 +62,54 @@ def _get_env_variables() -> tuple[str, str]:
         return 'Dyl-M/auto_youtube_playlist', 'PAT'
 
 
+# Configuration loading helpers
+
+
+def _load_playlists_config() -> dict[str, PlaylistConfig]:
+    """Load and parse playlists configuration into PlaylistConfig instances.
+
+    Returns:
+        Dictionary mapping playlist names to PlaylistConfig instances.
+    """
+    playlists_data = file_utils.load_json(
+        str(paths.PLAYLISTS_JSON),
+        required_keys=[
+            'release', 'banger', 're_listening', 'legacy', 'apprentissage', 'divertissement_gaming', 'asmr',
+            'music_lives', 'regular_streams'
+        ]
+    )
+
+    return {
+        name: PlaylistConfig(
+            id=data['id'],
+            name=data['name'],
+            description=data['description'],
+            retention_days=data.get('retention_days'),
+            cleanup_on_end=data.get('cleanup_on_end')
+        )
+        for name, data in playlists_data.items()
+    }
+
+
+def _load_addon_config() -> AddOnConfig:
+    """Load and parse add-on configuration into AddOnConfig instance.
+
+    Returns:
+        AddOnConfig instance with configuration data.
+    """
+    add_on_data = file_utils.load_json(
+        str(paths.ADD_ON_JSON),
+        required_keys=['favorites']
+    )
+
+    return AddOnConfig(
+        favorites=add_on_data['favorites'],
+        playlist_not_found_pass=add_on_data.get('playlistNotFoundPass', []),
+        to_pass=add_on_data.get('toPass', []),
+        certified=add_on_data.get('certified', [])
+    )
+
+
 # Environment
 github_repo, PAT = _get_env_variables()
 
@@ -67,20 +119,11 @@ pocket_tube = file_utils.load_json(
     required_keys=['MUSIQUE', 'APPRENTISSAGE', 'DIVERTISSEMENT', 'GAMING']
 )
 
-playlists = file_utils.load_json(
-    str(paths.PLAYLISTS_JSON),
-    required_keys=['release', 'banger', 're_listening', 'legacy',
-                   'apprentissage', 'divertissement_gaming', 'asmr',
-                   'music_lives', 'regular_streams']
-)
-
-add_on_data = file_utils.load_json(
-    str(paths.ADD_ON_JSON),
-    required_keys=['favorites']
-)
+playlists = _load_playlists_config()
+add_on = _load_addon_config()
 
 # Extract configuration values
-favorites = add_on_data['favorites'].values()
+favorites = add_on.favorites.values()
 
 # YouTube Channels list
 music = pocket_tube['MUSIQUE']
@@ -90,30 +133,30 @@ other = list(set(other_raw))
 all_channels = list(set(music + other))
 
 # YouTube playlists
-release: str = playlists['release']['id']
-banger: str = playlists['banger']['id']
-re_listening: str = playlists['re_listening']['id']
-legacy: str = playlists['legacy']['id']
-music_lives: str = playlists['music_lives']['id']
-regular_streams: str = playlists['regular_streams']['id']
+release: str = playlists['release'].id
+banger: str = playlists['banger'].id
+re_listening: str = playlists['re_listening'].id
+legacy: str = playlists['legacy'].id
+music_lives: str = playlists['music_lives'].id
+regular_streams: str = playlists['regular_streams'].id
 
 # Category priority order and playlist mapping (for non-music channels)
 CATEGORY_PRIORITY: list[str] = ['APPRENTISSAGE', 'DIVERTISSEMENT', 'GAMING', 'ASMR']
 
 CATEGORY_PLAYLISTS: dict[str, str] = {
-    'APPRENTISSAGE': playlists['apprentissage']['id'],
-    'DIVERTISSEMENT': playlists['divertissement_gaming']['id'],
-    'GAMING': playlists['divertissement_gaming']['id'],
-    'ASMR': playlists['asmr']['id'],
+    'APPRENTISSAGE': playlists['apprentissage'].id,
+    'DIVERTISSEMENT': playlists['divertissement_gaming'].id,
+    'GAMING': playlists['divertissement_gaming'].id,
+    'ASMR': playlists['asmr'].id,
 }
 
 # Playlist addition mapping: (playlist_id, log_name)
 PLAYLIST_ADDITIONS: list[tuple[str, str]] = [
     (banger, 'Banger Radar'),
     (release, 'Release Radar'),
-    (playlists['apprentissage']['id'], 'Educational content'),
-    (playlists['divertissement_gaming']['id'], 'Entertainment & Gaming'),
-    (playlists['asmr']['id'], 'ASMR & Relaxation'),
+    (playlists['apprentissage'].id, 'Educational content'),
+    (playlists['divertissement_gaming'].id, 'Entertainment & Gaming'),
+    (playlists['asmr'].id, 'ASMR & Relaxation'),
     (music_lives, 'Music Lives'),
     (regular_streams, 'My streams'),
 ]
@@ -124,6 +167,10 @@ category_channels = {
     'GAMING': set(pocket_tube['GAMING']),
     'ASMR': set(pocket_tube.get('ASMR', [])),
 }
+
+# Video router singleton
+video_router = create_router_from_config(pocket_tube, playlists, add_on)
+set_default_router(video_router)
 
 # Historical Data - create if doesn't exist
 if os.path.exists(paths.STATS_CSV):
@@ -160,14 +207,7 @@ def _create_logger() -> logging.Logger:
     Returns:
         Configured Logger instance for history logging.
     """
-    logger = logging.Logger(name='history_main', level=0)
-    handler = logging.FileHandler(filename=paths.HISTORY_LOG)
-    handler.setLevel(logging.DEBUG)
-    handler.setFormatter(
-        logging.Formatter(fmt='%(asctime)s [%(levelname)s] - %(message)s', datefmt='%Y-%m-%d %H:%M:%S%z')
-    )
-    logger.addHandler(handler)
-    return logger
+    return create_file_logger('history_main', paths.HISTORY_LOG, respect_no_logging=False)
 
 
 def _update_historical_stats(service: youtube.pyt.Client, historical_data: pd.DataFrame) -> pd.DataFrame:
@@ -208,76 +248,6 @@ def _add_videos_to_playlists(
         if videos:
             logger.info('Addition to "%s": %s video(s).', log_name, len(videos))
             youtube.add_to_playlist(service, playlist_id, videos, prog_bar=prog_bar)
-
-
-def dest_playlist(channel_id: str, is_shorts: bool, v_duration: int,
-                  live_status: str = 'none', max_duration: int | None = None) -> str:
-    """Return destination playlist for addition based on channel category and video properties.
-
-    Routing logic:
-        1. Upcoming streams -> route to stream playlists (music_lives or regular_streams).
-        2. Shorts are always excluded (return 'shorts').
-        3. Non-music channels route to category playlists by priority:
-           APPRENTISSAGE > DIVERTISSEMENT/GAMING > ASMR.
-        4. Music channels:
-           - Long videos (>threshold) from dual-category channels -> their non-music category playlist.
-           - Long videos (>threshold) from music-only channels -> 'none' (skipped).
-           - Favorites -> Banger Radar.
-           - Others -> Release Radar.
-
-    Args:
-        channel_id: YouTube channel ID.
-        is_shorts: Boolean indicating whether the video is a YouTube Short.
-        v_duration: YouTube video duration in seconds.
-        live_status: YouTube live broadcast content status ('none', 'upcoming', 'live').
-        max_duration: Duration threshold in minutes (uses config.LONG_VIDEO_THRESHOLD_MINUTES by default).
-
-    Returns:
-        Appropriate YouTube playlist ID or special string ('shorts', 'none').
-    """
-    if max_duration is None:
-        max_duration = config.LONG_VIDEO_THRESHOLD_MINUTES
-
-    # Upcoming streams -> route to stream playlists
-    if live_status == 'upcoming':
-        if channel_id in music:
-            return music_lives
-        return regular_streams
-
-    if is_shorts:
-        return 'shorts'
-
-    is_music_channel = channel_id in music
-    is_long_video = v_duration > max_duration * 60
-
-    # Determine non-music category (if any) using priority order
-    non_music_category = None
-    for category in CATEGORY_PRIORITY:
-        if channel_id in category_channels.get(category, set()):
-            non_music_category = category
-            break
-
-    # Non-music channels -> route to category playlist
-    if not is_music_channel:
-        if non_music_category:
-            return CATEGORY_PLAYLISTS[non_music_category]
-        # Channel not in any known category (should not happen normally)
-        return 'none'
-
-    # Music channel with long video
-    if is_long_video:
-        # Dual-category channel: route to non-music category playlist
-        if non_music_category:
-            return CATEGORY_PLAYLISTS[non_music_category]
-        # Music-only channel: skip long videos
-        return 'none'
-
-    # Short music videos from favorites -> Banger Radar
-    if channel_id in favorites:
-        return banger
-
-    # Regular short music videos -> Release Radar
-    return release
 
 
 def update_repo_secrets(secret_name: str, new_value: str, logger: logging.Logger | None = None) -> None:
@@ -346,10 +316,10 @@ def main(historical_data: pd.DataFrame) -> None:
     else:
         # Add statistics about the videos for selection
         history_main.info('Add statistics for %s video(s).', len(new_videos))
-        new_data = youtube.add_stats(service=youtube_oauth, video_list=new_videos)
+        new_data = youtube.add_stats(service=youtube_oauth, playlist_items=new_videos)
 
         # Filter out upcoming streams from stats storage (don't track stats for scheduled content)
-        upcoming_mask = new_data['live_status'] == 'upcoming'
+        upcoming_mask = new_data['live_status'] == LIVE_STATUS_UPCOMING
         if upcoming_mask.any():
             history_main.info('Filtered %d upcoming stream(s) from stats tracking.', upcoming_mask.sum())
 
@@ -406,13 +376,8 @@ def main(historical_data: pd.DataFrame) -> None:
 
 
 if __name__ == '__main__':
-    # Create a basic logger for top-level exception handling
-    top_level_logger = logging.Logger(name='top_level', level=0)
-    top_level_handler = logging.FileHandler(filename=paths.HISTORY_LOG)
-    top_level_handler.setFormatter(
-        logging.Formatter(fmt='%(asctime)s [%(levelname)s] - %(message)s', datefmt='%Y-%m-%d %H:%M:%S%z')
-    )
-    top_level_logger.addHandler(top_level_handler)
+    # Create a basic logger for top-level exception handling (always logs, even in standalone mode)
+    top_level_logger = create_file_logger('top_level', paths.HISTORY_LOG, respect_no_logging=False)
 
     try:
         main(histo_data)
