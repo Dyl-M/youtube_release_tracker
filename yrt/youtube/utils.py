@@ -83,7 +83,7 @@ def set_logger(logger: Any) -> None:
     Args:
         logger: Logger instance to use for this module.
     """
-    global history  # noqa: PYL-W0603 - intentional module-level state for dependency injection
+    global history  # skipcq: PYL-W0603 - intentional module-level state for dependency injection
     history = logger
 
 
