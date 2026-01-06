@@ -9,6 +9,8 @@ Pythonic implementation, and readability.
   to log files (or at least, not leave any traces).
 - **Test Coverage:** Target 90% code coverage by the end of improvements (reported to DeepSource). Coverage should
   improve incrementally phase by phase.
+    - **Baseline (Phase 1 complete):** 43% code coverage (177 tests passing)
+    - **Note:** This is *code line coverage*, not *test pass rate* (which is 88.5%)
 
 ---
 
@@ -661,6 +663,30 @@ class YouTubeService(Protocol):
 
 **Total:** 20 improvement items (7 fixed, 13 remaining)
 
+### Current Code Coverage Breakdown (43% total)
+
+| Module                    | Coverage | Status         |
+|---------------------------|----------|----------------|
+| `yrt/__init__.py`         | 100%     | ✅ Complete     |
+| `yrt/config.py`           | 100%     | ✅ Complete     |
+| `yrt/constants.py`        | 100%     | ✅ Complete     |
+| `yrt/exceptions.py`       | 100%     | ✅ Complete     |
+| `yrt/logging_utils.py`    | 100%     | ✅ Complete     |
+| `yrt/models.py`           | 100%     | ✅ Complete     |
+| `yrt/paths.py`            | 100%     | ✅ Complete     |
+| `yrt/router.py`           | 95%      | ✅ Complete     |
+| `yrt/file_utils.py`       | 76%      | 🔸 Needs work  |
+| `yrt/youtube/__init__.py` | 100%     | ✅ Complete     |
+| `yrt/youtube/utils.py`    | 58%      | 🔸 Needs work  |
+| `yrt/youtube/stats.py`    | 23%      | ⚠️ Low         |
+| `yrt/youtube/api.py`      | 20%      | ⚠️ Low         |
+| `yrt/youtube/auth.py`     | 17%      | ⚠️ Low         |
+| `yrt/youtube/playlist.py` | 15%      | ⚠️ Low         |
+| `yrt/youtube/cleanup.py`  | 12%      | ⚠️ Low         |
+| `yrt/main.py`             | 0%       | ❌ Not covered  |
+| `yrt/analytics.py`        | 0%       | 🚫 Placeholder |
+| `yrt/_sandbox.py`         | 0%       | 🚫 Dev only    |
+
 ## Files to Modify
 
 | File                       | Changes                            |
@@ -701,7 +727,7 @@ class YouTubeService(Protocol):
 
 ### Phase 1: Foundation ✅ COMPLETE
 
-**🧪 Coverage target:** Maintain current coverage (~73%) - **Achieved: 200 tests (177 passing)**
+**🧪 Coverage:** 43% code coverage (200 tests, 177 passing)
 
 1. ✅ **Bug fix:** Add `YRT_NO_LOGGING` check to `yrt/file_utils.py:14-27`
 2. ✅ **DRY:** Create `yrt/logging_utils.py` with shared logger factory
@@ -710,7 +736,7 @@ class YouTubeService(Protocol):
 
 ### Phase 2: youtube.py Refactoring ✅ COMPLETE
 
-**🧪 Coverage target:** ~75% (new modules should have unit tests) - **Achieved**
+**🧪 Coverage:** Maintained 43% (structural refactoring, no new coverage)
 
 5. ✅ Create `yrt/youtube/` package structure
 6. ✅ Extract `yrt/models.py` with dataclasses (PlaylistItem, VideoStats, etc.) - *Note: at package level, not youtube/*
@@ -727,7 +753,7 @@ class YouTubeService(Protocol):
 
 ### Phase 3: main.py Improvements (Partial)
 
-**🧪 Coverage target:** ~80%
+**🧪 Coverage target:** 55% (focus on router + config validation)
 
 17. ✅ Extract `VideoRouter` class from `dest_playlist()` function - *Created `yrt/router.py`*
 18. ⏸️ Add config validation in `yrt/config.py` - *Pending*
@@ -736,7 +762,7 @@ class YouTubeService(Protocol):
 
 ### Phase 4: Test Coverage Push
 
-**🧪 Coverage target:** ~90%
+**🧪 Coverage target:** 75% (major push on youtube submodules)
 
 21. Implement `dest_playlist()` routing tests (6 tests)
 22. Implement configuration loading tests (3 tests)
@@ -748,7 +774,7 @@ class YouTubeService(Protocol):
 
 ### Phase 5: Cleanup & Final Polish
 
-**🧪 Coverage target:** 90%+ (maintain and verify)
+**🧪 Coverage target:** 90% (final goal)
 
 28. Improve `_scripts/archive_data.py` error handling
 29. Remove/mark `yrt/analytics.py` as placeholder
