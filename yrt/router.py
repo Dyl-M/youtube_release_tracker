@@ -2,7 +2,6 @@
 
 # Standard library
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
 
 # Local
 from .constants import (
@@ -17,9 +16,6 @@ from .constants import (
     CATEGORY_PRIORITY,
 )
 from .models import PlaylistConfig, AddOnConfig
-
-if TYPE_CHECKING:
-    pass
 
 # Module-level default router (set by main.py after config loading)
 _default_router: 'VideoRouter | None' = None
