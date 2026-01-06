@@ -657,11 +657,13 @@ class YouTubeService(Protocol):
 - **☢️ Critical:** 1 bug ~~requiring immediate fix~~ ✅ Fixed
 - **⚠️ High Priority:** 5 structural improvements ✅ All done (Logger Factory, Split youtube.py, Domain Models,
   VideoRouter, Constants Module)
-- **🛑 Medium Priority:** 5 code quality improvements
+- **🛑 Medium Priority:** 5 code quality improvements (2 pending: config validation, pathlib consistency)
 - **🧪 Test Suite:** 4 test coverage improvements (1 fixed: Test logging isolation)
 - **🛃 Low Priority:** 5 nice-to-have improvements
+- **CI/CD:** Test coverage workflow with DeepSource reporting ✅ Added
 
 **Total:** 20 improvement items (7 fixed, 13 remaining)
+**PR #141:** Merged - Phase 1-3 (partial) complete
 
 ### Current Code Coverage Breakdown (43% total)
 
@@ -725,7 +727,7 @@ class YouTubeService(Protocol):
 
 ## Implementation Order
 
-### Phase 1: Foundation ✅ COMPLETE
+### Phase 1: Foundation ✅ COMPLETE (Merged PR #141)
 
 **🧪 Coverage:** 43% code coverage (200 tests, 177 passing)
 
@@ -733,8 +735,10 @@ class YouTubeService(Protocol):
 2. ✅ **DRY:** Create `yrt/logging_utils.py` with shared logger factory
 3. ✅ **Constants:** Create `yrt/constants.py` for magic strings/numbers
 4. ✅ Add tests for new `logging_utils.py` and `constants.py` modules
+5. ✅ **CI/CD:** Add `test-coverage.yml` workflow with DeepSource reporting
+6. ✅ **Code Quality:** Resolve DeepSource issues (E402, PLW0603, cyclomatic complexity)
 
-### Phase 2: youtube.py Refactoring ✅ COMPLETE
+### Phase 2: youtube.py Refactoring ✅ COMPLETE (Merged PR #141)
 
 **🧪 Coverage:** Maintained 43% (structural refactoring, no new coverage)
 
@@ -751,7 +755,7 @@ class YouTubeService(Protocol):
 15. ✅ Update imports in `yrt/main.py` and `_scripts/`
 16. ✅ Add/update tests for refactored youtube submodules
 
-### Phase 3: main.py Improvements (Partial)
+### Phase 3: main.py Improvements (Partial - Merged PR #141)
 
 **🧪 Coverage target:** 55% (focus on router + config validation)
 

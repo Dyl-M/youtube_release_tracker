@@ -1,9 +1,14 @@
 # YouTube Release Tracker
 
+[![Python 3.12](https://img.shields.io/badge/python-3.12-blue?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
 [![GitHub last commit](https://img.shields.io/github/last-commit/Dyl-M/youtube_release_tracker?label=Last%20commit&style=flat-square)](https://github.com/Dyl-M/youtube_release_tracker/commits/main)
 [![GitHub commit activity](https://img.shields.io/github/commit-activity/w/Dyl-M/youtube_release_tracker?label=Commit%20activity&style=flat-square)](https://github.com/Dyl-M/youtube_release_tracker/commits/main)
-[![DeepSource](https://deepsource.io/gh/Dyl-M/youtube_release_tracker.svg/?label=active+issues&token=w_aZJJfhd5HPPLyXnDJkstmn)](https://deepsource.io/gh/Dyl-M/youtube_release_tracker/?ref=repository-badge)
-[![DeepSource](https://deepsource.io/gh/Dyl-M/youtube_release_tracker.svg/?label=resolved+issues&token=w_aZJJfhd5HPPLyXnDJkstmn)](https://deepsource.io/gh/Dyl-M/youtube_release_tracker/?ref=repository-badge)
+[![GitHub stars](https://img.shields.io/github/stars/Dyl-M/youtube_release_tracker?style=flat-square)]()
+[![License](https://img.shields.io/github/license/Dyl-M/youtube_release_tracker?style=flat-square)](LICENSE)
+
+[![Tests](https://github.com/Dyl-M/youtube_release_tracker/actions/workflows/test-coverage.yml/badge.svg)](https://github.com/Dyl-M/youtube_release_tracker/actions/workflows/test-coverage.yml)
+[![DeepSource](https://app.deepsource.com/gh/Dyl-M/youtube_release_tracker.svg/?label=active+issues&show_trend=true&token=WpKQsgGZsHi_FrteJ2YyUhQ_)](https://app.deepsource.com/gh/Dyl-M/youtube_release_tracker/)
+[![DeepSource](https://app.deepsource.com/gh/Dyl-M/youtube_release_tracker.svg/?label=code+coverage&show_trend=true&token=WpKQsgGZsHi_FrteJ2YyUhQ_)](https://app.deepsource.com/gh/Dyl-M/youtube_release_tracker/)
 
 [![Bluesky followers](https://img.shields.io/bluesky/followers/dyl-m.bsky.social?label=Bluesky)](https://bsky.app/profile/dyl-m.bsky.social)
 
@@ -47,7 +52,8 @@ Repository structure
 │   ├── workflows
 │   │   ├── claude.yml
 │   │   ├── licence_workflow.yml
-│   │   └── main_workflow.yml
+│   │   ├── main_workflow.yml
+│   │   └── test-coverage.yml
 │   └── dependabot.yml
 │
 ├── _config
