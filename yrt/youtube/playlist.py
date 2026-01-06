@@ -325,6 +325,5 @@ def add_api_fail(service: pyt.Client, prog_bar: bool = True) -> None:
             add_to_playlist(service, p_id, videos_to_retry, prog_bar=prog_bar)
             addition += 1
 
-    if addition > 0:
-        if utils.history:
-            utils.history.info('Video recovery from previous API failure(s) complete.')
+    if addition > 0 and utils.history:
+        utils.history.info('Video recovery from previous API failure(s) complete.')

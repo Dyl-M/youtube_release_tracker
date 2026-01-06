@@ -13,14 +13,16 @@ from yrt.logging_utils import create_file_logger
 class TestCreateFileLogger:
     """Tests for create_file_logger function."""
 
-    def test_creates_logger_with_correct_name(self, tmp_path: Path) -> None:
+    @staticmethod
+    def test_creates_logger_with_correct_name(tmp_path: Path) -> None:
         """Test that logger is created with the specified name."""
         log_file = tmp_path / "test.log"
         logger = create_file_logger("test_logger", log_file)
 
         assert logger.name == "test_logger"
 
-    def test_creates_logger_with_file_handler(self, tmp_path: Path) -> None:
+    @staticmethod
+    def test_creates_logger_with_file_handler(tmp_path: Path) -> None:
         """Test that logger has a file handler when YRT_NO_LOGGING is not set."""
         log_file = tmp_path / "test.log"
 
@@ -32,7 +34,8 @@ class TestCreateFileLogger:
         assert len(logger.handlers) == 1
         assert isinstance(logger.handlers[0], logging.FileHandler)
 
-    def test_no_handler_when_yrt_no_logging_set(self, tmp_path: Path) -> None:
+    @staticmethod
+    def test_no_handler_when_yrt_no_logging_set(tmp_path: Path) -> None:
         """Test that no file handler is added when YRT_NO_LOGGING is set."""
         log_file = tmp_path / "test.log"
 
@@ -41,7 +44,8 @@ class TestCreateFileLogger:
 
         assert len(logger.handlers) == 0
 
-    def test_respect_no_logging_false_ignores_env_var(self, tmp_path: Path) -> None:
+    @staticmethod
+    def test_respect_no_logging_false_ignores_env_var(tmp_path: Path) -> None:
         """Test that respect_no_logging=False ignores YRT_NO_LOGGING env var."""
         log_file = tmp_path / "test.log"
 
@@ -51,7 +55,8 @@ class TestCreateFileLogger:
         assert len(logger.handlers) == 1
         assert isinstance(logger.handlers[0], logging.FileHandler)
 
-    def test_default_level_is_debug(self, tmp_path: Path) -> None:
+    @staticmethod
+    def test_default_level_is_debug(tmp_path: Path) -> None:
         """Test that the default handler level is DEBUG."""
         log_file = tmp_path / "test.log"
 
@@ -61,7 +66,8 @@ class TestCreateFileLogger:
 
         assert logger.handlers[0].level == logging.DEBUG
 
-    def test_custom_level(self, tmp_path: Path) -> None:
+    @staticmethod
+    def test_custom_level(tmp_path: Path) -> None:
         """Test that custom level is applied to handler."""
         log_file = tmp_path / "test.log"
 
@@ -71,7 +77,8 @@ class TestCreateFileLogger:
 
         assert logger.handlers[0].level == logging.WARNING
 
-    def test_logger_writes_to_file(self, tmp_path: Path) -> None:
+    @staticmethod
+    def test_logger_writes_to_file(tmp_path: Path) -> None:
         """Test that logger actually writes to the specified file."""
         log_file = tmp_path / "test.log"
 
@@ -88,7 +95,8 @@ class TestCreateFileLogger:
         content = log_file.read_text()
         assert "Test message" in content
 
-    def test_formatter_format(self, tmp_path: Path) -> None:
+    @staticmethod
+    def test_formatter_format(tmp_path: Path) -> None:
         """Test that the log formatter produces expected format."""
         log_file = tmp_path / "test.log"
 
@@ -105,14 +113,16 @@ class TestCreateFileLogger:
         assert "[WARNING]" in content
         assert "Test warning" in content
 
-    def test_logger_base_level_is_zero(self, tmp_path: Path) -> None:
+    @staticmethod
+    def test_logger_base_level_is_zero(tmp_path: Path) -> None:
         """Test that the logger base level is 0 (logs everything)."""
         log_file = tmp_path / "test.log"
         logger = create_file_logger("test_logger", log_file)
 
         assert logger.level == 0
 
-    def test_multiple_loggers_independent(self, tmp_path: Path) -> None:
+    @staticmethod
+    def test_multiple_loggers_independent(tmp_path: Path) -> None:
         """Test that multiple loggers with different names are independent."""
         log_file1 = tmp_path / "test1.log"
         log_file2 = tmp_path / "test2.log"

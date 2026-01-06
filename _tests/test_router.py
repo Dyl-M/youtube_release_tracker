@@ -51,12 +51,14 @@ def router(sample_router_config):
 class TestRouterConfig:
     """Tests for RouterConfig dataclass."""
 
-    def test_creation_with_valid_data(self, sample_router_config):
+    @staticmethod
+    def test_creation_with_valid_data(sample_router_config):
         """Test RouterConfig creation with valid data."""
         assert sample_router_config.release_radar_id == 'PL_release'
         assert sample_router_config.long_video_threshold_minutes == 10
 
-    def test_validation_empty_release_radar(self):
+    @staticmethod
+    def test_validation_empty_release_radar():
         """Test validation rejects empty release_radar_id."""
         with pytest.raises(ValueError, match="release_radar_id cannot be empty"):
             RouterConfig(
@@ -71,7 +73,8 @@ class TestRouterConfig:
                 regular_streams_id='PL_streams'
             )
 
-    def test_validation_empty_banger_radar(self):
+    @staticmethod
+    def test_validation_empty_banger_radar():
         """Test validation rejects empty banger_radar_id."""
         with pytest.raises(ValueError, match="banger_radar_id cannot be empty"):
             RouterConfig(
@@ -86,7 +89,8 @@ class TestRouterConfig:
                 regular_streams_id='PL_streams'
             )
 
-    def test_validation_empty_music_lives(self):
+    @staticmethod
+    def test_validation_empty_music_lives():
         """Test validation rejects empty music_lives_id."""
         with pytest.raises(ValueError, match="music_lives_id cannot be empty"):
             RouterConfig(
@@ -101,7 +105,8 @@ class TestRouterConfig:
                 regular_streams_id='PL_streams'
             )
 
-    def test_validation_empty_regular_streams(self):
+    @staticmethod
+    def test_validation_empty_regular_streams():
         """Test validation rejects empty regular_streams_id."""
         with pytest.raises(ValueError, match="regular_streams_id cannot be empty"):
             RouterConfig(
@@ -116,7 +121,8 @@ class TestRouterConfig:
                 regular_streams_id=''
             )
 
-    def test_validation_zero_threshold(self):
+    @staticmethod
+    def test_validation_zero_threshold():
         """Test validation rejects zero threshold."""
         with pytest.raises(ValueError, match="long_video_threshold_minutes must be positive"):
             RouterConfig(
@@ -132,7 +138,8 @@ class TestRouterConfig:
                 long_video_threshold_minutes=0
             )
 
-    def test_validation_negative_threshold(self):
+    @staticmethod
+    def test_validation_negative_threshold():
         """Test validation rejects negative threshold."""
         with pytest.raises(ValueError, match="long_video_threshold_minutes must be positive"):
             RouterConfig(
@@ -156,22 +163,26 @@ class TestRouterConfig:
 class TestVideoRouterShorts:
     """Tests for shorts detection and routing."""
 
-    def test_shorts_return_special_value(self, router):
+    @staticmethod
+    def test_shorts_return_special_value(router):
         """Test that shorts return 'shorts' destination."""
         result = router.route('UC_music_1', is_shorts=True, duration=60)
         assert result == 'shorts'
 
-    def test_shorts_none_treated_as_not_shorts(self, router):
+    @staticmethod
+    def test_shorts_none_treated_as_not_shorts(router):
         """Test that is_shorts=None is treated as not a short."""
         result = router.route('UC_music_2', is_shorts=None, duration=120)
         assert result == 'PL_release'
 
-    def test_shorts_takes_precedence_over_music(self, router):
+    @staticmethod
+    def test_shorts_takes_precedence_over_music(router):
         """Test shorts detection happens before music routing."""
         result = router.route('UC_music_1', is_shorts=True, duration=30)
         assert result == 'shorts'
 
-    def test_shorts_from_non_music_channel(self, router):
+    @staticmethod
+    def test_shorts_from_non_music_channel(router):
         """Test shorts from non-music channel also return 'shorts'."""
         result = router.route('UC_learn_1', is_shorts=True, duration=60)
         assert result == 'shorts'
@@ -184,32 +195,37 @@ class TestVideoRouterShorts:
 class TestVideoRouterStreams:
     """Tests for upcoming stream routing."""
 
-    def test_upcoming_music_stream_to_music_lives(self, router):
+    @staticmethod
+    def test_upcoming_music_stream_to_music_lives(router):
         """Test upcoming streams from music channels go to music_lives."""
         result = router.route('UC_music_1', is_shorts=False, duration=None,
                               live_status='upcoming')
         assert result == 'PL_music_lives'
 
-    def test_upcoming_nonmusic_stream_to_regular(self, router):
+    @staticmethod
+    def test_upcoming_nonmusic_stream_to_regular(router):
         """Test upcoming streams from non-music channels go to regular_streams."""
         result = router.route('UC_learn_1', is_shorts=False, duration=None,
                               live_status='upcoming')
         assert result == 'PL_regular_streams'
 
-    def test_stream_routing_takes_precedence_over_shorts(self, router):
+    @staticmethod
+    def test_stream_routing_takes_precedence_over_shorts(router):
         """Test stream routing happens before shorts check."""
         # Even if is_shorts=True, upcoming stream should go to stream playlist
         result = router.route('UC_music_1', is_shorts=True, duration=None,
                               live_status='upcoming')
         assert result == 'PL_music_lives'
 
-    def test_live_status_none_bypasses_stream_routing(self, router):
+    @staticmethod
+    def test_live_status_none_bypasses_stream_routing(router):
         """Test live_status='none' does not trigger stream routing."""
         result = router.route('UC_music_2', is_shorts=False, duration=120,
                               live_status='none')
         assert result == 'PL_release'
 
-    def test_live_status_live_bypasses_stream_routing(self, router):
+    @staticmethod
+    def test_live_status_live_bypasses_stream_routing(router):
         """Test live_status='live' does not trigger stream routing."""
         # Currently active streams are treated as regular videos
         result = router.route('UC_music_2', is_shorts=False, duration=120,
@@ -224,32 +240,38 @@ class TestVideoRouterStreams:
 class TestVideoRouterNonMusic:
     """Tests for non-music channel routing."""
 
-    def test_apprentissage_channel_routes_correctly(self, router):
+    @staticmethod
+    def test_apprentissage_channel_routes_correctly(router):
         """Test APPRENTISSAGE category channels route to educational playlist."""
         result = router.route('UC_learn_1', is_shorts=False, duration=300)
         assert result == 'PL_apprentissage'
 
-    def test_divertissement_channel_routes_correctly(self, router):
+    @staticmethod
+    def test_divertissement_channel_routes_correctly(router):
         """Test DIVERTISSEMENT category channels route correctly."""
         result = router.route('UC_fun_1', is_shorts=False, duration=300)
         assert result == 'PL_divertissement'
 
-    def test_gaming_channel_routes_to_divertissement(self, router):
+    @staticmethod
+    def test_gaming_channel_routes_to_divertissement(router):
         """Test GAMING shares playlist with DIVERTISSEMENT."""
         result = router.route('UC_game_1', is_shorts=False, duration=300)
         assert result == 'PL_divertissement'
 
-    def test_asmr_channel_routes_correctly(self, router):
+    @staticmethod
+    def test_asmr_channel_routes_correctly(router):
         """Test ASMR category channels route correctly."""
         result = router.route('UC_asmr_1', is_shorts=False, duration=300)
         assert result == 'PL_asmr'
 
-    def test_unknown_nonmusic_channel_returns_none(self, router):
+    @staticmethod
+    def test_unknown_nonmusic_channel_returns_none(router):
         """Test unknown non-music channels return 'none'."""
         result = router.route('UC_unknown', is_shorts=False, duration=300)
         assert result == 'none'
 
-    def test_category_priority_order(self, router):
+    @staticmethod
+    def test_category_priority_order(router):
         """Test channels use first matching category by priority."""
         # UC_dual_category is in both music and APPRENTISSAGE
         # For non-music routing, this tests APPRENTISSAGE gets priority
@@ -264,53 +286,62 @@ class TestVideoRouterNonMusic:
 class TestVideoRouterMusic:
     """Tests for music channel routing."""
 
-    def test_favorite_music_to_banger_radar(self, router):
+    @staticmethod
+    def test_favorite_music_to_banger_radar(router):
         """Test favorite music channel videos go to Banger Radar."""
         result = router.route('UC_music_1', is_shorts=False, duration=180)
         assert result == 'PL_banger'
 
-    def test_regular_music_to_release_radar(self, router):
+    @staticmethod
+    def test_regular_music_to_release_radar(router):
         """Test regular music channel videos go to Release Radar."""
         result = router.route('UC_music_2', is_shorts=False, duration=180)
         assert result == 'PL_release'
 
-    def test_long_music_video_music_only_returns_none(self, router):
+    @staticmethod
+    def test_long_music_video_music_only_returns_none(router):
         """Test long videos from music-only channels return 'none'."""
         # Duration > 10 minutes (600 seconds), music-only channel
         result = router.route('UC_music_2', is_shorts=False, duration=700)
         assert result == 'none'
 
-    def test_long_music_video_dual_category_routes_to_category(self, router):
+    @staticmethod
+    def test_long_music_video_dual_category_routes_to_category(router):
         """Test long videos from dual-category channels route to category."""
         # UC_dual_category is in both music and APPRENTISSAGE
         result = router.route('UC_dual_category', is_shorts=False, duration=700)
         assert result == 'PL_apprentissage'
 
-    def test_duration_threshold_exact_boundary(self, router):
+    @staticmethod
+    def test_duration_threshold_exact_boundary(router):
         """Test behavior at exact threshold boundary."""
         # Exactly 10 minutes (600 seconds) should NOT be "long"
         result = router.route('UC_music_2', is_shorts=False, duration=600)
         assert result == 'PL_release'
 
-    def test_duration_threshold_just_over(self, router):
+    @staticmethod
+    def test_duration_threshold_just_over(router):
         """Test behavior just over threshold."""
         # 601 seconds should be "long"
         result = router.route('UC_music_2', is_shorts=False, duration=601)
         assert result == 'none'
 
-    def test_none_duration_treated_as_short(self, router):
+    @staticmethod
+    def test_none_duration_treated_as_short(router):
         """Test None duration is treated as 0 (not long)."""
         result = router.route('UC_music_2', is_shorts=False, duration=None)
         assert result == 'PL_release'
 
-    def test_favorite_long_video_still_routes_to_category(self, router):
+    @staticmethod
+    def test_favorite_long_video_still_routes_to_category(router):
         """Test long videos from favorites also follow long video rules."""
         # UC_music_1 is a favorite but if long and music-only, still returns 'none'
         # (UC_music_1 is not in any category, so should return 'none')
         result = router.route('UC_music_1', is_shorts=False, duration=700)
         assert result == 'none'
 
-    def test_dual_category_regular_video_routes_to_release_radar(self, router):
+    @staticmethod
+    def test_dual_category_regular_video_routes_to_release_radar(router):
         """Test regular-length videos from dual-category channels go to Release Radar.
 
         UC_dual_category is in both MUSIQUE and APPRENTISSAGE. Regular-length
@@ -328,18 +359,21 @@ class TestVideoRouterMusic:
 class TestVideoRouterCallable:
     """Tests for __call__ functionality."""
 
-    def test_callable_matches_route(self, router):
+    @staticmethod
+    def test_callable_matches_route(router):
         """Test __call__ produces same result as route()."""
         route_result = router.route('UC_music_1', False, 180, 'none')
         call_result = router('UC_music_1', False, 180, 'none')
         assert route_result == call_result
 
-    def test_callable_default_live_status(self, router):
+    @staticmethod
+    def test_callable_default_live_status(router):
         """Test __call__ with default live_status."""
         result = router('UC_music_1', False, 180)
         assert result == 'PL_banger'
 
-    def test_callable_with_all_parameters(self, router):
+    @staticmethod
+    def test_callable_with_all_parameters(router):
         """Test __call__ with all parameters specified."""
         result = router('UC_learn_1', False, 300, 'none')
         assert result == 'PL_apprentissage'
@@ -352,7 +386,8 @@ class TestVideoRouterCallable:
 class TestCreateRouterFromConfig:
     """Tests for create_router_from_config factory."""
 
-    def test_creates_router_successfully(self):
+    @staticmethod
+    def test_creates_router_successfully():
         """Test factory creates router with valid config."""
         pocket_tube = {
             'MUSIQUE': ['UC_music'],
@@ -377,7 +412,8 @@ class TestCreateRouterFromConfig:
         assert 'UC_music' in router.config.music_channels
         assert 'UC_music' in router.config.favorite_channels
 
-    def test_uses_default_threshold(self, monkeypatch):
+    @staticmethod
+    def test_uses_default_threshold(monkeypatch):
         """Test factory uses config.LONG_VIDEO_THRESHOLD_MINUTES by default."""
         from yrt import config
         monkeypatch.setattr(config, 'LONG_VIDEO_THRESHOLD_MINUTES', 15)
@@ -398,7 +434,8 @@ class TestCreateRouterFromConfig:
 
         assert router.config.long_video_threshold_minutes == 15
 
-    def test_custom_threshold_override(self):
+    @staticmethod
+    def test_custom_threshold_override():
         """Test factory accepts custom threshold override."""
         pocket_tube = {'MUSIQUE': [], 'APPRENTISSAGE': [], 'DIVERTISSEMENT': [], 'GAMING': []}
         playlists = {
@@ -418,7 +455,8 @@ class TestCreateRouterFromConfig:
 
         assert router.config.long_video_threshold_minutes == 20
 
-    def test_handles_missing_asmr_category(self):
+    @staticmethod
+    def test_handles_missing_asmr_category():
         """Test factory handles missing ASMR category gracefully."""
         pocket_tube = {
             'MUSIQUE': ['UC_music'],
@@ -450,10 +488,12 @@ class TestCreateRouterFromConfig:
 class TestVideoRouterConstants:
     """Tests for router class constants."""
 
-    def test_special_shorts_value(self, router):
+    @staticmethod
+    def test_special_shorts_value(router):
         """Test SPECIAL_SHORTS constant value."""
         assert router.SPECIAL_SHORTS == 'shorts'
 
-    def test_special_none_value(self, router):
+    @staticmethod
+    def test_special_none_value(router):
         """Test SPECIAL_NONE constant value."""
         assert router.SPECIAL_NONE == 'none'
