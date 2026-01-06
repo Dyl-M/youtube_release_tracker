@@ -87,6 +87,7 @@ Repository structure
 │   ├── conftest.py
 │   ├── README.md
 │   ├── test_config.py
+│   ├── test_constants.py
 │   ├── test_exceptions.py
 │   ├── test_file_utils.py
 │   ├── test_logging_utils.py
@@ -108,6 +109,7 @@ Repository structure
 │   ├── __init__.py
 │   ├── analytics.py
 │   ├── config.py
+│   ├── constants.py
 │   ├── exceptions.py
 │   ├── file_utils.py
 │   ├── logging_utils.py

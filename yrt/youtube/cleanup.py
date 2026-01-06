@@ -8,6 +8,7 @@ import pyyoutube as pyt  # type: ignore[import-untyped]
 
 # Local
 from .. import config
+from ..constants import LIVE_STATUS_NONE
 from ..models import PlaylistConfig, PlaylistItemRef
 from . import utils
 from .api import get_videos
@@ -79,7 +80,7 @@ def _find_ended_streams(service: pyt.Client, all_items: list[PlaylistItemRef]) -
         try:
             videos_response = get_videos(service=service, videos_list=chunk)
             for video in videos_response:
-                if video.snippet.liveBroadcastContent == 'none' and video.id in video_id_to_item:
+                if video.snippet.liveBroadcastContent == LIVE_STATUS_NONE and video.id in video_id_to_item:
                     ended_items.append(video_id_to_item[video.id])
 
         except pyt.error.PyYouTubeException as error:

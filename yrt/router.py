@@ -5,6 +5,17 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 # Local
+from .constants import (
+    ROUTING_SHORTS,
+    ROUTING_NONE,
+    LIVE_STATUS_UPCOMING,
+    CATEGORY_MUSIC,
+    CATEGORY_LEARNING,
+    CATEGORY_ENTERTAINMENT,
+    CATEGORY_GAMING,
+    CATEGORY_ASMR,
+    CATEGORY_PRIORITY,
+)
 from .models import PlaylistConfig, AddOnConfig
 
 if TYPE_CHECKING:
@@ -82,8 +93,8 @@ class VideoRouter:
         config: RouterConfig with routing parameters.
     """
 
-    SPECIAL_SHORTS: str = 'shorts'
-    SPECIAL_NONE: str = 'none'
+    SPECIAL_SHORTS: str = ROUTING_SHORTS
+    SPECIAL_NONE: str = ROUTING_NONE
 
     def __init__(self, config: RouterConfig) -> None:
         """Initialize router with configuration.
@@ -107,7 +118,7 @@ class VideoRouter:
             Playlist ID or special string ('shorts', 'none').
         """
         # Step 1: Handle upcoming streams
-        if live_status == 'upcoming':
+        if live_status == LIVE_STATUS_UPCOMING:
             return self._route_stream(channel_id)
 
         # Step 2: Handle shorts
@@ -247,20 +258,20 @@ def create_router_from_config(
     threshold = long_video_threshold or app_config.LONG_VIDEO_THRESHOLD_MINUTES
 
     router_config = RouterConfig(
-        music_channels=set(pocket_tube.get('MUSIQUE', [])),
+        music_channels=set(pocket_tube.get(CATEGORY_MUSIC, [])),
         favorite_channels=set(add_on.favorites.values()),
         category_channels={
-            'APPRENTISSAGE': set(pocket_tube.get('APPRENTISSAGE', [])),
-            'DIVERTISSEMENT': set(pocket_tube.get('DIVERTISSEMENT', [])),
-            'GAMING': set(pocket_tube.get('GAMING', [])),
-            'ASMR': set(pocket_tube.get('ASMR', [])),
+            CATEGORY_LEARNING: set(pocket_tube.get(CATEGORY_LEARNING, [])),
+            CATEGORY_ENTERTAINMENT: set(pocket_tube.get(CATEGORY_ENTERTAINMENT, [])),
+            CATEGORY_GAMING: set(pocket_tube.get(CATEGORY_GAMING, [])),
+            CATEGORY_ASMR: set(pocket_tube.get(CATEGORY_ASMR, [])),
         },
-        category_priority=['APPRENTISSAGE', 'DIVERTISSEMENT', 'GAMING', 'ASMR'],
+        category_priority=list(CATEGORY_PRIORITY),
         category_playlists={
-            'APPRENTISSAGE': playlists['apprentissage'].id,
-            'DIVERTISSEMENT': playlists['divertissement_gaming'].id,
-            'GAMING': playlists['divertissement_gaming'].id,
-            'ASMR': playlists['asmr'].id,
+            CATEGORY_LEARNING: playlists['apprentissage'].id,
+            CATEGORY_ENTERTAINMENT: playlists['divertissement_gaming'].id,
+            CATEGORY_GAMING: playlists['divertissement_gaming'].id,
+            CATEGORY_ASMR: playlists['asmr'].id,
         },
         release_radar_id=playlists['release'].id,
         banger_radar_id=playlists['banger'].id,

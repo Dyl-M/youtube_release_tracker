@@ -5,6 +5,9 @@ from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from typing import Any
 
+# Local
+from .constants import LIVE_STATUS_NONE, STATUS_PUBLIC
+
 
 # === Configuration Models ===
 
@@ -116,7 +119,7 @@ class VideoStats:
     duration: int | None = None
     is_shorts: bool | None = None
     live_status: str | None = None
-    latest_status: str = 'public'
+    latest_status: str = STATUS_PUBLIC
 
     def __post_init__(self) -> None:
         """Validate video ID."""
@@ -162,8 +165,8 @@ class VideoData:
     comments: int | None = None
     duration: int | None = None
     is_shorts: bool | None = None
-    live_status: str = 'none'
-    latest_status: str = 'public'
+    live_status: str = LIVE_STATUS_NONE
+    latest_status: str = STATUS_PUBLIC
     dest_playlist: str | None = None
 
     @classmethod
@@ -193,7 +196,7 @@ class VideoData:
             comments=stats.comments,
             duration=stats.duration,
             is_shorts=stats.is_shorts,
-            live_status=stats.live_status or 'none',
+            live_status=stats.live_status or LIVE_STATUS_NONE,
             latest_status=stats.latest_status,
         )
 

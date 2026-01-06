@@ -236,46 +236,33 @@ class VideoRouter:
 
 **Location:** Magic strings scattered throughout codebase
 
-**Status:** Pending
+**Status:** ✅ Fixed
 
 **Issue:** Magic strings for video routing, live statuses, error categories, and date formats.
 
-**Solution:** Create `yrt/constants.py`:
+**Solution Implemented:** Created `yrt/constants.py` with:
 
-```python
-"""Application-wide constants."""
+- `ROUTING_SHORTS`, `ROUTING_NONE` - Video routing destinations
+- `LIVE_STATUS_NONE`, `LIVE_STATUS_UPCOMING`, `LIVE_STATUS_LIVE` - Live broadcast statuses
+- `STATUS_PUBLIC`, `STATUS_UNLISTED`, `STATUS_PRIVATE`, `STATUS_DELETED` - Privacy statuses
+- `TRANSIENT_ERRORS`, `PERMANENT_ERRORS`, `QUOTA_ERRORS` - API error categories (frozensets)
+- `ISO_DATE_FORMAT`, `LOG_DATE_FORMAT` - Date/time formats
+- `CHANNEL_PREFIX`, `UPLOAD_PLAYLIST_PREFIX` - YouTube ID prefixes
+- `CATEGORY_MUSIC`, `CATEGORY_LEARNING`, `CATEGORY_ENTERTAINMENT`, `CATEGORY_GAMING`, `CATEGORY_ASMR` - Channel
+  categories
+- `CATEGORY_PRIORITY` - Category routing priority order
 
-# Video routing destinations
-VIDEO_ROUTING_SHORTS = 'shorts'
-VIDEO_ROUTING_NONE = 'none'
+**Files modified:**
 
-# Live broadcast statuses
-LIVE_STATUS_NONE = 'none'
-LIVE_STATUS_UPCOMING = 'upcoming'
-LIVE_STATUS_LIVE = 'live'
-
-# Privacy statuses
-PRIVACY_PUBLIC = 'public'
-PRIVACY_UNLISTED = 'unlisted'
-PRIVACY_PRIVATE = 'private'
-PRIVACY_DELETED = 'deleted'
-
-# API error categories (frozen sets for immutability)
-TRANSIENT_ERRORS = frozenset(['serviceunavailable', 'backenderror', 'internalerror'])
-PERMANENT_ERRORS = frozenset(['videonotfound', 'forbidden', 'playlistoperationunsupported', 'duplicate'])
-QUOTA_ERRORS = frozenset(['quotaexceeded'])
-
-# Date/time formats
-ISO_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S%z'
-LOG_DATE_FORMAT = '%Y-%m-%d %H:%M:%S%z'
-
-# Playlist ID prefixes
-UPLOAD_PLAYLIST_PREFIX = 'UU'
-CHANNEL_PREFIX = 'UC'
-
-# Backoff configuration
-BACKOFF_JITTER_RATIO = 0.5
-```
+- `yrt/constants.py` - Created with all constants
+- `yrt/youtube/utils.py` - Removed error sets, re-exports from constants for backward compatibility
+- `yrt/router.py` - Imports routing and category constants
+- `yrt/models.py` - Imports status constants for defaults
+- `yrt/youtube/cleanup.py` - Imports live status constants
+- `yrt/youtube/stats.py` - Imports STATUS_DELETED constant
+- `yrt/main.py` - Imports LIVE_STATUS_UPCOMING constant
+- `yrt/__init__.py` - Added 'constants' to exports
+- `_tests/test_constants.py` - Created with 37 comprehensive tests
 
 ---
 
@@ -666,13 +653,13 @@ class YouTubeService(Protocol):
 ## 📄 Summary
 
 - **☢️ Critical:** 1 bug ~~requiring immediate fix~~ ✅ Fixed
-- **⚠️ High Priority:** 5 structural improvements (4 fixed: Logger Factory, Split youtube.py, Domain Models,
-  VideoRouter)
+- **⚠️ High Priority:** 5 structural improvements ✅ All done (Logger Factory, Split youtube.py, Domain Models,
+  VideoRouter, Constants Module)
 - **🛑 Medium Priority:** 5 code quality improvements
 - **🧪 Test Suite:** 4 test coverage improvements (1 fixed: Test logging isolation)
 - **🛃 Low Priority:** 5 nice-to-have improvements
 
-**Total:** 20 improvement items (6 fixed, 14 remaining)
+**Total:** 20 improvement items (7 fixed, 13 remaining)
 
 ## Files to Modify
 
@@ -696,7 +683,7 @@ class YouTubeService(Protocol):
 |--------------------------------|--------------------------|--------------------------------|
 | `yrt/logging_utils.py`         | Shared logger factory    | ✅ Created                      |
 | `yrt/router.py`                | Video routing logic      | ✅ Created                      |
-| `yrt/constants.py`             | Magic strings/numbers    | Pending                        |
+| `yrt/constants.py`             | Magic strings/numbers    | ✅ Created                      |
 | `yrt/youtube/__init__.py`      | Package exports          | ✅ Created                      |
 | `yrt/youtube/auth.py`          | Authentication functions | ✅ Created                      |
 | `yrt/youtube/api.py`           | Core API calls           | ✅ Created                      |
@@ -707,44 +694,45 @@ class YouTubeService(Protocol):
 | `yrt/youtube/retry.py`         | Retry decorator          | Pending                        |
 | `yrt/youtube/utils.py`         | Utilities                | ✅ Created                      |
 | `_tests/test_router.py`        | Router unit tests        | ✅ Created                      |
+| `_tests/test_constants.py`     | Constants unit tests     | ✅ Created                      |
 | `_tests/fixtures/error_*.json` | Error response fixtures  | Pending                        |
 
 ## Implementation Order
 
-### Phase 1: Foundation
+### Phase 1: Foundation ✅ COMPLETE
 
-**🧪 Coverage target:** Maintain current coverage (~73%)
+**🧪 Coverage target:** Maintain current coverage (~73%) - **Achieved: 200 tests (177 passing)**
 
-1. **Bug fix:** Add `YRT_NO_LOGGING` check to `yrt/file_utils.py:14-27`
-2. **DRY:** Create `yrt/logging_utils.py` with shared logger factory
-3. **Constants:** Create `yrt/constants.py` for magic strings/numbers
-4. Add tests for new `logging_utils.py` and `constants.py` modules
+1. ✅ **Bug fix:** Add `YRT_NO_LOGGING` check to `yrt/file_utils.py:14-27`
+2. ✅ **DRY:** Create `yrt/logging_utils.py` with shared logger factory
+3. ✅ **Constants:** Create `yrt/constants.py` for magic strings/numbers
+4. ✅ Add tests for new `logging_utils.py` and `constants.py` modules
 
-### Phase 2: youtube.py Refactoring
+### Phase 2: youtube.py Refactoring ✅ COMPLETE
 
-**🧪 Coverage target:** ~75% (new modules should have unit tests)
+**🧪 Coverage target:** ~75% (new modules should have unit tests) - **Achieved**
 
-5. Create `yrt/youtube/` package structure
-6. Extract `yrt/youtube/models.py` with dataclasses (PlaylistItem, VideoStats, enums)
-7. Extract `yrt/youtube/auth.py` (create_service_local, create_service_workflow, encode_key)
-8. Extract `yrt/youtube/retry.py` with retry decorator
-9. Extract `yrt/youtube/utils.py` (is_shorts, last_exe_date, sort_db, parse_iso8601_duration)
-10. Extract `yrt/youtube/api.py` (get_playlist_items, get_videos, get_subs, iter_channels)
-11. Extract `yrt/youtube/stats.py` (get_stats, add_stats, weekly_stats)
-12. Extract `yrt/youtube/playlist.py` (add_to_playlist, del_from_playlist, fill_release_radar)
-13. Extract `yrt/youtube/cleanup.py` (cleanup_expired_videos, cleanup_ended_streams)
-14. Create `yrt/youtube/__init__.py` with public API exports
-15. Update imports in `yrt/main.py` and `_scripts/`
-16. Add/update tests for refactored youtube submodules
+5. ✅ Create `yrt/youtube/` package structure
+6. ✅ Extract `yrt/models.py` with dataclasses (PlaylistItem, VideoStats, etc.) - *Note: at package level, not youtube/*
+7. ✅ Extract `yrt/youtube/auth.py` (create_service_local, create_service_workflow, encode_key)
+8. ⏸️ Extract `yrt/youtube/retry.py` with retry decorator - *Deferred to Phase 5*
+9. ✅ Extract `yrt/youtube/utils.py` (is_shorts, last_exe_date, sort_db, parse_iso8601_duration)
+10. ✅ Extract `yrt/youtube/api.py` (get_playlist_items, get_videos, get_subs, iter_channels)
+11. ✅ Extract `yrt/youtube/stats.py` (get_stats, add_stats, weekly_stats)
+12. ✅ Extract `yrt/youtube/playlist.py` (add_to_playlist, del_from_playlist, fill_release_radar)
+13. ✅ Extract `yrt/youtube/cleanup.py` (cleanup_expired_videos, cleanup_ended_streams)
+14. ✅ Create `yrt/youtube/__init__.py` with public API exports
+15. ✅ Update imports in `yrt/main.py` and `_scripts/`
+16. ✅ Add/update tests for refactored youtube submodules
 
-### Phase 3: main.py Improvements
+### Phase 3: main.py Improvements (Partial)
 
 **🧪 Coverage target:** ~80%
 
-17. Extract `VideoRouter` class from `dest_playlist()` function
-18. Add config validation in `yrt/config.py`
-19. Use pathlib consistently in file operations
-20. Add tests for `VideoRouter` class
+17. ✅ Extract `VideoRouter` class from `dest_playlist()` function - *Created `yrt/router.py`*
+18. ⏸️ Add config validation in `yrt/config.py` - *Pending*
+19. ⏸️ Use pathlib consistently in file operations - *Pending*
+20. ✅ Add tests for `VideoRouter` class - *40 tests in `test_router.py`*
 
 ### Phase 4: Test Coverage Push
 

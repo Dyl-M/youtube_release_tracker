@@ -11,6 +11,7 @@ import pyyoutube as pyt  # type: ignore[import-untyped]
 
 # Local
 from .. import config
+from ..constants import STATUS_DELETED
 from ..exceptions import APIError
 from ..models import PlaylistItem, VideoStats, VideoData, to_dict_list
 from . import utils
@@ -79,7 +80,7 @@ def get_stats(service: pyt.Client, videos_list: list[Any], check_shorts: bool = 
             duration=None,
             is_shorts=None,
             live_status=None,
-            latest_status='deleted'
+            latest_status=STATUS_DELETED
         )
         for item_id in missing
     ]

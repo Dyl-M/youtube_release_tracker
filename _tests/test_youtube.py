@@ -84,7 +84,7 @@ class TestErrorConstants:
     @staticmethod
     def test_transient_errors_defined():
         """Test TRANSIENT_ERRORS constant is defined with normalized lowercase values."""
-        assert isinstance(TRANSIENT_ERRORS, set)
+        assert isinstance(TRANSIENT_ERRORS, (set, frozenset))
         assert 'serviceunavailable' in TRANSIENT_ERRORS
         assert 'backenderror' in TRANSIENT_ERRORS
         assert 'internalerror' in TRANSIENT_ERRORS
@@ -92,7 +92,7 @@ class TestErrorConstants:
     @staticmethod
     def test_permanent_errors_defined():
         """Test PERMANENT_ERRORS constant is defined with normalized lowercase values."""
-        assert isinstance(PERMANENT_ERRORS, set)
+        assert isinstance(PERMANENT_ERRORS, (set, frozenset))
         assert 'videonotfound' in PERMANENT_ERRORS
         assert 'forbidden' in PERMANENT_ERRORS
         assert 'duplicate' in PERMANENT_ERRORS
@@ -100,7 +100,7 @@ class TestErrorConstants:
     @staticmethod
     def test_quota_errors_defined():
         """Test QUOTA_ERRORS constant is defined with normalized lowercase values."""
-        assert isinstance(QUOTA_ERRORS, set)
+        assert isinstance(QUOTA_ERRORS, (set, frozenset))
         assert 'quotaexceeded' in QUOTA_ERRORS
 
     @staticmethod

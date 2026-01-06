@@ -14,15 +14,23 @@ import tzlocal
 from .. import config
 from .. import file_utils
 from .. import paths
+from ..constants import (
+    TRANSIENT_ERRORS,
+    PERMANENT_ERRORS,
+    QUOTA_ERRORS,
+    ISO_DATE_FORMAT,
+    LOG_DATE_FORMAT,
+)
 from ..exceptions import APIError
 
-# Error categorization for API retry logic (normalized to lowercase for comparison)
-TRANSIENT_ERRORS = {'serviceunavailable', 'backenderror', 'internalerror'}
-PERMANENT_ERRORS = {'videonotfound', 'forbidden', 'playlistoperationunsupported', 'duplicate'}
-QUOTA_ERRORS = {'quotaexceeded'}
-
-# Date format for YouTube API responses
-ISO_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S%z'
+# Re-export for backward compatibility
+__all__ = [
+    'TRANSIENT_ERRORS',
+    'PERMANENT_ERRORS',
+    'QUOTA_ERRORS',
+    'ISO_DATE_FORMAT',
+    'is_shorts',
+]
 
 
 def last_exe_date() -> dt.datetime:
@@ -44,7 +52,7 @@ def last_exe_date() -> dt.datetime:
             raise ValueError(f'Could not parse date from log line: {first_log}')
 
         d_str = match.group()
-        return dt.datetime.strptime(d_str, '%Y-%m-%d %H:%M:%S%z')
+        return dt.datetime.strptime(d_str, LOG_DATE_FORMAT)
 
     except (FileNotFoundError, IndexError):
         # On first run or corrupted file, default to 24 hours ago (daily workflow)

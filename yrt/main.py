@@ -15,6 +15,7 @@ from . import config
 from . import file_utils
 from . import paths
 from . import youtube
+from .constants import LIVE_STATUS_UPCOMING
 from .exceptions import YouTubeTrackerError, GitHubError
 from .logging_utils import create_file_logger
 from .models import PlaylistConfig, AddOnConfig
@@ -318,7 +319,7 @@ def main(historical_data: pd.DataFrame) -> None:
         new_data = youtube.add_stats(service=youtube_oauth, playlist_items=new_videos)
 
         # Filter out upcoming streams from stats storage (don't track stats for scheduled content)
-        upcoming_mask = new_data['live_status'] == 'upcoming'
+        upcoming_mask = new_data['live_status'] == LIVE_STATUS_UPCOMING
         if upcoming_mask.any():
             history_main.info('Filtered %d upcoming stream(s) from stats tracking.', upcoming_mask.sum())
 

@@ -6,6 +6,7 @@ __author__ = 'Dylan "dyl-m" Monfret'
 __all__ = [
     'analytics',
     'config',
+    'constants',
     'exceptions',
     'file_utils',
     'main',
