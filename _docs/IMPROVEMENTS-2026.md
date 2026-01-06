@@ -137,6 +137,7 @@ checking benefits.
 **Solution Implemented:** Created dataclasses in `yrt/models.py`:
 
 **Dataclasses created:**
+
 - `PlaylistConfig` - Playlist metadata with validation
 - `AddOnConfig` - Favorites and filters configuration
 - `PlaylistItem` - Core video data with source_channel_id
@@ -145,10 +146,12 @@ checking benefits.
 - `PlaylistItemRef` - Lightweight reference for playlist operations
 
 **Helper functions:**
+
 - `to_dict()` - Convert dataclass to dict with datetime serialization
 - `to_dict_list()` - Batch convert for pandas DataFrame integration
 
 **Key improvements:**
+
 - Eliminated ~150+ instances of `dict[str, Any]` throughout codebase
 - Full IDE autocomplete and type checking support
 - Validation in `__post_init__` methods
@@ -167,6 +170,7 @@ checking benefits.
 **Impact:** Business-critical routing logic buried in complex conditionals.
 
 **Solution Implemented:** Created `yrt/router.py` with:
+
 - `RouterConfig` dataclass for routing configuration with validation
 - `VideoRouter` class with clear routing methods
 - Factory function `create_router_from_config()` for easy instantiation
@@ -427,7 +431,36 @@ def get_execution_context() -> ExecutionContext:
 
 ## 🧪 Test Suite Improvements
 
-### 12. Implement main.py Tests (20 skipped)
+### 12. Prevent Test Suite from Writing to Log Files
+
+**Location:** `_tests/conftest.py`
+
+**Status:** ✅ Fixed
+
+**Issue:** Several yrt modules create loggers at import time (module-level):
+
+- `yrt/config.py:10` - `logger = create_file_logger('config', paths.HISTORY_LOG)`
+- `yrt/file_utils.py:14` - `logger = create_file_logger('file_utils', paths.HISTORY_LOG)`
+- `yrt/youtube/__init__.py:16` - `history = create_file_logger('history', paths.HISTORY_LOG)`
+
+When tests imported these modules without `YRT_NO_LOGGING=1` set, file handlers were created that could write to
+`_log/history.log`.
+
+**Impact:** Test runs could pollute the production log file with test-related entries.
+
+**Fix:** Set `YRT_NO_LOGGING=1` at the top of `conftest.py` BEFORE any yrt imports:
+
+```python
+import os
+
+# Disable logging BEFORE importing yrt modules to prevent log file creation
+os.environ['YRT_NO_LOGGING'] = '1'
+```
+
+**Note:** API calls during tests are already handled via mocking (`@patch` decorators). No real YouTube API calls are
+made.
+
+### 13. Implement main.py Tests (20 skipped)
 
 **Location:** `_tests/test_main.py:8-141`
 
@@ -438,21 +471,12 @@ business-critical routing logic.
 
 **Priority tests to implement:**
 
-1. `dest_playlist()` routing logic (6 tests):
-    - `test_shorts_are_ignored`
-    - `test_music_channel_short_video_to_release_radar`
-    - `test_music_channel_long_video_music_only`
-    - `test_music_channel_long_video_other_categories`
-    - `test_favorite_channel_to_banger_radar`
-    - `test_non_music_channel_to_category_playlist`
-
+1. `dest_playlist()` routing logic (6 tests) - **Now covered by `test_router.py` (40 tests)**
 2. Configuration loading validation (3 tests)
-
 3. `copy_last_exe_log()` function (2 tests)
-
 4. Exception handling (2 tests)
 
-### 13. Extract and Test Duration Parsing
+### 14. Extract and Test Duration Parsing
 
 **Location:** `_tests/test_youtube.py:110-131` (3 skipped tests)
 
@@ -480,7 +504,7 @@ def parse_iso8601_duration(duration_str: str) -> int:
     return isodate.parse_duration(duration_str).total_seconds()
 ```
 
-### 14. Improve archive_data.py Error Handling
+### 15. Improve archive_data.py Error Handling
 
 **Location:** `_scripts/archive_data.py:288-295`
 
@@ -642,12 +666,13 @@ class YouTubeService(Protocol):
 ## 📄 Summary
 
 - **☢️ Critical:** 1 bug ~~requiring immediate fix~~ ✅ Fixed
-- **⚠️ High Priority:** 5 structural improvements (4 fixed: Logger Factory, Split youtube.py, Domain Models, VideoRouter)
+- **⚠️ High Priority:** 5 structural improvements (4 fixed: Logger Factory, Split youtube.py, Domain Models,
+  VideoRouter)
 - **🛑 Medium Priority:** 5 code quality improvements
-- **🧪 Test Suite:** 3 test coverage improvements
+- **🧪 Test Suite:** 4 test coverage improvements (1 fixed: Test logging isolation)
 - **🛃 Low Priority:** 5 nice-to-have improvements
 
-**Total:** 19 improvement items (5 fixed, 14 remaining)
+**Total:** 20 improvement items (6 fixed, 14 remaining)
 
 ## Files to Modify
 
@@ -661,27 +686,28 @@ class YouTubeService(Protocol):
 | `yrt/exceptions.py`        | Add context attributes             |
 | `yrt/analytics.py`         | Remove or mark as placeholder      |
 | `_scripts/archive_data.py` | Use specific exceptions            |
+| `_tests/conftest.py`       | ✅ Add YRT_NO_LOGGING isolation     |
 | `_tests/test_main.py`      | Implement 20 skipped tests         |
 | `_tests/test_youtube.py`   | Implement duration parsing tests   |
 
 ## New Files to Create
 
-| File                           | Purpose                  | Status |
-|--------------------------------|--------------------------|--------|
-| `yrt/logging_utils.py`         | Shared logger factory    | ✅ Created |
-| `yrt/router.py`                | Video routing logic      | ✅ Created |
-| `yrt/constants.py`             | Magic strings/numbers    | Pending |
-| `yrt/youtube/__init__.py`      | Package exports          | ✅ Created |
-| `yrt/youtube/auth.py`          | Authentication functions | ✅ Created |
-| `yrt/youtube/api.py`           | Core API calls           | ✅ Created |
-| `yrt/youtube/stats.py`         | Statistics management    | ✅ Created |
-| `yrt/youtube/playlist.py`      | Playlist operations      | ✅ Created |
-| `yrt/youtube/cleanup.py`       | Cleanup operations       | ✅ Created |
+| File                           | Purpose                  | Status                         |
+|--------------------------------|--------------------------|--------------------------------|
+| `yrt/logging_utils.py`         | Shared logger factory    | ✅ Created                      |
+| `yrt/router.py`                | Video routing logic      | ✅ Created                      |
+| `yrt/constants.py`             | Magic strings/numbers    | Pending                        |
+| `yrt/youtube/__init__.py`      | Package exports          | ✅ Created                      |
+| `yrt/youtube/auth.py`          | Authentication functions | ✅ Created                      |
+| `yrt/youtube/api.py`           | Core API calls           | ✅ Created                      |
+| `yrt/youtube/stats.py`         | Statistics management    | ✅ Created                      |
+| `yrt/youtube/playlist.py`      | Playlist operations      | ✅ Created                      |
+| `yrt/youtube/cleanup.py`       | Cleanup operations       | ✅ Created                      |
 | `yrt/youtube/models.py`        | Dataclasses and enums    | Deferred (using yrt/models.py) |
-| `yrt/youtube/retry.py`         | Retry decorator          | Pending |
-| `yrt/youtube/utils.py`         | Utilities                | ✅ Created |
-| `_tests/test_router.py`        | Router unit tests        | ✅ Created |
-| `_tests/fixtures/error_*.json` | Error response fixtures  | Pending |
+| `yrt/youtube/retry.py`         | Retry decorator          | Pending                        |
+| `yrt/youtube/utils.py`         | Utilities                | ✅ Created                      |
+| `_tests/test_router.py`        | Router unit tests        | ✅ Created                      |
+| `_tests/fixtures/error_*.json` | Error response fixtures  | Pending                        |
 
 ## Implementation Order
 
