@@ -119,7 +119,7 @@ def archive_stats(cutoff: datetime) -> tuple[int, int]:
         return 0, 0
 
     # Group by year
-    to_archive['year'] = to_archive['release_date_parsed'].dt.year
+    to_archive = to_archive.assign(year=lambda ar_df: ar_df['release_date_parsed'].dt.year)
     archived_count = 0
     skipped_count = 0
 

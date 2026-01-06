@@ -25,11 +25,20 @@ from ..exceptions import APIError
 
 # Re-export for backward compatibility
 __all__ = [
+    # Functions
+    'last_exe_date',
+    'is_shorts',
+    'sort_db',
+    'get_items_count',
+    # Module-level state
+    'NOW',
+    'LAST_EXE',
+    'ADD_ON',
+    # Constants (re-exported from yrt.constants)
     'TRANSIENT_ERRORS',
     'PERMANENT_ERRORS',
     'QUOTA_ERRORS',
     'ISO_DATE_FORMAT',
-    'is_shorts',
 ]
 
 

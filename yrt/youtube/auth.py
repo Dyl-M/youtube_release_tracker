@@ -74,13 +74,13 @@ def create_service_local(log: bool = True) -> pyt.Client:
     Raises:
         YouTubeServiceError: If the service creation fails.
     """
-    oauth_file = paths.OAUTH_JSON  # OAUTH 2.0 ID path
+    oauth_file = str(paths.OAUTH_JSON)  # OAUTH 2.0 ID path
     scopes = ['https://www.googleapis.com/auth/youtube', 'https://www.googleapis.com/auth/youtube.force-ssl']
     instance_fail_message = 'Failed to create service instance for YouTube'
     cred = None
 
     if os.path.exists(paths.CREDENTIALS_JSON):
-        cred = Credentials.from_authorized_user_file(paths.CREDENTIALS_JSON)  # Retrieve credentials
+        cred = Credentials.from_authorized_user_file(str(paths.CREDENTIALS_JSON))  # Retrieve credentials
 
     if not cred or not cred.valid:  # Cover outdated or non-existant credentials
         if cred and cred.expired and cred.refresh_token:
