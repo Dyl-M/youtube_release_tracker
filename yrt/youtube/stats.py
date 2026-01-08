@@ -138,7 +138,7 @@ def weekly_stats(
     x_week_ago = ref_date.replace(hour=0, minute=0, second=0, microsecond=0) - dt.timedelta(weeks=week_delta)
 
     # Filter data with this new reference date
-    histo_data['release_date'] = pd.to_datetime(histo_data.release_date)
+    histo_data['release_date'] = pd.to_datetime(histo_data.release_date, format='ISO8601')
     date_mask = (histo_data.release_date.dt.date == x_week_ago.date()) & (histo_data[f'views_w{week_delta}'].isnull())
     selection = histo_data[date_mask]
     id_mask = selection.video_id.tolist()
