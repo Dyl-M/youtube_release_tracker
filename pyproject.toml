@@ -25,35 +25,35 @@ classifiers = [
     "Topic :: Multimedia :: Video",
 ]
 dependencies = [
-    "google-auth>=2.41.1,<2.42.0", # Pinned: google-auth-oauthlib 1.2.x requires <2.42.0
-    "google-auth-oauthlib~=1.2.3",
-    "isodate~=0.7.2",
-    "pandas~=2.3.3",
-    "pygithub~=2.8.1",
-    "python-youtube~=0.9.8",
-    "requests~=2.32.5",
-    "tqdm~=4.67.1",
-    "tzlocal~=5.3.1",
+    "google-auth==2.41.1",
+    "google-auth-oauthlib==1.2.3",
+    "isodate==0.7.2",
+    "pandas==2.3.3",
+    "pygithub==2.8.1",
+    "python-youtube==0.9.8",
+    "requests==2.32.5",
+    "tqdm==4.67.1",
+    "tzlocal==5.3.1",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "mypy~=1.19.1",
-    "pandas-stubs~=2.3.3",
-    "pytest~=9.0.2",
-    "pytest-cov~=7.0.0",
-    "ruff~=0.14.10",
-    "types-requests~=2.32.0",
+    "mypy==1.19.1",
+    "pandas-stubs==2.3.3.260113",
+    "pytest==9.0.2",
+    "pytest-cov==7.0.0",
+    "ruff==0.14.10",
+    "types-requests==2.32.4.20260107",
 ]
 # Future analytics features (currently unused)
 analytics = [
-    "beautifulsoup4~=4.14.3",
-    "ipykernel~=7.1.0",
-    "jupyter~=1.1.1",
-    "nbformat~=5.10.4",
-    "numpy~=2.4.0",
-    "plotly~=6.5.0",
-    "scikit-learn~=1.8.0",
+    "beautifulsoup4==4.14.3",
+    "ipykernel==7.1.0",
+    "jupyter==1.1.1",
+    "nbformat==5.10.4",
+    "numpy==2.4.2",
+    "plotly==6.5.0",
+    "scikit-learn==1.8.0",
 ]
 
 [project.urls]
