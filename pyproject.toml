@@ -25,10 +25,10 @@ classifiers = [
     "Topic :: Multimedia :: Video",
 ]
 dependencies = [
-    "google-auth>=2.41.1,<2.42.0", # Pinned: google-auth-oauthlib 1.2.x requires <2.42.0
+    "google-auth>=2.41.1,<2.49.0", # Pinned: google-auth-oauthlib 1.2.x requires <2.42.0
     "google-auth-oauthlib~=1.2.3",
     "isodate~=0.7.2",
-    "pandas~=2.3.3",
+    "pandas~=3.0.0",
     "pygithub~=2.8.1",
     "python-youtube~=0.9.8",
     "requests~=2.32.5",
