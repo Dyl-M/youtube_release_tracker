@@ -2810,3 +2810,25 @@
 2026-04-26 08:14:43+0000 [INFO] - No videos in "🍿🔴 My streams (Private)"
 2026-04-26 08:14:44+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
 2026-04-26 08:14:44+0000 [INFO] - Process ended.
+2026-04-27 09:13:02+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-04-27 09:13:03+0000 [INFO] - Process started.
+2026-04-27 09:13:03+0000 [INFO] - API credentials refreshed.
+2026-04-27 09:13:03+0000 [INFO] - YouTube service created successfully.
+2026-04-27 09:13:03+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-04-27 09:14:17+0000 [INFO] - Add statistics for 47 video(s).
+2026-04-27 09:14:37+0000 [INFO] - Addition to "Banger Radar": 4 video(s).
+2026-04-27 09:14:38+0000 [INFO] - Addition to "Release Radar": 17 video(s).
+2026-04-27 09:14:44+0000 [INFO] - Addition to "Educational content": 1 video(s).
+2026-04-27 09:14:44+0000 [INFO] - Addition to "Entertainment & Gaming": 6 video(s).
+2026-04-27 09:14:46+0000 [INFO] - Addition to "ASMR & Relaxation": 2 video(s).
+2026-04-27 09:14:47+0000 [INFO] - 23 addition(s) from Re-listening playlist.
+2026-04-27 09:14:59+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-04-27 09:14:59+0000 [INFO] - Removing 2 expired video(s) from "🧠 Educational content (Private)"
+2026-04-27 09:14:59+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-04-27 09:14:59+0000 [INFO] - Removing 5 expired video(s) from "🍿🎮 Entertainment & Gaming (Private)"
+2026-04-27 09:15:00+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-04-27 09:15:00+0000 [INFO] - Removing 1 expired video(s) from "💤 ASMR & Relaxation (Private)"
+2026-04-27 09:15:01+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-04-27 09:15:01+0000 [INFO] - No videos in "🍿🔴 My streams (Private)"
+2026-04-27 09:15:02+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-04-27 09:15:02+0000 [INFO] - Process ended.
