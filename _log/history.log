@@ -2832,3 +2832,26 @@
 2026-04-27 09:15:01+0000 [INFO] - No videos in "🍿🔴 My streams (Private)"
 2026-04-27 09:15:02+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
 2026-04-27 09:15:02+0000 [INFO] - Process ended.
+2026-04-28 09:14:01+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-04-28 09:14:02+0000 [INFO] - Process started.
+2026-04-28 09:14:02+0000 [INFO] - API credentials refreshed.
+2026-04-28 09:14:02+0000 [INFO] - YouTube service created successfully.
+2026-04-28 09:14:02+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-04-28 09:15:16+0000 [INFO] - Add statistics for 43 video(s).
+2026-04-28 09:15:34+0000 [INFO] - Filtered 1 upcoming stream(s) from stats tracking.
+2026-04-28 09:15:34+0000 [INFO] - Addition to "Banger Radar": 4 video(s).
+2026-04-28 09:15:36+0000 [INFO] - Addition to "Release Radar": 16 video(s).
+2026-04-28 09:15:42+0000 [INFO] - Addition to "Educational content": 3 video(s).
+2026-04-28 09:15:43+0000 [INFO] - Addition to "Entertainment & Gaming": 2 video(s).
+2026-04-28 09:15:44+0000 [INFO] - Addition to "My streams": 1 video(s).
+2026-04-28 09:15:45+0000 [INFO] - 24 addition(s) from Re-listening playlist.
+2026-04-28 09:16:03+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-04-28 09:16:04+0000 [INFO] - Removing 2 expired video(s) from "🧠 Educational content (Private)"
+2026-04-28 09:16:04+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-04-28 09:16:04+0000 [INFO] - Removing 2 expired video(s) from "🍿🎮 Entertainment & Gaming (Private)"
+2026-04-28 09:16:05+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-04-28 09:16:05+0000 [INFO] - Removing 1 expired video(s) from "💤 ASMR & Relaxation (Private)"
+2026-04-28 09:16:06+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-04-28 09:16:06+0000 [INFO] - No ended streams in "🍿🔴 My streams (Private)"
+2026-04-28 09:16:07+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-04-28 09:16:07+0000 [INFO] - Process ended.
