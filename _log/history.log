@@ -3121,3 +3121,28 @@
 2026-05-09 08:25:41+0000 [INFO] - No ended streams in "🍿🔴 My streams (Private)"
 2026-05-09 08:25:42+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
 2026-05-09 08:25:42+0000 [INFO] - Process ended.
+2026-05-10 08:48:30+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-05-10 08:48:30+0000 [INFO] - Process started.
+2026-05-10 08:48:31+0000 [INFO] - API credentials refreshed.
+2026-05-10 08:48:31+0000 [INFO] - YouTube service created successfully.
+2026-05-10 08:48:31+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-05-10 08:49:46+0000 [INFO] - Add statistics for 46 video(s).
+2026-05-10 08:50:09+0000 [INFO] - Filtered 2 upcoming stream(s) from stats tracking.
+2026-05-10 08:50:09+0000 [INFO] - Addition to "Banger Radar": 2 video(s).
+2026-05-10 08:50:10+0000 [INFO] - Addition to "Release Radar": 15 video(s).
+2026-05-10 08:50:14+0000 [INFO] - Addition to "Educational content": 1 video(s).
+2026-05-10 08:50:14+0000 [INFO] - Addition to "Entertainment & Gaming": 3 video(s).
+2026-05-10 08:50:15+0000 [INFO] - Addition to "ASMR & Relaxation": 1 video(s).
+2026-05-10 08:50:16+0000 [INFO] - Addition to "Music Lives": 1 video(s).
+2026-05-10 08:50:16+0000 [INFO] - Addition to "My streams": 1 video(s).
+2026-05-10 08:50:17+0000 [INFO] - No addition necessary for Release Radar
+2026-05-10 08:50:17+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-05-10 08:50:18+0000 [INFO] - Removing 1 expired video(s) from "🧠 Educational content (Private)"
+2026-05-10 08:50:18+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-05-10 08:50:18+0000 [INFO] - Removing 4 expired video(s) from "🍿🎮 Entertainment & Gaming (Private)"
+2026-05-10 08:50:19+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-05-10 08:50:19+0000 [INFO] - No expired videos in "💤 ASMR & Relaxation (Private)"
+2026-05-10 08:50:19+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-05-10 08:50:19+0000 [INFO] - Removing 1 ended stream(s) from "🍿🔴 My streams (Private)"
+2026-05-10 08:50:20+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-05-10 08:50:20+0000 [INFO] - Process ended.
