@@ -1,16 +1,14 @@
 # YouTube Release Tracker
 
-[![Python 3.12](https://img.shields.io/badge/python-3.12-blue?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
-[![GitHub last commit](https://img.shields.io/github/last-commit/Dyl-M/youtube_release_tracker?label=Last%20commit&style=flat-square)](https://github.com/Dyl-M/youtube_release_tracker/commits/main)
-[![GitHub commit activity](https://img.shields.io/github/commit-activity/w/Dyl-M/youtube_release_tracker?label=Commit%20activity&style=flat-square)](https://github.com/Dyl-M/youtube_release_tracker/commits/main)
-[![GitHub stars](https://img.shields.io/github/stars/Dyl-M/youtube_release_tracker?style=flat-square)]()
+[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json&style=flat-square)](https://github.com/astral-sh/uv)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json&style=flat-square)](https://github.com/astral-sh/ruff)
 [![License](https://img.shields.io/github/license/Dyl-M/youtube_release_tracker?style=flat-square)](LICENSE)
 
-[![Tests](https://github.com/Dyl-M/youtube_release_tracker/actions/workflows/test-coverage.yml/badge.svg)](https://github.com/Dyl-M/youtube_release_tracker/actions/workflows/test-coverage.yml)
+![Status](https://img.shields.io/badge/status-active-brightgreen?style=flat-square)
+[![Test & Coverage](https://img.shields.io/github/actions/workflow/status/Dyl-M/youtube_release_tracker/test-coverage.yml?label=Test%20%26%20Coverage&style=flat-square&logo=github-actions&logoColor=white)](https://github.com/Dyl-M/youtube_release_tracker/actions/workflows/test-coverage.yml)
 [![DeepSource](https://app.deepsource.com/gh/Dyl-M/youtube_release_tracker.svg/?label=active+issues&show_trend=true&token=WpKQsgGZsHi_FrteJ2YyUhQ_)](https://app.deepsource.com/gh/Dyl-M/youtube_release_tracker/)
 [![DeepSource](https://app.deepsource.com/gh/Dyl-M/youtube_release_tracker.svg/?label=code+coverage&show_trend=true&token=WpKQsgGZsHi_FrteJ2YyUhQ_)](https://app.deepsource.com/gh/Dyl-M/youtube_release_tracker/)
-
-[![Bluesky followers](https://img.shields.io/bluesky/followers/dyl-m.bsky.social?label=Bluesky)](https://bsky.app/profile/dyl-m.bsky.social)
 
 ![Repository illustration](_media/repo_illustration.png?raw=true "Repository illustration")
 
@@ -57,6 +55,14 @@ youtube_release_tracker/
 ├── _tests        # Pytest test suite, fixtures and shared configuration
 └── yrt           # Main application package (source code)
 ```
+
+Branches
+-------------
+
+- `main`: clean code reference (this branch). Receives code changes and a single squashed execution-log commit per
+  month.
+- `run`: execution branch where the daily automated process runs and commits its logs and statistics.
+- `dev`: integration branch for ongoing development.
 
 External information
 -------------
