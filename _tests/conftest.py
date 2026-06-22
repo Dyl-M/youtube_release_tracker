@@ -165,6 +165,4 @@ def allow_temp_files(tmp_path, monkeypatch):
     # Patch the ALLOWED_DIRS
     monkeypatch.setattr(file_utils, 'ALLOWED_DIRS', extended_allowed)
 
-    return
-
     # Cleanup happens automatically via monkeypatch
