@@ -45,92 +45,17 @@ Repository structure
 -------------
 
 ```
-├── .github
-│   ├── ISSUE_TEMPLATE
-│   │   ├── feature_request.yml
-│   │   └── issue_report.yml
-│   ├── workflows
-│   │   ├── claude.yml
-│   │   ├── licence_workflow.yml
-│   │   ├── main_workflow.yml
-│   │   └── test-coverage.yml
-│   └── dependabot.yml
-│
-├── _config
-│   ├── add-on.json
-│   ├── api_failure.json
-│   ├── constants.json
-│   ├── playlists.json
-│   └── pocket_tube.json
-│
-├── _data
-│   └── stats.csv
-│
-├── _docs
-│   ├── IMPROVEMENTS-2026.md
-│   └── notes.txt
-│
-├── _log
-│   ├── history.log
-│   └── last_exe.log
-│
-├── _media
-│   └── repo_illustration.png
-│
-├── _notebooks
-│   └── channels_reporting.ipynb
-│
-├── _scripts
-│   ├── __init__.py
-│   ├── archive_data.py
-│   └── sort_db.py
-│
-├── _tests
-│   ├── fixtures
-│   │   ├── sample_playlist_response.json
-│   │   └── sample_video_stats.json
-│   ├── __init__.py
-│   ├── conftest.py
-│   ├── README.md
-│   ├── test_config.py
-│   ├── test_constants.py
-│   ├── test_exceptions.py
-│   ├── test_file_utils.py
-│   ├── test_logging_utils.py
-│   ├── test_main.py
-│   ├── test_models.py
-│   ├── test_paths.py
-│   ├── test_router.py
-│   └── test_youtube.py
-│
-├── yrt
-│   ├── youtube
-│   │   ├── __init__.py
-│   │   ├── api.py
-│   │   ├── auth.py
-│   │   ├── cleanup.py
-│   │   ├── playlist.py
-│   │   ├── stats.py
-│   │   └── utils.py
-│   ├── __init__.py
-│   ├── analytics.py
-│   ├── config.py
-│   ├── constants.py
-│   ├── exceptions.py
-│   ├── file_utils.py
-│   ├── logging_utils.py
-│   ├── main.py
-│   ├── models.py
-│   ├── paths.py
-│   └── router.py
-│
-├── .deepsource.toml
-├── .gitignore
-├── LICENSE
-├── pyproject.toml
-├── pytest.ini
-├── README.md
-└── uv.lock
+youtube_release_tracker/
+├── .github       # GitHub Actions workflows, issue templates and Dependabot config
+├── _config       # JSON configuration: channels, playlists, favorites and constants
+├── _data         # Historical video statistics (stats.csv)
+├── _docs         # Project documentation and notes
+├── _log          # Execution logs (history.log, last_exe.log)
+├── _media        # Repository illustration and media assets
+├── _notebooks    # Reporting Jupyter notebooks and exported PDFs
+├── _scripts      # Standalone maintenance scripts (database sort, data archiving)
+├── _tests        # Pytest test suite, fixtures and shared configuration
+└── yrt           # Main application package (source code)
 ```
 
 External information
