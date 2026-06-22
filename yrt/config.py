@@ -1,8 +1,7 @@
 """Centralized configuration loading with defaults fallback."""
 
 # Local
-from . import paths
-from . import file_utils
+from . import file_utils, paths
 from .exceptions import ConfigurationError
 from .logging_utils import create_file_logger
 
@@ -11,25 +10,11 @@ logger = create_file_logger('config', paths.HISTORY_LOG)
 
 # Default configuration values (used if constants.json is missing or incomplete)
 DEFAULTS = {
-    'api': {
-        'batch_size': 50,
-        'max_retries': 3,
-        'base_delay_seconds': 1,
-        'max_backoff_seconds': 32
-    },
-    'network': {
-        'timeout_seconds': 5
-    },
-    'playlists': {
-        'release_radar_target_size': 40,
-        'relistening_age_weeks': 1
-    },
-    'video': {
-        'long_video_threshold_minutes': 10
-    },
-    'stats': {
-        'week_deltas': [1, 4, 12, 24]
-    }
+    'api': {'batch_size': 50, 'max_retries': 3, 'base_delay_seconds': 1, 'max_backoff_seconds': 32},
+    'network': {'timeout_seconds': 5},
+    'playlists': {'release_radar_target_size': 40, 'relistening_age_weeks': 1},
+    'video': {'long_video_threshold_minutes': 10},
+    'stats': {'week_deltas': [1, 4, 12, 24]},
 }
 
 

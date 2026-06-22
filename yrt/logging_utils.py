@@ -7,10 +7,7 @@ from pathlib import Path
 
 
 def create_file_logger(
-        name: str,
-        log_file: Path,
-        level: int = logging.DEBUG,
-        respect_no_logging: bool = True
+    name: str, log_file: Path, level: int = logging.DEBUG, respect_no_logging: bool = True
 ) -> logging.Logger:
     """Create a standardized file logger.
 
@@ -31,10 +28,7 @@ def create_file_logger(
     handler = logging.FileHandler(filename=log_file)
     handler.setLevel(level)
 
-    formatter = logging.Formatter(
-        fmt='%(asctime)s [%(levelname)s] - %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S%z'
-    )
+    formatter = logging.Formatter(fmt='%(asctime)s [%(levelname)s] - %(message)s', datefmt='%Y-%m-%d %H:%M:%S%z')
 
     handler.setFormatter(formatter)
     logger.addHandler(handler)

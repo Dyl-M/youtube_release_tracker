@@ -83,7 +83,7 @@ class TestSaveJson:
 
         # Verify file was created and contains correct data
         assert Path(file_path).exists()
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, encoding='utf-8') as f:
             loaded = json.load(f)
         assert loaded == data
 
@@ -95,7 +95,7 @@ class TestSaveJson:
 
         file_utils.save_json(file_path, data)
 
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, encoding='utf-8') as f:
             content = f.read()
 
         # Check for proper indentation
@@ -114,7 +114,7 @@ class TestSaveJson:
         new_data = {'new': 'data'}
         file_utils.save_json(file_path, new_data)
 
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, encoding='utf-8') as f:
             loaded = json.load(f)
         assert loaded == new_data
         assert 'old' not in loaded
@@ -136,13 +136,7 @@ class TestValidateNestedKeys:
     @staticmethod
     def test_validate_nested_keys():
         """Test validation of nested keys using dot notation."""
-        data = {
-            'level1': {
-                'level2': {
-                    'key': 'value'
-                }
-            }
-        }
+        data = {'level1': {'level2': {'key': 'value'}}}
         required = ['level1.level2.key']
 
         # Should not raise any exception

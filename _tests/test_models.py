@@ -8,16 +8,15 @@ import pytest
 
 # Local
 from yrt.models import (
-    PlaylistConfig,
     AddOnConfig,
+    PlaylistConfig,
     PlaylistItem,
-    VideoStats,
-    VideoData,
     PlaylistItemRef,
+    VideoData,
+    VideoStats,
     to_dict,
-    to_dict_list
+    to_dict_list,
 )
-
 
 # === PlaylistConfig Tests ===
 
@@ -25,11 +24,7 @@ from yrt.models import (
 def test_playlist_config_creation():
     """Test PlaylistConfig creation with valid data."""
     config = PlaylistConfig(
-        id='PL123',
-        name='Test Playlist',
-        description='Test Description',
-        retention_days=7,
-        cleanup_on_end=True
+        id='PL123', name='Test Playlist', description='Test Description', retention_days=7, cleanup_on_end=True
     )
     assert config.id == 'PL123'
     assert config.name == 'Test Playlist'
@@ -40,44 +35,27 @@ def test_playlist_config_creation():
 
 def test_playlist_config_optional_fields():
     """Test PlaylistConfig with optional fields omitted."""
-    config = PlaylistConfig(
-        id='PL123',
-        name='Test Playlist',
-        description='Test Description'
-    )
+    config = PlaylistConfig(id='PL123', name='Test Playlist', description='Test Description')
     assert config.retention_days is None
     assert config.cleanup_on_end is None
 
 
 def test_playlist_config_validation_empty_id():
     """Test PlaylistConfig raises ValueError for empty ID."""
-    with pytest.raises(ValueError, match="Playlist ID cannot be empty"):
-        PlaylistConfig(
-            id='',
-            name='Test Playlist',
-            description='Test Description'
-        )
+    with pytest.raises(ValueError, match='Playlist ID cannot be empty'):
+        PlaylistConfig(id='', name='Test Playlist', description='Test Description')
 
 
 def test_playlist_config_validation_empty_name():
     """Test PlaylistConfig raises ValueError for empty name."""
-    with pytest.raises(ValueError, match="Playlist name cannot be empty"):
-        PlaylistConfig(
-            id='PL123',
-            name='',
-            description='Test Description'
-        )
+    with pytest.raises(ValueError, match='Playlist name cannot be empty'):
+        PlaylistConfig(id='PL123', name='', description='Test Description')
 
 
 def test_playlist_config_validation_negative_retention():
     """Test PlaylistConfig raises ValueError for negative retention_days."""
-    with pytest.raises(ValueError, match="retention_days must be >= 0"):
-        PlaylistConfig(
-            id='PL123',
-            name='Test Playlist',
-            description='Test Description',
-            retention_days=-1
-        )
+    with pytest.raises(ValueError, match='retention_days must be >= 0'):
+        PlaylistConfig(id='PL123', name='Test Playlist', description='Test Description', retention_days=-1)
 
 
 # === AddOnConfig Tests ===
@@ -89,7 +67,7 @@ def test_addon_config_creation():
         favorites={'Artist1': 'UC123', 'Artist2': 'UC456'},
         playlist_not_found_pass=['UC789'],
         to_pass=['UC999'],
-        certified=['UC111']
+        certified=['UC111'],
     )
     assert config.favorites == {'Artist1': 'UC123', 'Artist2': 'UC456'}
     assert config.playlist_not_found_pass == ['UC789']
@@ -108,7 +86,7 @@ def test_addon_config_defaults():
 
 def test_addon_config_validation_invalid_favorites():
     """Test AddOnConfig raises ValueError for non-dict favorites."""
-    with pytest.raises(ValueError, match="favorites must be a dict"):
+    with pytest.raises(ValueError, match='favorites must be a dict'):
         AddOnConfig(favorites=['not', 'a', 'dict'])  # type: ignore[arg-type]
 
 
@@ -126,7 +104,7 @@ def test_playlist_item_creation():
         status='public',
         channel_id='UC789',
         channel_name='Test Channel',
-        source_channel_id='UC999'
+        source_channel_id='UC999',
     )
     assert item.video_id == 'vid123'
     assert item.video_title == 'Test Video'
@@ -140,7 +118,7 @@ def test_playlist_item_creation():
 
 def test_playlist_item_validation_empty_video_id():
     """Test PlaylistItem raises ValueError for empty video_id."""
-    with pytest.raises(ValueError, match="video_id cannot be empty"):
+    with pytest.raises(ValueError, match='video_id cannot be empty'):
         PlaylistItem(
             video_id='',
             video_title='Test',
@@ -149,13 +127,13 @@ def test_playlist_item_validation_empty_video_id():
             status='public',
             channel_id='UC123',
             channel_name='Test',
-            source_channel_id='UC456'
+            source_channel_id='UC456',
         )
 
 
 def test_playlist_item_validation_empty_source_channel():
     """Test PlaylistItem raises ValueError for empty source_channel_id."""
-    with pytest.raises(ValueError, match="source_channel_id cannot be empty"):
+    with pytest.raises(ValueError, match='source_channel_id cannot be empty'):
         PlaylistItem(
             video_id='vid123',
             video_title='Test',
@@ -164,7 +142,7 @@ def test_playlist_item_validation_empty_source_channel():
             status='public',
             channel_id='UC123',
             channel_name='Test',
-            source_channel_id=''
+            source_channel_id='',
         )
 
 
@@ -181,7 +159,7 @@ def test_video_stats_creation():
         duration=300,
         is_shorts=False,
         live_status='none',
-        latest_status='public'
+        latest_status='public',
     )
     assert stats.video_id == 'vid123'
     assert stats.views == 1000
@@ -208,7 +186,7 @@ def test_video_stats_defaults():
 
 def test_video_stats_validation_empty_video_id():
     """Test VideoStats raises ValueError for empty video_id."""
-    with pytest.raises(ValueError, match="video_id cannot be empty"):
+    with pytest.raises(ValueError, match='video_id cannot be empty'):
         VideoStats(video_id='')
 
 
@@ -234,7 +212,7 @@ def test_video_data_creation():
         is_shorts=False,
         live_status='none',
         latest_status='public',
-        dest_playlist='PL123'
+        dest_playlist='PL123',
     )
     assert data.video_id == 'vid123'
     assert data.views == 1000
@@ -253,7 +231,7 @@ def test_video_data_factory_method():
         status='public',
         channel_id='UC789',
         channel_name='Test Channel',
-        source_channel_id='UC999'
+        source_channel_id='UC999',
     )
 
     stats = VideoStats(
@@ -264,7 +242,7 @@ def test_video_data_factory_method():
         duration=300,
         is_shorts=False,
         live_status='upcoming',
-        latest_status='public'
+        latest_status='public',
     )
 
     data = VideoData.from_playlist_item_and_stats(item, stats)
@@ -302,13 +280,10 @@ def test_video_data_factory_none_live_status():
         status='public',
         channel_id='UC789',
         channel_name='Test',
-        source_channel_id='UC999'
+        source_channel_id='UC999',
     )
 
-    stats = VideoStats(
-        video_id='vid123',
-        live_status=None
-    )
+    stats = VideoStats(video_id='vid123', live_status=None)
 
     data = VideoData.from_playlist_item_and_stats(item, stats)
     assert data.live_status == 'none'
@@ -320,11 +295,7 @@ def test_video_data_factory_none_live_status():
 def test_playlist_item_ref_creation():
     """Test PlaylistItemRef creation with all fields."""
     add_date = datetime(2024, 1, 15, 12, 0, 0)
-    ref = PlaylistItemRef(
-        item_id='item123',
-        video_id='vid456',
-        add_date=add_date
-    )
+    ref = PlaylistItemRef(item_id='item123', video_id='vid456', add_date=add_date)
     assert ref.item_id == 'item123'
     assert ref.video_id == 'vid456'
     assert ref.add_date == add_date
@@ -332,10 +303,7 @@ def test_playlist_item_ref_creation():
 
 def test_playlist_item_ref_without_add_date():
     """Test PlaylistItemRef creation without optional add_date."""
-    ref = PlaylistItemRef(
-        item_id='item123',
-        video_id='vid456'
-    )
+    ref = PlaylistItemRef(item_id='item123', video_id='vid456')
     assert ref.item_id == 'item123'
     assert ref.video_id == 'vid456'
     assert ref.add_date is None
@@ -343,13 +311,13 @@ def test_playlist_item_ref_without_add_date():
 
 def test_playlist_item_ref_validation_empty_item_id():
     """Test PlaylistItemRef raises ValueError for empty item_id."""
-    with pytest.raises(ValueError, match="item_id cannot be empty"):
+    with pytest.raises(ValueError, match='item_id cannot be empty'):
         PlaylistItemRef(item_id='', video_id='vid123')
 
 
 def test_playlist_item_ref_validation_empty_video_id():
     """Test PlaylistItemRef raises ValueError for empty video_id."""
-    with pytest.raises(ValueError, match="video_id cannot be empty"):
+    with pytest.raises(ValueError, match='video_id cannot be empty'):
         PlaylistItemRef(item_id='item123', video_id='')
 
 
@@ -358,12 +326,7 @@ def test_playlist_item_ref_validation_empty_video_id():
 
 def test_to_dict_with_playlist_config():
     """Test to_dict() converts PlaylistConfig to dict."""
-    config = PlaylistConfig(
-        id='PL123',
-        name='Test Playlist',
-        description='Test Description',
-        retention_days=7
-    )
+    config = PlaylistConfig(id='PL123', name='Test Playlist', description='Test Description', retention_days=7)
     result = to_dict(config)
 
     assert isinstance(result, dict)
@@ -385,7 +348,7 @@ def test_to_dict_with_datetime():
         status='public',
         channel_id='UC789',
         channel_name='Test',
-        source_channel_id='UC999'
+        source_channel_id='UC999',
     )
     result = to_dict(item)
 
@@ -396,7 +359,7 @@ def test_to_dict_with_datetime():
 
 def test_to_dict_non_dataclass_raises_error():
     """Test to_dict() raises TypeError for non-dataclass input."""
-    with pytest.raises(TypeError, match="Expected dataclass"):
+    with pytest.raises(TypeError, match='Expected dataclass'):
         to_dict({'not': 'a dataclass'})  # type: ignore[arg-type]
 
 
@@ -405,7 +368,7 @@ def test_to_dict_list():
     items = [
         PlaylistItemRef(item_id='item1', video_id='vid1'),
         PlaylistItemRef(item_id='item2', video_id='vid2'),
-        PlaylistItemRef(item_id='item3', video_id='vid3')
+        PlaylistItemRef(item_id='item3', video_id='vid3'),
     ]
 
     result = to_dict_list(items)

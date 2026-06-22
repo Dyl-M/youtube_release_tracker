@@ -5,35 +5,35 @@ import pytest
 
 # Local
 from yrt.constants import (
-    # Routing
-    ROUTING_SHORTS,
-    ROUTING_NONE,
+    CATEGORY_ASMR,
+    CATEGORY_ENTERTAINMENT,
+    CATEGORY_GAMING,
+    CATEGORY_LEARNING,
+    # Category constants
+    CATEGORY_MUSIC,
+    CATEGORY_PRIORITY,
+    # Channel prefixes
+    CHANNEL_PREFIX,
+    # Date formats
+    ISO_DATE_FORMAT,
+    LIVE_STATUS_LIVE,
     # Live statuses
     LIVE_STATUS_NONE,
     LIVE_STATUS_UPCOMING,
-    LIVE_STATUS_LIVE,
+    LOG_DATE_FORMAT,
+    PERMANENT_ERRORS,
+    QUOTA_ERRORS,
+    ROUTING_NONE,
+    # Routing
+    ROUTING_SHORTS,
+    STATUS_DELETED,
+    STATUS_PRIVATE,
     # Video statuses
     STATUS_PUBLIC,
     STATUS_UNLISTED,
-    STATUS_PRIVATE,
-    STATUS_DELETED,
     # Error categories
     TRANSIENT_ERRORS,
-    PERMANENT_ERRORS,
-    QUOTA_ERRORS,
-    # Date formats
-    ISO_DATE_FORMAT,
-    LOG_DATE_FORMAT,
-    # Channel prefixes
-    CHANNEL_PREFIX,
     UPLOAD_PLAYLIST_PREFIX,
-    # Category constants
-    CATEGORY_MUSIC,
-    CATEGORY_LEARNING,
-    CATEGORY_ENTERTAINMENT,
-    CATEGORY_GAMING,
-    CATEGORY_ASMR,
-    CATEGORY_PRIORITY,
 )
 
 
@@ -252,7 +252,7 @@ class TestCategoryConstants:
             CATEGORY_GAMING,
             CATEGORY_ASMR,
         )
-        assert CATEGORY_PRIORITY == expected
+        assert expected == CATEGORY_PRIORITY
 
     @staticmethod
     def test_category_priority_excludes_musique():
@@ -267,27 +267,27 @@ class TestBackwardCompatibility:
     @staticmethod
     def test_utils_exports_transient_errors():
         """Test TRANSIENT_ERRORS importable from utils."""
-        # noinspection PyPep8Naming
-        from yrt.youtube.utils import TRANSIENT_ERRORS as utils_errors
-        assert utils_errors is TRANSIENT_ERRORS
+        from yrt.youtube.utils import TRANSIENT_ERRORS as UTILS_TRANSIENT_ERRORS
+
+        assert UTILS_TRANSIENT_ERRORS is TRANSIENT_ERRORS
 
     @staticmethod
     def test_utils_exports_permanent_errors():
         """Test PERMANENT_ERRORS importable from utils."""
-        # noinspection PyPep8Naming
-        from yrt.youtube.utils import PERMANENT_ERRORS as utils_errors
-        assert utils_errors is PERMANENT_ERRORS
+        from yrt.youtube.utils import PERMANENT_ERRORS as UTILS_PERMANENT_ERRORS
+
+        assert UTILS_PERMANENT_ERRORS is PERMANENT_ERRORS
 
     @staticmethod
     def test_utils_exports_quota_errors():
         """Test QUOTA_ERRORS importable from utils."""
-        # noinspection PyPep8Naming
-        from yrt.youtube.utils import QUOTA_ERRORS as utils_errors
-        assert utils_errors is QUOTA_ERRORS
+        from yrt.youtube.utils import QUOTA_ERRORS as UTILS_QUOTA_ERRORS
+
+        assert UTILS_QUOTA_ERRORS is QUOTA_ERRORS
 
     @staticmethod
     def test_utils_exports_iso_date_format():
         """Test ISO_DATE_FORMAT importable from utils."""
-        # noinspection PyPep8Naming
-        from yrt.youtube.utils import ISO_DATE_FORMAT as utils_format
-        assert utils_format is ISO_DATE_FORMAT
+        from yrt.youtube.utils import ISO_DATE_FORMAT as UTILS_ISO_DATE_FORMAT
+
+        assert UTILS_ISO_DATE_FORMAT is ISO_DATE_FORMAT

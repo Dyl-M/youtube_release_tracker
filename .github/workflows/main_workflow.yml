@@ -29,8 +29,23 @@ jobs:
 
     steps:
       - id: git-checkout
-        name: Checkout repository
+        name: Checkout run branch
         uses: actions/checkout@v6
+        with:
+          ref: run
+          fetch-depth: 0
+
+      - id: sync-code
+        name: Sync code from main
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "github-actions"
+          git fetch origin main
+          git merge origin/main --no-edit || {
+            git checkout --ours -- _data/ _log/
+            git add -A
+            git commit --no-edit
+          }
 
       - id: uv-setup
         name: Set up uv
@@ -58,16 +73,11 @@ jobs:
 
       - id: commit
         name: Commit changes (Log and historical data)
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "github-actions"
-          git commit -m "log: Latest execution report." -a
+        run: git commit -m "log: Latest execution report." -a || echo "No changes to commit"
 
       - id: push
-        name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+        name: Push changes to run branch
+        run: git push origin HEAD:run
 
       - id: notify-failure
         name: Create issue on workflow failure

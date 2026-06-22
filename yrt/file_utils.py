@@ -76,22 +76,22 @@ def load_json(file_path: str, required_keys: list[str] | None = None) -> dict[st
     file_name = os.path.basename(file_path)
 
     try:
-        with open(validated_path, 'r', encoding='utf8') as f:
+        with open(validated_path, encoding='utf8') as f:
             data = json.load(f)
 
     except FileNotFoundError:
         logger.critical('%s not found. Expected location: %s', file_name, file_path)
         logger.critical('Please ensure all required files exist.')
-        raise ConfigurationError(f'{file_name} not found at {file_path}')
+        raise ConfigurationError(f'{file_name} not found at {file_path}') from None
 
     except json.JSONDecodeError as e:
         logger.critical('%s is malformed: %s', file_name, str(e))
         logger.critical('Please check the JSON syntax.')
-        raise ConfigurationError(f'{file_name} is malformed: {e}')
+        raise ConfigurationError(f'{file_name} is malformed: {e}') from e
 
     except Exception as e:
         logger.critical('Unexpected error loading %s: %s', file_name, str(e))
-        raise ConfigurationError(f'Unexpected error loading {file_name}: {e}')
+        raise ConfigurationError(f'Unexpected error loading {file_name}: {e}') from e
 
     # Validate required keys if specified
     if required_keys:
@@ -122,13 +122,13 @@ def save_json(file_path: str, data: dict[str, Any], indent: int = 2) -> None:
         with open(validated_path, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=indent)
 
-    except IOError as e:
+    except OSError as e:
         logger.critical('Failed to write %s: %s', file_name, str(e))
-        raise ConfigurationError(f'Failed to write {file_name}: {e}')
+        raise ConfigurationError(f'Failed to write {file_name}: {e}') from e
 
     except Exception as e:
         logger.critical('Unexpected error saving %s: %s', file_name, str(e))
-        raise ConfigurationError(f'Unexpected error saving {file_name}: {e}')
+        raise ConfigurationError(f'Unexpected error saving {file_name}: {e}') from e
 
 
 def validate_nested_keys(data: dict[str, Any], key_path: list[str], file_name: str) -> None:

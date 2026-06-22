@@ -1,0 +1,37 @@
+name: YTB Tracker - Monthly Log Consolidation
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    - cron: "0 12 1 * *"
+      timezone: "America/Los_Angeles"
+
+jobs:
+  consolidate:
+    name: squash-run-into-main
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - id: git-checkout
+        name: Checkout main branch
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - id: consolidate
+        name: Squash run into main and reset run
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "github-actions"
+          git fetch origin run main
+          git checkout main
+          git merge --squash origin/run
+          MONTH=$(date -d "1 month ago" +'%Y-%m')
+          git diff --staged --quiet || git commit -m "log: Monthly execution report (${MONTH})."
+          git push origin main
+          git push --force origin main:run

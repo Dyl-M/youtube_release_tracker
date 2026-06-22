@@ -5,7 +5,7 @@ import datetime as dt
 import json
 import os
 from pathlib import Path
-from unittest.mock import Mock, MagicMock
+from unittest.mock import MagicMock, Mock
 
 # Third-party
 import pytest
@@ -52,7 +52,7 @@ def sample_video_data():
         'channel_title': 'Test Channel',
         'published_at': '2024-01-15T12:00:00Z',
         'duration': 'PT3M30S',  # 3 minutes 30 seconds
-        'is_shorts': False
+        'is_shorts': False,
     }
 
 
@@ -60,15 +60,12 @@ def sample_video_data():
 def sample_playlist_item():
     """Sample playlist item from YouTube API."""
     return {
-        'contentDetails': {
-            'videoId': 'dQw4w9WgXcQ',
-            'videoPublishedAt': '2024-01-15T12:00:00Z'
-        },
+        'contentDetails': {'videoId': 'dQw4w9WgXcQ', 'videoPublishedAt': '2024-01-15T12:00:00Z'},
         'snippet': {
             'title': 'Test Video Title',
             'channelId': 'UCuAXFkgsw1L7xaCfnd5JJOw',
-            'channelTitle': 'Test Channel'
-        }
+            'channelTitle': 'Test Channel',
+        },
     }
 
 
@@ -77,14 +74,8 @@ def sample_video_stats():
     """Sample video statistics from YouTube API."""
     return {
         'id': 'dQw4w9WgXcQ',
-        'statistics': {
-            'viewCount': '1000000',
-            'likeCount': '50000',
-            'commentCount': '1000'
-        },
-        'contentDetails': {
-            'duration': 'PT3M30S'
-        }
+        'statistics': {'viewCount': '1000000', 'likeCount': '50000', 'commentCount': '1000'},
+        'contentDetails': {'duration': 'PT3M30S'},
     }
 
 
@@ -113,28 +104,20 @@ def sample_pocket_tube_data():
         'MUSIQUE': ['UCchannel1', 'UCchannel2'],
         'APPRENTISSAGE': ['UCchannel3'],
         'DIVERTISSEMENT': ['UCchannel4'],
-        'GAMING': ['UCchannel5']
+        'GAMING': ['UCchannel5'],
     }
 
 
 @pytest.fixture
 def sample_playlists_data():
     """Sample playlists.json configuration."""
-    return {
-        'banger_radar': 'PLbanger123',
-        'release_radar': 'PLrelease456',
-        'watch_later': 'PLwatch789'
-    }
+    return {'banger_radar': 'PLbanger123', 'release_radar': 'PLrelease456', 'watch_later': 'PLwatch789'}
 
 
 @pytest.fixture
 def sample_addon_data():
     """Sample add-on.json configuration."""
-    return {
-        'favorites': ['UCchannel1'],
-        'playlistNotFoundPass': ['UCchannel6'],
-        'toPass': ['UCchannel7']
-    }
+    return {'favorites': ['UCchannel1'], 'playlistNotFoundPass': ['UCchannel6'], 'toPass': ['UCchannel7']}
 
 
 @pytest.fixture
@@ -177,11 +160,9 @@ def allow_temp_files(tmp_path, monkeypatch):
     # Get current allowed dirs and add temp path
     original_allowed = file_utils.ALLOWED_DIRS.copy()
     temp_dir = str(tmp_path.parent.parent)  # Get pytest's temp root
-    extended_allowed = original_allowed + [temp_dir]
+    extended_allowed = [*original_allowed, temp_dir]
 
     # Patch the ALLOWED_DIRS
     monkeypatch.setattr(file_utils, 'ALLOWED_DIRS', extended_allowed)
-
-    yield
 
     # Cleanup happens automatically via monkeypatch

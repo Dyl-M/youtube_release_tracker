@@ -5,15 +5,15 @@ import datetime as dt
 from typing import Any
 
 # Third-party
-import isodate  # type: ignore[import-untyped]
+import isodate
 import pandas as pd
-import pyyoutube as pyt  # type: ignore[import-untyped]
+import pyyoutube as pyt
 
 # Local
 from .. import config
 from ..constants import STATUS_DELETED
 from ..exceptions import APIError
-from ..models import PlaylistItem, VideoStats, VideoData, to_dict_list
+from ..models import PlaylistItem, VideoData, VideoStats, to_dict_list
 from . import utils
 from .api import get_videos
 
@@ -41,10 +41,7 @@ def get_stats(service: pyt.Client, videos_list: list[Any], check_shorts: bool = 
         videos_ids = videos_list
 
     # Split tasks in chunks to request a maximum of API_BATCH_SIZE videos at each iteration.
-    batch_size = config.API_BATCH_SIZE
-    videos_chunks = [videos_ids[i:i + min(batch_size, len(videos_ids))] for i in range(0, len(videos_ids), batch_size)]
-
-    for chunk in videos_chunks:
+    for chunk in utils.chunked(videos_ids, config.API_BATCH_SIZE):
         try:
             request = get_videos(service=service, videos_list=chunk)
 
@@ -58,7 +55,7 @@ def get_stats(service: pyt.Client, videos_list: list[Any], check_shorts: bool = 
                     duration=isodate.parse_duration(getattr(item.contentDetails, 'duration', 'PT0S') or 'PT0S').seconds,
                     is_shorts=utils.is_shorts(video_id=item.id) if check_shorts else None,
                     live_status=item.snippet.liveBroadcastContent,
-                    latest_status=item.status.privacyStatus
+                    latest_status=item.status.privacyStatus,
                 )
                 for item in request
             ]
@@ -66,7 +63,7 @@ def get_stats(service: pyt.Client, videos_list: list[Any], check_shorts: bool = 
         except pyt.error.PyYouTubeException as api_error:
             if utils.history:
                 utils.history.error(api_error.message)
-            raise APIError(f'API error while getting stats: {api_error.message}')
+            raise APIError(f'API error while getting stats: {api_error.message}') from api_error
 
     validated = [video.video_id for video in items]
     missing = [vid_id for vid_id in videos_ids if vid_id not in validated]
@@ -80,7 +77,7 @@ def get_stats(service: pyt.Client, videos_list: list[Any], check_shorts: bool = 
             duration=None,
             is_shorts=None,
             live_status=None,
-            latest_status=STATUS_DELETED
+            latest_status=STATUS_DELETED,
         )
         for item_id in missing
     ]
@@ -109,8 +106,7 @@ def add_stats(service: pyt.Client, playlist_items: list[PlaylistItem]) -> pd.Dat
 
     # Merge PlaylistItem + VideoStats into VideoData
     video_data_list = [
-        VideoData.from_playlist_item_and_stats(item, stats_by_id[item.video_id])
-        for item in playlist_items
+        VideoData.from_playlist_item_and_stats(item, stats_by_id[item.video_id]) for item in playlist_items
     ]
 
     # Convert to DataFrame
@@ -118,10 +114,7 @@ def add_stats(service: pyt.Client, playlist_items: list[PlaylistItem]) -> pd.Dat
 
 
 def weekly_stats(
-        service: pyt.Client,
-        histo_data: pd.DataFrame,
-        week_delta: int,
-        ref_date: dt.datetime = dt.datetime.now(dt.timezone.utc)
+    service: pyt.Client, histo_data: pd.DataFrame, week_delta: int, ref_date: dt.datetime | None = None
 ) -> pd.DataFrame:
     """Add weekly statistics to historical data retrieved from YouTube for each run.
 
@@ -129,11 +122,14 @@ def weekly_stats(
         service: A Python YouTube Client.
         histo_data: Data with statistics retrieved throughout the weeks.
         week_delta: How far we should get stats for videos (1, 4, 13 or 26 weeks).
-        ref_date: A reference date (midnight UTC by default).
+        ref_date: A reference date (current time in UTC by default, evaluated per call).
 
     Returns:
         Historical data enhanced with new statistics.
     """
+    if ref_date is None:
+        ref_date = dt.datetime.now(dt.UTC)
+
     # Get the date from "x week ago"
     x_week_ago = ref_date.replace(hour=0, minute=0, second=0, microsecond=0) - dt.timedelta(weeks=week_delta)
 
@@ -159,9 +155,8 @@ def weekly_stats(
         histo_data.loc[histo_data.video_id.isin(id_mask), ['status']] = histo_data.latest_status
         histo_data.drop(columns=['views', 'likes', 'comments', 'latest_status'], inplace=True)
 
-    else:
-        if utils.history:
-            utils.history.info('No change to apply on historical data for following delta: %s week(s)', week_delta)
+    elif utils.history:
+        utils.history.info('No change to apply on historical data for following delta: %s week(s)', week_delta)
 
     # Apply the type Int64 for each feature (necessary for export)
     w_features = [col for col in histo_data.columns if '_w' in col]

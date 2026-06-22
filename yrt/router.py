@@ -5,17 +5,17 @@ from dataclasses import dataclass
 
 # Local
 from .constants import (
-    ROUTING_SHORTS,
-    ROUTING_NONE,
-    LIVE_STATUS_UPCOMING,
-    CATEGORY_MUSIC,
-    CATEGORY_LEARNING,
+    CATEGORY_ASMR,
     CATEGORY_ENTERTAINMENT,
     CATEGORY_GAMING,
-    CATEGORY_ASMR,
+    CATEGORY_LEARNING,
+    CATEGORY_MUSIC,
     CATEGORY_PRIORITY,
+    LIVE_STATUS_UPCOMING,
+    ROUTING_NONE,
+    ROUTING_SHORTS,
 )
-from .models import PlaylistConfig, AddOnConfig
+from .models import AddOnConfig, PlaylistConfig
 
 # Module-level default router (set by main.py after config loading)
 _default_router: 'VideoRouter | None' = None
@@ -63,10 +63,10 @@ class RouterConfig:
 
         for name, value in required_ids:
             if not value:
-                raise ValueError(f"{name} cannot be empty")
+                raise ValueError(f'{name} cannot be empty')
 
         if self.long_video_threshold_minutes <= 0:
-            raise ValueError("long_video_threshold_minutes must be positive")
+            raise ValueError('long_video_threshold_minutes must be positive')
 
 
 # === Router Class ===
@@ -100,8 +100,7 @@ class VideoRouter:
         """
         self.config = config
 
-    def route(self, channel_id: str, is_shorts: bool | None,
-              duration: int | None, live_status: str = 'none') -> str:
+    def route(self, channel_id: str, is_shorts: bool | None, duration: int | None, live_status: str = 'none') -> str:
         """Determine destination playlist for a video.
 
         Args:
@@ -185,8 +184,7 @@ class VideoRouter:
             return self.config.category_playlists[category]
         return self.SPECIAL_NONE
 
-    def _route_music(self, channel_id: str, is_long: bool,
-                     non_music_category: str | None) -> str:
+    def _route_music(self, channel_id: str, is_long: bool, non_music_category: str | None) -> str:
         """Route music channel video to appropriate playlist.
 
         Args:
@@ -210,8 +208,7 @@ class VideoRouter:
         # Regular music goes to Release Radar
         return self.config.release_radar_id
 
-    def __call__(self, channel_id: str, is_shorts: bool | None,
-                 duration: int | None, live_status: str = 'none') -> str:
+    def __call__(self, channel_id: str, is_shorts: bool | None, duration: int | None, live_status: str = 'none') -> str:
         """Allow router instance to be called like a function.
 
         This enables backward-compatible usage as a drop-in replacement
@@ -233,10 +230,10 @@ class VideoRouter:
 
 
 def create_router_from_config(
-        pocket_tube: dict[str, list[str]],
-        playlists: dict[str, PlaylistConfig],
-        add_on: AddOnConfig,
-        long_video_threshold: int | None = None
+    pocket_tube: dict[str, list[str]],
+    playlists: dict[str, PlaylistConfig],
+    add_on: AddOnConfig,
+    long_video_threshold: int | None = None,
 ) -> VideoRouter:
     """Create a VideoRouter from configuration objects.
 
@@ -273,7 +270,7 @@ def create_router_from_config(
         banger_radar_id=playlists['banger'].id,
         music_lives_id=playlists['music_lives'].id,
         regular_streams_id=playlists['regular_streams'].id,
-        long_video_threshold_minutes=threshold
+        long_video_threshold_minutes=threshold,
     )
 
     return VideoRouter(router_config)
@@ -291,8 +288,7 @@ def set_default_router(router: VideoRouter) -> None:
     _default_router = router
 
 
-def dest_playlist(channel_id: str, is_shorts: bool | None, v_duration: int | None,
-                  live_status: str = 'none') -> str:
+def dest_playlist(channel_id: str, is_shorts: bool | None, v_duration: int | None, live_status: str = 'none') -> str:
     """Return destination playlist for addition based on channel category and video properties.
 
     This is a convenience function that uses the default router set by main.py.
@@ -321,11 +317,6 @@ def dest_playlist(channel_id: str, is_shorts: bool | None, v_duration: int | Non
         RuntimeError: If called before set_default_router().
     """
     if _default_router is None:
-        raise RuntimeError("Router not initialized. Call set_default_router() first.")
+        raise RuntimeError('Router not initialized. Call set_default_router() first.')
 
-    return _default_router.route(
-        channel_id,
-        is_shorts,
-        v_duration,
-        live_status
-    )
+    return _default_router.route(channel_id, is_shorts, v_duration, live_status)
