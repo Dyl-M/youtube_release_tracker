@@ -7,5 +7,5 @@ import pandas as pd
 pd.set_option('display.max_columns', None)  # pd.set_option('display.max_rows', None)
 pd.set_option('display.width', 250)
 
-if __name__ == "__main__":
-    print('Hello world :)')
+if __name__ == '__main__':
+    print('Hello world :)')  # noqa: T201

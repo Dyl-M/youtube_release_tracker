@@ -1,13 +1,12 @@
 """Domain models for YouTube Release Tracker."""
 
 # Standard library
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from typing import Any
 
 # Local
 from .constants import LIVE_STATUS_NONE, STATUS_PUBLIC
-
 
 # === Configuration Models ===
 
@@ -33,11 +32,11 @@ class PlaylistConfig:
     def __post_init__(self) -> None:
         """Validate playlist configuration."""
         if not self.id:
-            raise ValueError("Playlist ID cannot be empty")
+            raise ValueError('Playlist ID cannot be empty')
         if not self.name:
-            raise ValueError("Playlist name cannot be empty")
+            raise ValueError('Playlist name cannot be empty')
         if self.retention_days is not None and self.retention_days < 0:
-            raise ValueError(f"retention_days must be >= 0, got {self.retention_days}")
+            raise ValueError(f'retention_days must be >= 0, got {self.retention_days}')
 
 
 @dataclass
@@ -59,7 +58,7 @@ class AddOnConfig:
     def __post_init__(self) -> None:
         """Validate add-on configuration."""
         if not isinstance(self.favorites, dict):
-            raise ValueError("favorites must be a dict")
+            raise ValueError('favorites must be a dict')
 
 
 # === Video/Playlist Item Models ===
@@ -92,9 +91,9 @@ class PlaylistItem:
     def __post_init__(self) -> None:
         """Validate required fields."""
         if not self.video_id:
-            raise ValueError("video_id cannot be empty")
+            raise ValueError('video_id cannot be empty')
         if not self.source_channel_id:
-            raise ValueError("source_channel_id cannot be empty")
+            raise ValueError('source_channel_id cannot be empty')
 
 
 @dataclass
@@ -124,7 +123,7 @@ class VideoStats:
     def __post_init__(self) -> None:
         """Validate video ID."""
         if not self.video_id:
-            raise ValueError("video_id cannot be empty")
+            raise ValueError('video_id cannot be empty')
 
 
 @dataclass
@@ -170,9 +169,7 @@ class VideoData:
     dest_playlist: str | None = None
 
     @classmethod
-    def from_playlist_item_and_stats(
-            cls, item: PlaylistItem, stats: VideoStats
-    ) -> 'VideoData':
+    def from_playlist_item_and_stats(cls, item: PlaylistItem, stats: VideoStats) -> 'VideoData':
         """Merge PlaylistItem and VideoStats into VideoData.
 
         Args:
@@ -218,9 +215,9 @@ class PlaylistItemRef:
     def __post_init__(self) -> None:
         """Validate required fields."""
         if not self.item_id:
-            raise ValueError("item_id cannot be empty")
+            raise ValueError('item_id cannot be empty')
         if not self.video_id:
-            raise ValueError("video_id cannot be empty")
+            raise ValueError('video_id cannot be empty')
 
 
 # === Helper Functions ===
@@ -240,8 +237,8 @@ def to_dict(obj: Any) -> dict[str, Any]:
     """
     from dataclasses import is_dataclass
 
-    if not is_dataclass(obj):
-        raise TypeError(f"Expected dataclass, got {type(obj)}")
+    if not is_dataclass(obj) or isinstance(obj, type):
+        raise TypeError(f'Expected dataclass instance, got {type(obj)}')
 
     result = asdict(obj)
 

@@ -5,21 +5,19 @@ import logging
 import os
 import re
 import sys
+from typing import cast
 
 # Third-party
 import github
 import pandas as pd
 
 # Local
-from . import config
-from . import file_utils
-from . import paths
-from . import youtube
+from . import config, file_utils, paths, youtube
 from .constants import LIVE_STATUS_UPCOMING
-from .exceptions import YouTubeTrackerError, GitHubError
+from .exceptions import GitHubError, YouTubeTrackerError
 from .logging_utils import create_file_logger
-from .models import PlaylistConfig, AddOnConfig
-from .router import create_router_from_config, set_default_router, dest_playlist
+from .models import AddOnConfig, PlaylistConfig
+from .router import create_router_from_config, dest_playlist, set_default_router
 
 # System
 
@@ -28,6 +26,9 @@ try:
 
 except IndexError:
     exe_mode = 'local'
+
+# Name of the GitHub repository secret holding the base64-encoded credentials
+CREDS_ENV_NAME = 'CREDS_B64'
 
 
 def _get_env_variables() -> tuple[str, str]:
@@ -47,17 +48,17 @@ def _get_env_variables() -> tuple[str, str]:
 
         # Validate that the values are not empty
         if not repo or not pat:
-            raise ValueError("Environment variables are empty")
+            raise ValueError('Environment variables are empty')
 
         return repo, pat
 
     except (KeyError, ValueError) as er:
         if exe_mode == 'action':
-            missing_var = str(er).replace("'", "") if isinstance(er, KeyError) else "GITHUB_REPOSITORY or PAT"
+            missing_var = str(er).replace("'", '') if isinstance(er, KeyError) else 'GITHUB_REPOSITORY or PAT'
             raise ConfigurationError(
-                f"Required environment variable {missing_var} not set or empty. "
-                f"Please configure GitHub repository secrets."
-            )
+                f'Required environment variable {missing_var} not set or empty. '
+                f'Please configure GitHub repository secrets.'
+            ) from er
         # Fall back to local mode defaults
         return 'Dyl-M/auto_youtube_playlist', 'PAT'
 
@@ -74,9 +75,16 @@ def _load_playlists_config() -> dict[str, PlaylistConfig]:
     playlists_data = file_utils.load_json(
         str(paths.PLAYLISTS_JSON),
         required_keys=[
-            'release', 'banger', 're_listening', 'legacy', 'apprentissage', 'divertissement_gaming', 'asmr',
-            'music_lives', 'regular_streams'
-        ]
+            'release',
+            'banger',
+            're_listening',
+            'legacy',
+            'apprentissage',
+            'divertissement_gaming',
+            'asmr',
+            'music_lives',
+            'regular_streams',
+        ],
     )
 
     return {
@@ -85,7 +93,7 @@ def _load_playlists_config() -> dict[str, PlaylistConfig]:
             name=data['name'],
             description=data['description'],
             retention_days=data.get('retention_days'),
-            cleanup_on_end=data.get('cleanup_on_end')
+            cleanup_on_end=data.get('cleanup_on_end'),
         )
         for name, data in playlists_data.items()
     }
@@ -97,16 +105,13 @@ def _load_addon_config() -> AddOnConfig:
     Returns:
         AddOnConfig instance with configuration data.
     """
-    add_on_data = file_utils.load_json(
-        str(paths.ADD_ON_JSON),
-        required_keys=['favorites']
-    )
+    add_on_data = file_utils.load_json(str(paths.ADD_ON_JSON), required_keys=['favorites'])
 
     return AddOnConfig(
         favorites=add_on_data['favorites'],
         playlist_not_found_pass=add_on_data.get('playlistNotFoundPass', []),
         to_pass=add_on_data.get('toPass', []),
-        certified=add_on_data.get('certified', [])
+        certified=add_on_data.get('certified', []),
     )
 
 
@@ -115,8 +120,7 @@ github_repo, PAT = _get_env_variables()
 
 # Load configuration files with validation
 pocket_tube = file_utils.load_json(
-    str(paths.POCKET_TUBE_JSON),
-    required_keys=['MUSIQUE', 'APPRENTISSAGE', 'DIVERTISSEMENT', 'GAMING']
+    str(paths.POCKET_TUBE_JSON), required_keys=['MUSIQUE', 'APPRENTISSAGE', 'DIVERTISSEMENT', 'GAMING']
 )
 
 playlists = _load_playlists_config()
@@ -127,8 +131,9 @@ favorites = add_on.favorites.values()
 
 # YouTube Channels list
 music = pocket_tube['MUSIQUE']
-other_raw = (pocket_tube['APPRENTISSAGE'] + pocket_tube['DIVERTISSEMENT'] +
-             pocket_tube['GAMING'] + pocket_tube.get('ASMR', []))
+other_raw = (
+    pocket_tube['APPRENTISSAGE'] + pocket_tube['DIVERTISSEMENT'] + pocket_tube['GAMING'] + pocket_tube.get('ASMR', [])
+)
 other = list(set(other_raw))
 all_channels = list(set(music + other))
 
@@ -177,11 +182,30 @@ if os.path.exists(paths.STATS_CSV):
     histo_data = pd.read_csv(paths.STATS_CSV, encoding='utf-8')
 
 else:
-    print("INFO: stats.csv not found. Creating new empty DataFrame.")
+    print('INFO: stats.csv not found. Creating new empty DataFrame.')
     # Create empty DataFrame with correct schema
-    columns = ['video_id', 'channel_id', 'release_date', 'status', 'is_shorts', 'duration', 'views_w1', 'views_w4',
-               'views_w12', 'views_w24', 'likes_w1', 'likes_w4', 'likes_w12', 'likes_w24', 'comments_w1', 'comments_w4',
-               'comments_w12', 'comments_w24', 'channel_name', 'video_title']
+    columns = [
+        'video_id',
+        'channel_id',
+        'release_date',
+        'status',
+        'is_shorts',
+        'duration',
+        'views_w1',
+        'views_w4',
+        'views_w12',
+        'views_w24',
+        'likes_w1',
+        'likes_w4',
+        'likes_w12',
+        'likes_w24',
+        'comments_w1',
+        'comments_w4',
+        'comments_w12',
+        'comments_w24',
+        'channel_name',
+        'video_title',
+    ]
     histo_data = pd.DataFrame(columns=columns)
 
 
@@ -190,10 +214,10 @@ else:
 
 def copy_last_exe_log() -> None:
     """Copy the last execution logging from the main history file."""
-    with open(paths.HISTORY_LOG, 'r', encoding='utf8') as history_file:
+    with open(paths.HISTORY_LOG, encoding='utf8') as history_file:
         history = history_file.read()
 
-    last_exe = re.findall(r".*?Process started\.", history)[-1]
+    last_exe = re.findall(r'.*?Process started\.', history)[-1]
     last_exe_idx = history.rfind(last_exe)
     last_exe_log = history[last_exe_idx:]
 
@@ -221,19 +245,12 @@ def _update_historical_stats(service: youtube.pyt.Client, historical_data: pd.Da
         Updated DataFrame with collected stats.
     """
     for week_delta in config.STATS_WEEK_DELTAS:
-        historical_data = youtube.weekly_stats(
-            service=service,
-            histo_data=historical_data,
-            week_delta=week_delta
-        )
+        historical_data = youtube.weekly_stats(service=service, histo_data=historical_data, week_delta=week_delta)
     return historical_data
 
 
 def _add_videos_to_playlists(
-        service: youtube.pyt.Client,
-        to_add: dict[str, list[str]],
-        logger: logging.Logger,
-        prog_bar: bool
+    service: youtube.pyt.Client, to_add: dict[str, list[str]], logger: logging.Logger, prog_bar: bool
 ) -> None:
     """Add videos to their destination playlists.
 
@@ -274,9 +291,9 @@ def update_repo_secrets(secret_name: str, new_value: str, logger: logging.Logger
             logger.error("Failed to update Repository Secret '%s' : %s", secret_name, error)
 
         else:
-            print(f"Failed to update secret {secret_name}. Error: {error}")
+            print(f'Failed to update secret {secret_name}. Error: {error}')
 
-        raise GitHubError(f"Failed to update Repository Secret '{secret_name}': {error}")
+        raise GitHubError(f"Failed to update Repository Secret '{secret_name}': {error}") from error
 
 
 def main(historical_data: pd.DataFrame) -> None:
@@ -324,13 +341,33 @@ def main(historical_data: pd.DataFrame) -> None:
             history_main.info('Filtered %d upcoming stream(s) from stats tracking.', upcoming_mask.sum())
 
         # Prepare data for storing (excluding upcoming streams)
-        to_keep = ['video_id', 'channel_id', 'release_date', 'status', 'is_shorts', 'duration', 'channel_name',
-                   'video_title']
-        stats_list = ['views_w1', 'views_w4', 'views_w12', 'views_w24', 'likes_w1', 'likes_w4', 'likes_w12',
-                      'likes_w24', 'comments_w1', 'comments_w4', 'comments_w12', 'comments_w24']
+        to_keep = [
+            'video_id',
+            'channel_id',
+            'release_date',
+            'status',
+            'is_shorts',
+            'duration',
+            'channel_name',
+            'video_title',
+        ]
+        stats_list = [
+            'views_w1',
+            'views_w4',
+            'views_w12',
+            'views_w24',
+            'likes_w1',
+            'likes_w4',
+            'likes_w12',
+            'likes_w24',
+            'comments_w1',
+            'comments_w4',
+            'comments_w12',
+            'comments_w24',
+        ]
 
         stored = new_data[~upcoming_mask][to_keep]
-        stored.loc[:, stats_list] = [pd.NA] * len(stats_list)  # type: ignore[assignment]
+        stored.loc[:, stats_list] = [pd.NA] * len(stats_list)
         stored = stored[to_keep[:-2] + stats_list + to_keep[-2:]]
 
         # Sort and store (drop all-NA columns before concat to avoid FutureWarning)
@@ -339,23 +376,17 @@ def main(historical_data: pd.DataFrame) -> None:
         stored.to_csv(paths.STATS_CSV, encoding='utf-8', index=False)
 
         # Define destination playlist (use source_channel_id to handle YouTube's auto-generated artist channels)
-        new_data['dest_playlist'] = new_data.apply(lambda row: dest_playlist(row.source_channel_id,
-                                                                             row.is_shorts,
-                                                                             row.duration,
-                                                                             row.live_status), axis=1)
+        new_data['dest_playlist'] = new_data.apply(
+            lambda row: dest_playlist(row.source_channel_id, row.is_shorts, row.duration, row.live_status), axis=1
+        )
 
         # Add videos to playlists
-        to_add = new_data.groupby('dest_playlist')['video_id'].apply(list).to_dict()
+        # noinspection PyTypeChecker
+        to_add = cast('dict[str, list[str]]', new_data.groupby('dest_playlist')['video_id'].apply(list).to_dict())
         _add_videos_to_playlists(youtube_oauth, to_add, history_main, prog_bar)
 
     # Fill the Release Radar playlist (uses config.RELEASE_RADAR_TARGET by default)
-    youtube.fill_release_radar(
-        youtube_oauth,
-        release,
-        re_listening,
-        legacy,
-        prog_bar=prog_bar
-    )
+    youtube.fill_release_radar(youtube_oauth, release, re_listening, legacy, prog_bar=prog_bar)
 
     # Cleanup expired videos from category playlists
     youtube.cleanup_expired_videos(youtube_oauth, playlists, prog_bar=prog_bar)
@@ -369,7 +400,7 @@ def main(historical_data: pd.DataFrame) -> None:
 
     else:  # Credentials in base64 update - Remote option
         if creds_b64 is not None:
-            update_repo_secrets(secret_name='CREDS_B64', new_value=creds_b64, logger=history_main)
+            update_repo_secrets(secret_name=CREDS_ENV_NAME, new_value=creds_b64, logger=history_main)
 
     history_main.info('Process ended.')  # End
     copy_last_exe_log()  # Copy what happened during process execution to the associated file.

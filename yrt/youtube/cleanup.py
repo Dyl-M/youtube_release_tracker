@@ -4,7 +4,7 @@
 import datetime as dt
 
 # Third-party
-import pyyoutube as pyt  # type: ignore[import-untyped]
+import pyyoutube as pyt
 
 # Local
 from .. import config
@@ -35,12 +35,11 @@ def _fetch_stream_playlist_items(service: pyt.Client, playlist_id: str, playlist
                 part=['snippet', 'contentDetails'],
                 playlist_id=playlist_id,
                 max_results=config.API_BATCH_SIZE,
-                pageToken=next_page_token
+                pageToken=next_page_token,
             )
 
             all_items.extend(
-                PlaylistItemRef(item_id=item.id, video_id=item.contentDetails.videoId)
-                for item in response.items
+                PlaylistItemRef(item_id=item.id, video_id=item.contentDetails.videoId) for item in response.items
             )
 
             next_page_token = response.nextPageToken
@@ -60,10 +59,7 @@ def _fetch_stream_playlist_items(service: pyt.Client, playlist_id: str, playlist
 
 
 def _fetch_expired_items(
-        service: pyt.Client,
-        playlist_id: str,
-        playlist_name: str,
-        cutoff_date: dt.datetime
+    service: pyt.Client, playlist_id: str, playlist_name: str, cutoff_date: dt.datetime
 ) -> list[PlaylistItemRef]:
     """Fetch items from a playlist that are older than the cutoff date.
 
@@ -85,7 +81,7 @@ def _fetch_expired_items(
                 part=['snippet', 'contentDetails'],
                 playlist_id=playlist_id,
                 max_results=config.API_BATCH_SIZE,
-                pageToken=next_page_token
+                pageToken=next_page_token,
             )
 
             for item in response.items:
@@ -95,11 +91,7 @@ def _fetch_expired_items(
                     added_date = dt.datetime.strptime(added_date_str, utils.ISO_DATE_FORMAT)
                     if added_date < cutoff_date:
                         expired_items.append(
-                            PlaylistItemRef(
-                                item_id=item.id,
-                                video_id=item.contentDetails.videoId,
-                                add_date=added_date
-                            )
+                            PlaylistItemRef(item_id=item.id, video_id=item.contentDetails.videoId, add_date=added_date)
                         )
 
             next_page_token = response.nextPageToken
@@ -135,9 +127,7 @@ def _find_ended_streams(service: pyt.Client, all_items: list[PlaylistItemRef]) -
     ended_items: list[PlaylistItemRef] = []
 
     # Batch video status checks
-    batch_size = config.API_BATCH_SIZE
-    for i in range(0, len(video_ids), batch_size):
-        chunk = video_ids[i:i + batch_size]
+    for chunk in utils.chunked(video_ids, config.API_BATCH_SIZE):
         try:
             videos_response = get_videos(service=service, videos_list=chunk)
             for video in videos_response:
@@ -152,9 +142,7 @@ def _find_ended_streams(service: pyt.Client, all_items: list[PlaylistItemRef]) -
 
 
 def cleanup_expired_videos(
-        service: pyt.Client,
-        playlist_config: dict[str, PlaylistConfig],
-        prog_bar: bool = True
+    service: pyt.Client, playlist_config: dict[str, PlaylistConfig], prog_bar: bool = True
 ) -> None:
     """Remove expired videos from playlists with retention rules.
 
@@ -179,17 +167,10 @@ def cleanup_expired_videos(
 
         if utils.history:
             utils.history.info(
-                'Checking retention for playlist "%s" (retention: %d days)',
-                playlist_name,
-                playlist_cfg.retention_days
+                'Checking retention for playlist "%s" (retention: %d days)', playlist_name, playlist_cfg.retention_days
             )
 
-        expired_items = _fetch_expired_items(
-            service,
-            playlist_id,
-            playlist_name,
-            cutoff_date
-        )
+        expired_items = _fetch_expired_items(service, playlist_id, playlist_name, cutoff_date)
 
         if expired_items:
             if utils.history:
@@ -202,9 +183,7 @@ def cleanup_expired_videos(
 
 
 def cleanup_ended_streams(
-        service: pyt.Client,
-        playlist_config: dict[str, PlaylistConfig],
-        prog_bar: bool = True
+    service: pyt.Client, playlist_config: dict[str, PlaylistConfig], prog_bar: bool = True
 ) -> None:
     """Remove ended streams from playlists with cleanup_on_end=True.
 

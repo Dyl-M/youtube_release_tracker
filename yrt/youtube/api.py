@@ -6,8 +6,8 @@ import itertools
 from typing import Any
 
 # Third-party
-import pyyoutube as pyt  # type: ignore[import-untyped]
-import tqdm  # type: ignore[import-untyped]
+import pyyoutube as pyt
+import tqdm
 
 # Local
 from .. import config
@@ -38,14 +38,12 @@ def _parse_playlist_item(item: Any, date_format: str, source_channel_id: str) ->
         status=item.status.privacyStatus,
         channel_id=item.snippet.videoOwnerChannelId,
         channel_name=item.snippet.videoOwnerChannelTitle,
-        source_channel_id=source_channel_id  # Set at creation - no mutation!
+        source_channel_id=source_channel_id,  # Set at creation - no mutation!
     )
 
 
 def _handle_playlist_error(
-        error: pyt.error.PyYouTubeException,
-        playlist_id: str,
-        add_on: dict[str, Any] | None = None
+    error: pyt.error.PyYouTubeException, playlist_id: str, add_on: dict[str, Any] | None = None
 ) -> bool:
     """Handle playlist API errors. Raises APIError for fatal errors.
 
@@ -75,10 +73,7 @@ def _handle_playlist_error(
 
 
 def _filter_items_by_date_range(
-        p_items: list[PlaylistItem],
-        latest_d: dt.datetime,
-        oldest_d: dt.datetime | None = None,
-        day_ago: int | None = None
+    p_items: list[PlaylistItem], latest_d: dt.datetime, oldest_d: dt.datetime | None = None, day_ago: int | None = None
 ) -> list[PlaylistItem]:
     """Filter videos on a date range.
 
@@ -100,11 +95,11 @@ def _filter_items_by_date_range(
 
 
 def get_playlist_items(
-        service: pyt.Client,
-        playlist_id: str,
-        source_channel_id: str,
-        day_ago: int | None = None,
-        latest_d: dt.datetime | None = None
+    service: pyt.Client,
+    playlist_id: str,
+    source_channel_id: str,
+    day_ago: int | None = None,
+    latest_d: dt.datetime | None = None,
 ) -> list[PlaylistItem]:
     """Get the videos in a YouTube playlist.
 
@@ -133,7 +128,7 @@ def get_playlist_items(
                 part=['snippet', 'contentDetails', 'status'],
                 playlist_id=playlist_id,
                 max_results=config.API_BATCH_SIZE,
-                pageToken=next_page_token
+                pageToken=next_page_token,
             )
 
             # Parse items, filtering out those without release date
@@ -170,7 +165,7 @@ def get_videos(service: pyt.Client, videos_list: list[str]) -> list[Any]:
     return service.videos.list(  # type: ignore[no-any-return]
         part=['snippet', 'contentDetails', 'statistics', 'status'],
         video_id=videos_list,
-        max_results=config.API_BATCH_SIZE
+        max_results=config.API_BATCH_SIZE,
     ).items
 
 
@@ -187,17 +182,13 @@ def get_subs(service: pyt.Client, channel_list: list[str]) -> list[dict[str, Any
     ch_filter = [channel_id for channel_id in channel_list if channel_id is not None]
 
     # Split task in chunks to request on a maximum of API_BATCH_SIZE channels at each iteration.
-    batch_size = config.API_BATCH_SIZE
-    channels_chunks = [ch_filter[i:i + min(batch_size, len(ch_filter))] for i in range(0, len(ch_filter), batch_size)]
     raw_chunk = []
 
-    for chunk in channels_chunks:
+    for chunk in utils.chunked(ch_filter, config.API_BATCH_SIZE):
         req = service.channels.list(part=['statistics'], channel_id=chunk, max_results=config.API_BATCH_SIZE).items
         raw_chunk += req
 
-    items = [{'channel_id': item.id, 'subscribers': item.statistics.subscriberCount} for item in raw_chunk]
-
-    return items
+    return [{'channel_id': item.id, 'subscribers': item.statistics.subscriberCount} for item in raw_chunk]
 
 
 def check_if_live(service: pyt.Client, videos_list: list[str]) -> list[dict[str, Any]]:
@@ -216,11 +207,7 @@ def check_if_live(service: pyt.Client, videos_list: list[str]) -> list[dict[str,
     items = []
 
     # Split tasks in chunks to request a maximum of API_BATCH_SIZE videos at each iteration.
-    batch_size = config.API_BATCH_SIZE
-    videos_chunks = [videos_list[i:i + min(batch_size, len(videos_list))]
-                     for i in range(0, len(videos_list), batch_size)]
-
-    for chunk in videos_chunks:
+    for chunk in utils.chunked(videos_list, config.API_BATCH_SIZE):
         try:
             request = get_videos(service=service, videos_list=chunk)
 
@@ -230,17 +217,17 @@ def check_if_live(service: pyt.Client, videos_list: list[str]) -> list[dict[str,
         except pyt.error.PyYouTubeException as api_error:
             if utils.history:
                 utils.history.error(api_error.message)
-            raise APIError(f'API error while checking live status: {api_error.message}')
+            raise APIError(f'API error while checking live status: {api_error.message}') from api_error
 
     return items
 
 
 def iter_channels(
-        service: pyt.Client,
-        channels: list[str],
-        day_ago: int | None = None,
-        latest_d: dt.datetime | None = None,
-        prog_bar: bool = True
+    service: pyt.Client,
+    channels: list[str],
+    day_ago: int | None = None,
+    latest_d: dt.datetime | None = None,
+    prog_bar: bool = True,
 ) -> list[PlaylistItem]:
     """Apply 'get_playlist_items' for a collection of YouTube playlists.
 
@@ -268,8 +255,7 @@ def iter_channels(
 
     else:
         item_it = [
-            get_playlist_items(service, pl_id, ch_id, day_ago, latest_d)
-            for ch_id, pl_id in channel_playlist_pairs
+            get_playlist_items(service, pl_id, ch_id, day_ago, latest_d) for ch_id, pl_id in channel_playlist_pairs
         ]
 
     return list(itertools.chain.from_iterable(item_it))

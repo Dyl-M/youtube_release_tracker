@@ -8,23 +8,16 @@ import time
 from typing import Any
 
 # Third-party
-import pyyoutube as pyt  # type: ignore[import-untyped]
-import tqdm  # type: ignore[import-untyped]
+import pyyoutube as pyt
+import tqdm
 
 # Local
-from .. import config
-from .. import file_utils
-from .. import paths
+from .. import config, file_utils, paths
 from ..models import PlaylistItemRef
 from . import utils
 
 
-def add_to_playlist(
-        service: pyt.Client,
-        playlist_id: str,
-        videos_list: list[str],
-        prog_bar: bool = True
-) -> None:
+def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list[str], prog_bar: bool = True) -> None:
     """Add a list of video to a YouTube playlist.
 
     Args:
@@ -62,24 +55,35 @@ def add_to_playlist(
                 if error_reason_normalized in utils.TRANSIENT_ERRORS and attempt < config.MAX_RETRIES - 1:
                     # Calculate exponential backoff with equal jitter to prevent thundering herd
                     delay = min(config.MAX_BACKOFF, int(config.BASE_DELAY * math.exp(attempt)))
-                    wait_time = delay / 2 + random.uniform(0, delay / 2)
+                    wait_time = delay / 2 + random.uniform(0, delay / 2)  # noqa: S311
                     if utils.history:
-                        utils.history.warning('Transient error (%s) for video %s, retrying in %.2fs (attempt %s/%s)',
-                                              error_reason, video_id, wait_time, attempt + 1, config.MAX_RETRIES)
+                        utils.history.warning(
+                            'Transient error (%s) for video %s, retrying in %.2fs (attempt %s/%s)',
+                            error_reason,
+                            video_id,
+                            wait_time,
+                            attempt + 1,
+                            config.MAX_RETRIES,
+                        )
                     time.sleep(wait_time)
                     continue
 
                 # Handle permanent errors - log and skip, don't save for retry
                 if error_reason_normalized in utils.PERMANENT_ERRORS:
                     if utils.history:
-                        utils.history.warning('Permanent error (%s) for video %s - skipping: %s',
-                                              error_reason, video_id, http_error.message)
+                        utils.history.warning(
+                            'Permanent error (%s) for video %s - skipping: %s',
+                            error_reason,
+                            video_id,
+                            http_error.message,
+                        )
                     break  # Don't save to api_failure.json
 
                 # Handle quota errors or failed transient retries - save for next day retry
                 if utils.history:
-                    utils.history.warning('Addition Request Failure: (%s) - %s - %s',
-                                          video_id, error_reason, http_error.message)
+                    utils.history.warning(
+                        'Addition Request Failure: (%s) - %s - %s', video_id, error_reason, http_error.message
+                    )
                 api_failure[playlist_id]['failure'].append(video_id)
                 api_fail = True
                 break
@@ -89,10 +93,10 @@ def add_to_playlist(
 
 
 def del_from_playlist(
-        service: pyt.Client,
-        playlist_id: str,
-        items_list: list[PlaylistItemRef] | list[dict[str, Any]],
-        prog_bar: bool = True
+    service: pyt.Client,
+    playlist_id: str,
+    items_list: list[PlaylistItemRef] | list[dict[str, Any]],
+    prog_bar: bool = True,
 ) -> None:
     """Delete videos inside a YouTube playlist.
 
@@ -103,6 +107,7 @@ def del_from_playlist(
         prog_bar: Whether to use tqdm progress bar.
     """
     if prog_bar:
+        # noinspection PyTypeChecker
         del_iterator = tqdm.tqdm(items_list, desc=f'Deleting videos from the playlist ({playlist_id})')
 
     else:
@@ -137,11 +142,9 @@ def _get_videos_to_add_count(service: pyt.Client, target_playlist: str, lmt: int
         Number of videos to add (0 if error or already full).
     """
     try:
-        current_count = len(service.playlistItems.list(
-            part=['snippet'],
-            max_results=lmt,
-            playlist_id=target_playlist
-        ).items)
+        current_count = len(
+            service.playlistItems.list(part=['snippet'], max_results=lmt, playlist_id=target_playlist).items
+        )
         return lmt - current_count
 
     except pyt.PyYouTubeException as error:
@@ -180,12 +183,12 @@ def _calculate_allocation(n_add: int, count_a: int, count_b: int) -> tuple[int, 
 
 
 def _transfer_videos(
-        service: pyt.Client,
-        target_playlist: str,
-        source_playlist: str,
-        videos: list[dict],
-        source_name: str,
-        prog_bar: bool
+    service: pyt.Client,
+    target_playlist: str,
+    source_playlist: str,
+    videos: list[dict],
+    source_name: str,
+    prog_bar: bool,
 ) -> None:
     """Transfer videos from source to target playlist.
 
@@ -202,27 +205,17 @@ def _transfer_videos(
 
     if utils.history:
         utils.history.info('%s addition(s) from %s playlist.', len(videos), source_name)
-    add_to_playlist(
-        service,
-        target_playlist,
-        [v['video_id'] for v in videos],
-        prog_bar
-    )
-    del_from_playlist(
-        service,
-        source_playlist,
-        videos,
-        prog_bar
-    )
+    add_to_playlist(service, target_playlist, [v['video_id'] for v in videos], prog_bar)
+    del_from_playlist(service, source_playlist, videos, prog_bar)
 
 
 def fill_release_radar(
-        service: pyt.Client,
-        target_playlist: str,
-        re_listening_id: str,
-        legacy_id: str,
-        lmt: int | None = None,
-        prog_bar: bool = True
+    service: pyt.Client,
+    target_playlist: str,
+    re_listening_id: str,
+    legacy_id: str,
+    lmt: int | None = None,
+    prog_bar: bool = True,
 ) -> None:
     """Fill the Release Radar playlist with videos from re-listening playlists.
 
@@ -251,24 +244,20 @@ def fill_release_radar(
     week_ago = utils.NOW - dt.timedelta(weeks=config.RELISTENING_AGE_WEEKS)
 
     to_re_listen_items = service.playlistItems.list(
-        part=['snippet', 'contentDetails'],
-        playlist_id=re_listening_id,
-        max_results=lmt
+        part=['snippet', 'contentDetails'], playlist_id=re_listening_id, max_results=lmt
     ).items
-    to_re_listen_raw = [{'video_id': item.contentDetails.videoId,
-                         'add_date': dt.datetime.strptime(
-                             item.snippet.publishedAt,
-                             utils.ISO_DATE_FORMAT
-                         ),
-                         'item_id': item.id} for item in to_re_listen_items]
+    to_re_listen_raw = [
+        {
+            'video_id': item.contentDetails.videoId,
+            'add_date': dt.datetime.strptime(item.snippet.publishedAt, utils.ISO_DATE_FORMAT),
+            'item_id': item.id,
+        }
+        for item in to_re_listen_items
+    ]
 
     to_re_listen_fil = [item for item in to_re_listen_raw if item['add_date'] < week_ago]
 
-    legacy_items = service.playlistItems.list(
-        part=['contentDetails'],
-        playlist_id=legacy_id,
-        max_results=lmt
-    ).items
+    legacy_items = service.playlistItems.list(part=['contentDetails'], playlist_id=legacy_id, max_results=lmt).items
     legacy_raw = [{'video_id': item.contentDetails.videoId, 'item_id': item.id} for item in legacy_items]
 
     # Pre-selection with fallback if one source is insufficient
@@ -277,29 +266,15 @@ def fill_release_radar(
 
     # Adjust allocations if one source doesn't have enough content
     if len(addition_leg) < n_add_leg:
-        addition_rel = to_re_listen_fil[:n_add - len(addition_leg)]
+        addition_rel = to_re_listen_fil[: n_add - len(addition_leg)]
 
     elif len(addition_rel) < n_add_rel:
-        addition_leg = legacy_raw[:n_add - len(addition_rel)]
+        addition_leg = legacy_raw[: n_add - len(addition_rel)]
 
     # Transfer videos from sources to target
-    _transfer_videos(
-        service,
-        target_playlist,
-        re_listening_id,
-        addition_rel,
-        'Re-listening',
-        prog_bar
-    )
+    _transfer_videos(service, target_playlist, re_listening_id, addition_rel, 'Re-listening', prog_bar)
 
-    _transfer_videos(
-        service,
-        target_playlist,
-        legacy_id,
-        addition_leg,
-        'Legacy',
-        prog_bar
-    )
+    _transfer_videos(service, target_playlist, legacy_id, addition_leg, 'Legacy', prog_bar)
 
 
 def add_api_fail(service: pyt.Client, prog_bar: bool = True) -> None:
@@ -316,8 +291,9 @@ def add_api_fail(service: pyt.Client, prog_bar: bool = True) -> None:
         if info['failure']:
             videos_to_retry = info['failure'].copy()  # Copy the list before clearing
             if utils.history:
-                utils.history.info('%s addition(s) to %s playlist from previous API failure.',
-                                   len(videos_to_retry), info['name'])
+                utils.history.info(
+                    '%s addition(s) to %s playlist from previous API failure.', len(videos_to_retry), info['name']
+                )
             api_failure[p_id]['failure'] = []  # Clear before retry so add_to_playlist can re-add failures
             file_utils.save_json(str(paths.API_FAILURE_JSON), api_failure)  # Save cleared state
 

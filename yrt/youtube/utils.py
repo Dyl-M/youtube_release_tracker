@@ -2,24 +2,24 @@
 
 # Standard library
 import datetime as dt
+import itertools
 import re
+from collections.abc import Sequence
 from typing import Any
 
 # Third-party
-import pyyoutube as pyt  # type: ignore[import-untyped]
+import pyyoutube as pyt
 import requests
 import tzlocal
 
 # Local
-from .. import config
-from .. import file_utils
-from .. import paths
+from .. import config, file_utils, paths
 from ..constants import (
-    TRANSIENT_ERRORS,
-    PERMANENT_ERRORS,
-    QUOTA_ERRORS,
     ISO_DATE_FORMAT,
     LOG_DATE_FORMAT,
+    PERMANENT_ERRORS,
+    QUOTA_ERRORS,
+    TRANSIENT_ERRORS,
 )
 from ..exceptions import APIError
 
@@ -49,7 +49,7 @@ def last_exe_date() -> dt.datetime:
         Last execution date, or 24 hours ago if log is missing/empty.
     """
     try:
-        with open(paths.LAST_EXE_LOG, 'r', encoding='utf8') as log_file:
+        with open(paths.LAST_EXE_LOG, encoding='utf8') as log_file:
             lines = log_file.readlines()
             if not lines:
                 # Empty file - default to 24 hours ago (daily workflow)
@@ -68,13 +68,26 @@ def last_exe_date() -> dt.datetime:
         return dt.datetime.now(tz=tzlocal.get_localzone()) - dt.timedelta(days=1)
 
 
+def chunked[T](sequence: Sequence[T], size: int) -> list[list[T]]:
+    """Split a sequence into consecutive chunks of at most size items.
+
+    Args:
+        sequence: The sequence to split.
+        size: Maximum number of items per chunk (must be >= 1).
+
+    Returns:
+        A list of chunks, each a list with at most size items.
+    """
+    return [list(batch) for batch in itertools.batched(sequence, size)]
+
+
 # Module-level state (calculated at import time)
 ADD_ON = file_utils.load_json(str(paths.ADD_ON_JSON))
 NOW = dt.datetime.now(tz=tzlocal.get_localzone())
 LAST_EXE = last_exe_date()
 
 # Logger placeholder - will be set by __init__.py
-history = None  # type: ignore[assignment]
+history: Any = None
 
 
 def set_logger(logger: Any) -> None:
@@ -98,9 +111,7 @@ def is_shorts(video_id: str) -> bool:
     """
     try:
         response = requests.head(
-            f'https://www.youtube.com/shorts/{video_id}',
-            timeout=config.NETWORK_TIMEOUT,
-            allow_redirects=False
+            f'https://www.youtube.com/shorts/{video_id}', timeout=config.NETWORK_TIMEOUT, allow_redirects=False
         )
         return response.status_code == 200
 
@@ -148,15 +159,12 @@ def sort_db(service: pyt.Client, log: bool = True) -> None:
         information = []
 
         # Split task in chunks to request on a maximum of API_BATCH_SIZE channels at each iteration.
-        batch_size = config.API_BATCH_SIZE
-        channels_chunks = [_channel_list[i:i + min(batch_size, len(_channel_list))]
-                           for i in range(0, len(_channel_list), batch_size)]
-
-        for chunk in channels_chunks:
+        for chunk in chunked(_channel_list, config.API_BATCH_SIZE):
             try:
                 # Request channels
-                request = _service.channels.list(part=['snippet'], channel_id=chunk,
-                                                 max_results=config.API_BATCH_SIZE).items
+                request = _service.channels.list(
+                    part=['snippet'], channel_id=chunk, max_results=config.API_BATCH_SIZE
+                ).items
 
                 # Extract upload playlists, channel names and their ID.
                 information += [{'title': an_item.snippet.title, 'id': an_item.id} for an_item in request]
@@ -164,19 +172,18 @@ def sort_db(service: pyt.Client, log: bool = True) -> None:
             except pyt.error.PyYouTubeException as api_error:
                 if log and history:
                     history.error(api_error.message)
-                raise APIError(f'API error while sorting database: {api_error.message}')
+                raise APIError(f'API error while sorting database: {api_error.message}') from api_error
 
         # Sort channels' name by alphabetical order
         information = sorted(information, key=lambda dic: dic['title'].lower())
-        ids_only = [info['id'] for info in information]  # Get channel IDs only
-
-        return ids_only
+        return [info['id'] for info in information]  # Get channel IDs only
 
     channels_db = file_utils.load_json(str(paths.POCKET_TUBE_JSON))
 
-    categories = [db_keys for db_keys in channels_db.keys() if 'ysc' not in db_keys]  # Get PT categories
-    db_sorted = {category: get_channels(_service=service, _channel_list=channels_db[category])
-                 for category in categories}
+    categories = [db_keys for db_keys in channels_db if 'ysc' not in db_keys]  # Get PT categories
+    db_sorted = {
+        category: get_channels(_service=service, _channel_list=channels_db[category]) for category in categories
+    }
 
     for category in categories:  # Rewrite categories in the dict object associated with the PT JSON file
         channels_db[category] = db_sorted[category]

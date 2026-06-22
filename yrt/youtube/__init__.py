@@ -6,9 +6,9 @@ including authentication, video discovery, statistics collection, and playlist m
 
 # Third-party
 import pandas as pd
-import pyyoutube as pyt  # type: ignore[import-untyped]
+import pyyoutube as pyt
 
-# Local - for re-export
+# Local
 from .. import paths
 from ..logging_utils import create_file_logger
 
@@ -22,51 +22,46 @@ from . import utils  # noqa: E402
 utils.set_logger(history)
 
 # Import all public functions from submodules
-from .utils import (  # noqa: E402
-    last_exe_date,
-    is_shorts,
-    sort_db,
-    get_items_count,
-    # Constants and state
-    NOW,
-    LAST_EXE,
-    ADD_ON,
-    ISO_DATE_FORMAT,
-    TRANSIENT_ERRORS,
-    PERMANENT_ERRORS,
-    QUOTA_ERRORS,
-)
-
-from .auth import (  # noqa: E402
-    encode_key,
-    create_service_local,
-    create_service_workflow,
-)
-
 from .api import (  # noqa: E402
-    get_playlist_items,
-    get_videos,
-    get_subs,
     check_if_live,
+    get_playlist_items,
+    get_subs,
+    get_videos,
     iter_channels,
 )
-
-from .stats import (  # noqa: E402
-    get_stats,
-    add_stats,
-    weekly_stats,
+from .auth import (  # noqa: E402
+    create_service_local,
+    create_service_workflow,
+    encode_key,
 )
-
+from .cleanup import (  # noqa: E402
+    cleanup_ended_streams,
+    cleanup_expired_videos,
+)
 from .playlist import (  # noqa: E402
+    add_api_fail,
     add_to_playlist,
     del_from_playlist,
     fill_release_radar,
-    add_api_fail,
 )
-
-from .cleanup import (  # noqa: E402
-    cleanup_expired_videos,
-    cleanup_ended_streams,
+from .stats import (  # noqa: E402
+    add_stats,
+    get_stats,
+    weekly_stats,
+)
+from .utils import (  # noqa: E402
+    ADD_ON,
+    ISO_DATE_FORMAT,
+    LAST_EXE,
+    # Constants and state
+    NOW,
+    PERMANENT_ERRORS,
+    QUOTA_ERRORS,
+    TRANSIENT_ERRORS,
+    get_items_count,
+    is_shorts,
+    last_exe_date,
+    sort_db,
 )
 
 # Pandas options

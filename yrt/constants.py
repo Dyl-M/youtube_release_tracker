@@ -16,17 +16,21 @@ STATUS_PRIVATE = 'private'
 STATUS_DELETED = 'deleted'
 
 # === API Error Categories (frozen sets for immutability) ===
-TRANSIENT_ERRORS = frozenset({
-    'serviceunavailable',
-    'backenderror',
-    'internalerror',
-})
-PERMANENT_ERRORS = frozenset({
-    'videonotfound',
-    'forbidden',
-    'playlistoperationunsupported',
-    'duplicate',
-})
+TRANSIENT_ERRORS = frozenset(
+    {
+        'serviceunavailable',
+        'backenderror',
+        'internalerror',
+    }
+)
+PERMANENT_ERRORS = frozenset(
+    {
+        'videonotfound',
+        'forbidden',
+        'playlistoperationunsupported',
+        'duplicate',
+    }
+)
 QUOTA_ERRORS = frozenset({'quotaexceeded'})
 
 # === Date/Time Formats ===

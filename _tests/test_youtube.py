@@ -6,20 +6,20 @@ from unittest.mock import Mock, patch
 # Third-party
 import pytest
 
-# Local - explicit imports from submodules
-from yrt.youtube.utils import (
-    is_shorts,
-    ISO_DATE_FORMAT,
-    TRANSIENT_ERRORS,
-    PERMANENT_ERRORS,
-    QUOTA_ERRORS,
-)
+# Local
 from yrt.youtube.auth import (
-    encode_key,
     create_service_local,
     create_service_workflow,
+    encode_key,
 )
 from yrt.youtube.stats import get_stats
+from yrt.youtube.utils import (
+    ISO_DATE_FORMAT,
+    PERMANENT_ERRORS,
+    QUOTA_ERRORS,
+    TRANSIENT_ERRORS,
+    is_shorts,
+)
 
 
 @pytest.mark.unit
@@ -69,7 +69,7 @@ class TestIsShorts:
     @patch('yrt.youtube.utils.requests.head')
     def test_is_shorts_handles_network_error(self, mock_head, sample_video_id):
         """Test is_shorts() returns False on network errors."""
-        mock_head.side_effect = Exception("Network error")
+        mock_head.side_effect = Exception('Network error')
 
         result = is_shorts(sample_video_id)
 
@@ -107,6 +107,7 @@ class TestErrorConstants:
     def test_retry_constants_defined():
         """Test retry configuration constants are defined in config module."""
         from yrt import config
+
         assert hasattr(config, 'MAX_RETRIES')
         assert hasattr(config, 'BASE_DELAY')
         assert hasattr(config, 'MAX_BACKOFF')
@@ -120,7 +121,7 @@ class TestDurationParsing:
     """Test ISO 8601 duration parsing."""
 
     @staticmethod
-    @pytest.mark.skip("Not yet implemented")
+    @pytest.mark.skip('Not yet implemented')
     def test_parse_short_duration():
         """Test parsing short video duration (< 1 minute)."""
         # PT30S = 30 seconds
@@ -128,13 +129,13 @@ class TestDurationParsing:
         # If no helper exists, this documents expected behavior
 
     @staticmethod
-    @pytest.mark.skip("Not yet implemented")
+    @pytest.mark.skip('Not yet implemented')
     def test_parse_medium_duration():
         """Test parsing medium video duration (minutes)."""
         # PT3M30S = 3 minutes 30 seconds
 
     @staticmethod
-    @pytest.mark.skip("Not yet implemented")
+    @pytest.mark.skip('Not yet implemented')
     def test_parse_long_duration():
         """Test parsing long video duration (hours)."""
         # PT1H30M = 1 hour 30 minutes
@@ -149,6 +150,7 @@ class TestGetStats:
     def test_get_stats_has_check_shorts_parameter():
         """Test get_stats() accepts check_shorts parameter."""
         import inspect
+
         sig = inspect.signature(get_stats)
         assert 'check_shorts' in sig.parameters
 
@@ -156,6 +158,7 @@ class TestGetStats:
     def test_get_stats_check_shorts_default_true():
         """Test check_shorts defaults to True for new videos."""
         import inspect
+
         sig = inspect.signature(get_stats)
         param = sig.parameters['check_shorts']
         assert param.default is True

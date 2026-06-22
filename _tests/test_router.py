@@ -3,10 +3,10 @@
 # Third-party
 import pytest
 
+from yrt.models import AddOnConfig, PlaylistConfig
+
 # Local
 from yrt.router import RouterConfig, VideoRouter, create_router_from_config
-from yrt.models import PlaylistConfig, AddOnConfig
-
 
 # === Fixtures ===
 
@@ -34,7 +34,7 @@ def sample_router_config():
         banger_radar_id='PL_banger',
         music_lives_id='PL_music_lives',
         regular_streams_id='PL_regular_streams',
-        long_video_threshold_minutes=10
+        long_video_threshold_minutes=10,
     )
 
 
@@ -60,7 +60,7 @@ class TestRouterConfig:
     @staticmethod
     def test_validation_empty_release_radar():
         """Test validation rejects empty release_radar_id."""
-        with pytest.raises(ValueError, match="release_radar_id cannot be empty"):
+        with pytest.raises(ValueError, match='release_radar_id cannot be empty'):
             RouterConfig(
                 music_channels=set(),
                 favorite_channels=set(),
@@ -70,13 +70,13 @@ class TestRouterConfig:
                 release_radar_id='',
                 banger_radar_id='PL_banger',
                 music_lives_id='PL_lives',
-                regular_streams_id='PL_streams'
+                regular_streams_id='PL_streams',
             )
 
     @staticmethod
     def test_validation_empty_banger_radar():
         """Test validation rejects empty banger_radar_id."""
-        with pytest.raises(ValueError, match="banger_radar_id cannot be empty"):
+        with pytest.raises(ValueError, match='banger_radar_id cannot be empty'):
             RouterConfig(
                 music_channels=set(),
                 favorite_channels=set(),
@@ -86,13 +86,13 @@ class TestRouterConfig:
                 release_radar_id='PL_release',
                 banger_radar_id='',
                 music_lives_id='PL_lives',
-                regular_streams_id='PL_streams'
+                regular_streams_id='PL_streams',
             )
 
     @staticmethod
     def test_validation_empty_music_lives():
         """Test validation rejects empty music_lives_id."""
-        with pytest.raises(ValueError, match="music_lives_id cannot be empty"):
+        with pytest.raises(ValueError, match='music_lives_id cannot be empty'):
             RouterConfig(
                 music_channels=set(),
                 favorite_channels=set(),
@@ -102,13 +102,13 @@ class TestRouterConfig:
                 release_radar_id='PL_release',
                 banger_radar_id='PL_banger',
                 music_lives_id='',
-                regular_streams_id='PL_streams'
+                regular_streams_id='PL_streams',
             )
 
     @staticmethod
     def test_validation_empty_regular_streams():
         """Test validation rejects empty regular_streams_id."""
-        with pytest.raises(ValueError, match="regular_streams_id cannot be empty"):
+        with pytest.raises(ValueError, match='regular_streams_id cannot be empty'):
             RouterConfig(
                 music_channels=set(),
                 favorite_channels=set(),
@@ -118,13 +118,13 @@ class TestRouterConfig:
                 release_radar_id='PL_release',
                 banger_radar_id='PL_banger',
                 music_lives_id='PL_lives',
-                regular_streams_id=''
+                regular_streams_id='',
             )
 
     @staticmethod
     def test_validation_zero_threshold():
         """Test validation rejects zero threshold."""
-        with pytest.raises(ValueError, match="long_video_threshold_minutes must be positive"):
+        with pytest.raises(ValueError, match='long_video_threshold_minutes must be positive'):
             RouterConfig(
                 music_channels=set(),
                 favorite_channels=set(),
@@ -135,13 +135,13 @@ class TestRouterConfig:
                 banger_radar_id='PL_banger',
                 music_lives_id='PL_lives',
                 regular_streams_id='PL_streams',
-                long_video_threshold_minutes=0
+                long_video_threshold_minutes=0,
             )
 
     @staticmethod
     def test_validation_negative_threshold():
         """Test validation rejects negative threshold."""
-        with pytest.raises(ValueError, match="long_video_threshold_minutes must be positive"):
+        with pytest.raises(ValueError, match='long_video_threshold_minutes must be positive'):
             RouterConfig(
                 music_channels=set(),
                 favorite_channels=set(),
@@ -152,7 +152,7 @@ class TestRouterConfig:
                 banger_radar_id='PL_banger',
                 music_lives_id='PL_lives',
                 regular_streams_id='PL_streams',
-                long_video_threshold_minutes=-5
+                long_video_threshold_minutes=-5,
             )
 
 
@@ -198,38 +198,33 @@ class TestVideoRouterStreams:
     @staticmethod
     def test_upcoming_music_stream_to_music_lives(router):
         """Test upcoming streams from music channels go to music_lives."""
-        result = router.route('UC_music_1', is_shorts=False, duration=None,
-                              live_status='upcoming')
+        result = router.route('UC_music_1', is_shorts=False, duration=None, live_status='upcoming')
         assert result == 'PL_music_lives'
 
     @staticmethod
     def test_upcoming_nonmusic_stream_to_regular(router):
         """Test upcoming streams from non-music channels go to regular_streams."""
-        result = router.route('UC_learn_1', is_shorts=False, duration=None,
-                              live_status='upcoming')
+        result = router.route('UC_learn_1', is_shorts=False, duration=None, live_status='upcoming')
         assert result == 'PL_regular_streams'
 
     @staticmethod
     def test_stream_routing_takes_precedence_over_shorts(router):
         """Test stream routing happens before shorts check."""
         # Even if is_shorts=True, upcoming stream should go to stream playlist
-        result = router.route('UC_music_1', is_shorts=True, duration=None,
-                              live_status='upcoming')
+        result = router.route('UC_music_1', is_shorts=True, duration=None, live_status='upcoming')
         assert result == 'PL_music_lives'
 
     @staticmethod
     def test_live_status_none_bypasses_stream_routing(router):
         """Test live_status='none' does not trigger stream routing."""
-        result = router.route('UC_music_2', is_shorts=False, duration=120,
-                              live_status='none')
+        result = router.route('UC_music_2', is_shorts=False, duration=120, live_status='none')
         assert result == 'PL_release'
 
     @staticmethod
     def test_live_status_live_bypasses_stream_routing(router):
         """Test live_status='live' does not trigger stream routing."""
         # Currently active streams are treated as regular videos
-        result = router.route('UC_music_2', is_shorts=False, duration=120,
-                              live_status='live')
+        result = router.route('UC_music_2', is_shorts=False, duration=120, live_status='live')
         assert result == 'PL_release'
 
 
@@ -416,6 +411,7 @@ class TestCreateRouterFromConfig:
     def test_uses_default_threshold(monkeypatch):
         """Test factory uses config.LONG_VIDEO_THRESHOLD_MINUTES by default."""
         from yrt import config
+
         monkeypatch.setattr(config, 'LONG_VIDEO_THRESHOLD_MINUTES', 15)
 
         pocket_tube = {'MUSIQUE': [], 'APPRENTISSAGE': [], 'DIVERTISSEMENT': [], 'GAMING': []}
@@ -449,9 +445,7 @@ class TestCreateRouterFromConfig:
         }
         add_on = AddOnConfig(favorites={})
 
-        router = create_router_from_config(
-            pocket_tube, playlists, add_on, long_video_threshold=20
-        )
+        router = create_router_from_config(pocket_tube, playlists, add_on, long_video_threshold=20)
 
         assert router.config.long_video_threshold_minutes == 20
 
