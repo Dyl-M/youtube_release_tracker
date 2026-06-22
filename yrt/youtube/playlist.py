@@ -151,9 +151,8 @@ def _get_videos_to_add_count(service: pyt.Client, target_playlist: str, lmt: int
         if error.status_code == 403:
             if utils.history:
                 utils.history.warning('API quota exceeded.')
-        else:
-            if utils.history:
-                utils.history.warning('Unknown error: %s', error.message)
+        elif utils.history:
+            utils.history.warning('Unknown error: %s', error.message)
         return 0
 
 

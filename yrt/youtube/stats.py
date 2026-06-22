@@ -155,9 +155,8 @@ def weekly_stats(
         histo_data.loc[histo_data.video_id.isin(id_mask), ['status']] = histo_data.latest_status
         histo_data.drop(columns=['views', 'likes', 'comments', 'latest_status'], inplace=True)
 
-    else:
-        if utils.history:
-            utils.history.info('No change to apply on historical data for following delta: %s week(s)', week_delta)
+    elif utils.history:
+        utils.history.info('No change to apply on historical data for following delta: %s week(s)', week_delta)
 
     # Apply the type Int64 for each feature (necessary for export)
     w_features = [col for col in histo_data.columns if '_w' in col]

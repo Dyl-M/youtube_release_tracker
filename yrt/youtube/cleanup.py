@@ -50,9 +50,8 @@ def _fetch_stream_playlist_items(service: pyt.Client, playlist_id: str, playlist
             if error.status_code == 403:
                 if utils.history:
                     utils.history.warning('API quota exceeded while checking streams for %s', playlist_name)
-            else:
-                if utils.history:
-                    utils.history.warning('Error fetching items from %s: %s', playlist_name, error.message)
+            elif utils.history:
+                utils.history.warning('Error fetching items from %s: %s', playlist_name, error.message)
             break
 
     return all_items
@@ -103,9 +102,8 @@ def _fetch_expired_items(
                 if utils.history:
                     utils.history.warning('API quota exceeded while checking retention for %s', playlist_name)
 
-            else:
-                if utils.history:
-                    utils.history.warning('Error fetching items from %s: %s', playlist_name, error.message)
+            elif utils.history:
+                utils.history.warning('Error fetching items from %s: %s', playlist_name, error.message)
 
             break
 
@@ -222,6 +220,5 @@ def cleanup_ended_streams(
                 utils.history.info('Removing %d ended stream(s) from "%s"', len(ended_items), playlist_name)
             del_from_playlist(service, playlist_id, ended_items, prog_bar)
 
-        else:
-            if utils.history:
-                utils.history.info('No ended streams in "%s"', playlist_name)
+        elif utils.history:
+            utils.history.info('No ended streams in "%s"', playlist_name)

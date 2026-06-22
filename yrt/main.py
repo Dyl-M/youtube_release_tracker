@@ -398,9 +398,8 @@ def main(historical_data: pd.DataFrame) -> None:
         youtube.encode_key(json_path=str(paths.CREDENTIALS_JSON))
         youtube.encode_key(json_path=str(paths.OAUTH_JSON))
 
-    else:  # Credentials in base64 update - Remote option
-        if creds_b64 is not None:
-            update_repo_secrets(secret_name=CREDS_ENV_NAME, new_value=creds_b64, logger=history_main)
+    elif creds_b64 is not None:
+        update_repo_secrets(secret_name=CREDS_ENV_NAME, new_value=creds_b64, logger=history_main)
 
     history_main.info('Process ended.')  # End
     copy_last_exe_log()  # Copy what happened during process execution to the associated file.
