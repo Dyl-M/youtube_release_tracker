@@ -15,12 +15,11 @@ os.environ['YRT_NO_LOGGING'] = '1'
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-# Local
-from yrt.youtube import create_service_local, sort_db
-
 
 def main() -> None:
     """Run database sorting."""
+    from yrt.youtube import create_service_local, sort_db
+
     print('PocketTube Database Sorter')
     print('=' * 40)
 

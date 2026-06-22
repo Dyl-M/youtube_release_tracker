@@ -11,21 +11,17 @@ from collections import defaultdict
 from datetime import UTC, datetime
 from pathlib import Path
 
-# Disable logging BEFORE importing yrt modules
-os.environ['YRT_NO_LOGGING'] = '1'
-
 # Third-party
 import pandas as pd
 
 # noinspection PyPackageRequirements
 from dateutil.relativedelta import relativedelta
 
+# Disable logging BEFORE importing yrt modules
+os.environ['YRT_NO_LOGGING'] = '1'
+
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
-
-# Local
-from yrt import paths
-from yrt.youtube import create_service_local, sort_db
 
 # Constants
 MONTHS_TO_ARCHIVE = 6
@@ -106,6 +102,8 @@ def archive_stats(cutoff: datetime) -> tuple[int, int]:
     Returns:
         Tuple of (archived_count, skipped_duplicates_count).
     """
+    from yrt import paths
+
     stats_path = paths.STATS_CSV
 
     if not stats_path.exists():
@@ -209,6 +207,8 @@ def archive_logs() -> int:
     Returns:
         Number of lines archived.
     """
+    from yrt import paths
+
     log_path = paths.HISTORY_LOG
     current_year = datetime.now(UTC).year
 
@@ -276,6 +276,8 @@ def archive_logs() -> int:
 
 def main() -> None:
     """Main function to run the archiving process."""
+    from yrt.youtube import create_service_local, sort_db
+
     cutoff = get_cutoff_date()
 
     print('=' * 60)
