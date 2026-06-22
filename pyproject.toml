@@ -25,15 +25,15 @@ classifiers = [
     "Topic :: Multimedia :: Video",
 ]
 dependencies = [
-    "google-auth==2.53.0",
-    "google-auth-oauthlib==1.4.0",
-    "isodate==0.7.2",
-    "pandas==3.0.3",
-    "pygithub==2.9.1",
-    "python-youtube==0.9.9",
-    "requests==2.34.2",
-    "tqdm==4.67.3",
-    "tzlocal==5.3.1",
+    "google-auth>=2.53,<3",
+    "google-auth-oauthlib>=1.4,<2",
+    "isodate>=0.7,<1",
+    "pandas>=3.0,<4",
+    "pygithub>=2.9,<3",
+    "python-youtube>=0.9,<1",
+    "requests>=2.34,<3",
+    "tqdm>=4.67,<5",
+    "tzlocal>=5.3,<6"
 ]
 
 [project.optional-dependencies]
