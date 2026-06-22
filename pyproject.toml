@@ -25,35 +25,35 @@ classifiers = [
     "Topic :: Multimedia :: Video",
 ]
 dependencies = [
-    "google-auth>=2.53,<3",
+    "google-auth>=2.55.0,<3",
     "google-auth-oauthlib>=1.4,<2",
-    "isodate>=0.7,<1",
-    "pandas>=3.0,<4",
-    "pygithub>=2.9,<3",
-    "python-youtube>=0.9,<1",
-    "requests>=2.34,<3",
-    "tqdm>=4.67,<5",
-    "tzlocal>=5.3,<6"
+    "isodate>=0.7.2,<1",
+    "pandas>=3.0.3,<4",
+    "pygithub>=2.9.1,<3",
+    "python-youtube>=0.9.9,<1",
+    "requests>=2.34.2,<3",
+    "tqdm>=4.68.3,<5",
+    "tzlocal>=5.4.3,<6"
 ]
 
 [project.optional-dependencies]
 dev = [
     "mypy==2.1.0",
     "pandas-stubs==3.0.3.260530",
-    "pytest==9.0.3",
+    "pytest==9.1.1",
     "pytest-cov==7.1.0",
-    "ruff==0.15.15",
+    "ruff==0.15.18",
     "types-requests==2.33.0.20260518",
 ]
 # Future analytics features (currently unused)
 analytics = [
-    "beautifulsoup4==4.14.3",
-    "ipykernel==7.2.0",
+    "beautifulsoup4==4.15.0",
+    "ipykernel==7.3.0",
     "jupyter==1.1.1",
     "nbformat==5.10.4",
-    "numpy==2.4.6",
-    "plotly==6.7.0",
-    "scikit-learn==1.8.0",
+    "numpy==2.5.0",
+    "plotly==6.8.0",
+    "scikit-learn==1.9.0",
 ]
 
 [project.urls]
