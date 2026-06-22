@@ -73,7 +73,7 @@ jobs:
 
       - id: commit
         name: Commit changes (Log and historical data)
-        run: git commit -m "log: Latest execution report." -a || echo "No changes to commit"
+        run: 'git commit -m "log: Latest execution report." -a || echo "No changes to commit"'
 
       - id: push
         name: Push changes to run branch
