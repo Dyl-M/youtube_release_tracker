@@ -65,10 +65,10 @@ from pathlib import Path
 
 
 def create_file_logger(
-        name: str,
-        log_file: Path,
-        level: int = logging.DEBUG,
-        respect_no_logging: bool = True
+    name: str,
+    log_file: Path,
+    level: int = logging.DEBUG,
+    respect_no_logging: bool = True
 ) -> logging.Logger:
     """Create a standardized file logger.
 
@@ -187,11 +187,11 @@ class VideoRouter:
     """Routes videos to appropriate playlists based on channel category and video properties."""
 
     def __init__(
-            self,
-            music_channels: set[str],
-            favorites: set[str],
-            category_mapping: dict[str, set[str]],
-            playlist_ids: dict[str, str]
+        self,
+        music_channels: set[str],
+        favorites: set[str],
+        category_mapping: dict[str, set[str]],
+        playlist_ids: dict[str, str]
     ):
         self.music_channels = music_channels
         self.favorites = favorites
@@ -199,11 +199,11 @@ class VideoRouter:
         self.playlist_ids = playlist_ids
 
     def route_video(
-            self,
-            channel_id: str,
-            is_shorts: bool,
-            duration_seconds: int,
-            live_status: str = 'none'
+        self,
+        channel_id: str,
+        is_shorts: bool,
+        duration_seconds: int,
+        live_status: str = 'none'
     ) -> str:
         """Determine destination playlist for a video."""
         if live_status == 'upcoming':
@@ -317,10 +317,10 @@ import math
 
 
 def retry_with_backoff(
-        max_retries: int = 3,
-        transient_errors: set[str] = TRANSIENT_ERRORS,
-        base_delay: float = 1.0,
-        max_backoff: float = 32.0
+    max_retries: int = 3,
+    transient_errors: set[str] = TRANSIENT_ERRORS,
+    base_delay: float = 1.0,
+    max_backoff: float = 32.0
 ):
     """Decorator for retrying API calls with exponential backoff and jitter."""
 
@@ -531,11 +531,11 @@ except (YouTubeServiceError, CredentialsError, APIError) as e:
 
 ```python
 def iter_channels_generator(
-        service: pyt.Client,
-        channels: list[str],
-        day_ago: int | None = None,
-        latest_d: dt.datetime = NOW,
-        prog_bar: bool = True
+    service: pyt.Client,
+    channels: list[str],
+    day_ago: int | None = None,
+    latest_d: dt.datetime = NOW,
+    prog_bar: bool = True
 ) -> Generator[PlaylistItem, None, None]:
     """Generator that yields playlist items from channels."""
     for ch_id in channels:
@@ -649,6 +649,30 @@ class YouTubeService(Protocol):
 - `error_403_response.json` - Forbidden/private video
 - `error_quota_exceeded.json` - Quota exceeded response
 - `empty_playlist_response.json` - Empty playlist
+
+### 20. Scheduled Workflow Timing - Scheduler Lag
+
+**Location:** `.github/workflows/main_workflow.yml` (schedule trigger)
+
+**Status:** Accepted (documented limitation, no action needed)
+
+**Issue:** The daily run uses native GitHub Actions timezone support
+(`cron: "0 0 * * *"` + `timezone: "America/Los_Angeles"`, shipped March 2026). The config is correct and the job fires
+once per calendar day, but the actual dispatch is routinely **several hours late**: midnight Pacific maps to 07:00 UTC
+(PDT) / 08:00 UTC (PST), yet runs land mid-morning UTC (~09:00-13:00Z). This is inherent to GitHub's shared `schedule:`
+infrastructure — a hand-written UTC cron lags identically — and is confirmed expected behaviour, not a bug (community
+discussion #191400).
+
+**Impact:** None for a once-a-day tracker. Only relevant if precise execution time ever becomes a requirement.
+
+**Note:** Do **not** try to "fix" this by editing the cron — the lateness is not caused by the cron expression or the
+timezone key. If minimizing lag ever matters:
+
+- Nudge off the congested top-of-hour (e.g. `cron: "7 0 * * *"`) to dodge the worst peak-hour queueing.
+- For hard timing guarantees, trigger via an external scheduler (an outside cron service hitting `repository_dispatch` /
+  `workflow_dispatch`) instead of relying on GitHub's `schedule:`.
+
+The schedule is healthy as long as it fires once per calendar day.
 
 ---
 
