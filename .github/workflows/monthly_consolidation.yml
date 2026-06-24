@@ -36,3 +36,6 @@ jobs:
           git diff --staged --quiet || git commit -m "log: Monthly execution report (${MONTH})."
           git push origin main
           git push --force origin main:run
+          # Keep dev fast-forwardable to main: advance dev to the monthly commit.
+          # A non-fast-forward (unshipped dev work exists) is rejected harmlessly.
+          git push origin main:dev || echo "dev has unshipped work; rebase dev onto main before next ship"
