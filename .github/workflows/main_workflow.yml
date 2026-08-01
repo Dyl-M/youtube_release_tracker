@@ -30,7 +30,7 @@ jobs:
     steps:
       - id: git-checkout
         name: Checkout run branch
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: run
           fetch-depth: 0
