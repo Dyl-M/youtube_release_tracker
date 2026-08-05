@@ -161,7 +161,7 @@ checking benefits.
 - 26 comprehensive unit tests added
 - Zero regressions (100 tests passing)
 
-### 5. Extract VideoRouter Class from dest_playlist()
+### 5. Extract VideoRouter Class from dest_playlist ()
 
 **Location:** `yrt/main.py:213-280`
 
@@ -656,10 +656,10 @@ class YouTubeService(Protocol):
 
 **Status:** Accepted (documented limitation, no action needed)
 
-**Issue:** The daily run uses native GitHub Actions timezone support
-(`cron: "0 0 * * *"` + `timezone: "America/Los_Angeles"`, shipped March 2026). The config is correct and the job fires
-once per calendar day, but the actual dispatch is routinely **several hours late**: midnight Pacific maps to 07:00 UTC
-(PDT) / 08:00 UTC (PST), yet runs land mid-morning UTC (~09:00-13:00Z). This is inherent to GitHub's shared `schedule:`
+**Issue:** The daily run uses native GitHub Actions timezone support (`cron: "0 0 * * *"` +
+`timezone: "America/Los_Angeles"`, shipped March 2026). The config is correct and the job fires once per calendar day,
+but the actual dispatch is routinely **several hours late**: midnight Pacific maps to 07:00 UTC (PDT) / 08:00 UTC (PST),
+yet runs land mid-morning UTC (~09:00-13:00Z). This is inherent to GitHub's shared `schedule:`
 infrastructure — a hand-written UTC cron lags identically — and is confirmed expected behaviour, not a bug (community
 discussion #191400).
 
@@ -693,23 +693,23 @@ The schedule is healthy as long as it fires once per calendar day.
 
 | Module                    | Coverage | Status         |
 |---------------------------|----------|----------------|
-| `yrt/__init__.py`         | 100%     | ✅ Complete     |
-| `yrt/config.py`           | 100%     | ✅ Complete     |
-| `yrt/constants.py`        | 100%     | ✅ Complete     |
-| `yrt/exceptions.py`       | 100%     | ✅ Complete     |
-| `yrt/logging_utils.py`    | 100%     | ✅ Complete     |
-| `yrt/models.py`           | 100%     | ✅ Complete     |
-| `yrt/paths.py`            | 100%     | ✅ Complete     |
-| `yrt/router.py`           | 95%      | ✅ Complete     |
+| `yrt/__init__.py`         | 100%     | ✅ Complete    |
+| `yrt/config.py`           | 100%     | ✅ Complete    |
+| `yrt/constants.py`        | 100%     | ✅ Complete    |
+| `yrt/exceptions.py`       | 100%     | ✅ Complete    |
+| `yrt/logging_utils.py`    | 100%     | ✅ Complete    |
+| `yrt/models.py`           | 100%     | ✅ Complete    |
+| `yrt/paths.py`            | 100%     | ✅ Complete    |
+| `yrt/router.py`           | 95%      | ✅ Complete    |
 | `yrt/file_utils.py`       | 76%      | 🔸 Needs work  |
-| `yrt/youtube/__init__.py` | 100%     | ✅ Complete     |
+| `yrt/youtube/__init__.py` | 100%     | ✅ Complete    |
 | `yrt/youtube/utils.py`    | 58%      | 🔸 Needs work  |
 | `yrt/youtube/stats.py`    | 23%      | ⚠️ Low         |
 | `yrt/youtube/api.py`      | 20%      | ⚠️ Low         |
 | `yrt/youtube/auth.py`     | 17%      | ⚠️ Low         |
 | `yrt/youtube/playlist.py` | 15%      | ⚠️ Low         |
 | `yrt/youtube/cleanup.py`  | 12%      | ⚠️ Low         |
-| `yrt/main.py`             | 0%       | ❌ Not covered  |
+| `yrt/main.py`             | 0%       | ❌ Not covered |
 | `yrt/analytics.py`        | 0%       | 🚫 Placeholder |
 | `yrt/_sandbox.py`         | 0%       | 🚫 Dev only    |
 
@@ -725,7 +725,7 @@ The schedule is healthy as long as it fires once per calendar day.
 | `yrt/exceptions.py`        | Add context attributes             |
 | `yrt/analytics.py`         | Remove or mark as placeholder      |
 | `_scripts/archive_data.py` | Use specific exceptions            |
-| `_tests/conftest.py`       | ✅ Add YRT_NO_LOGGING isolation     |
+| `_tests/conftest.py`       | ✅ Add YRT_NO_LOGGING isolation    |
 | `_tests/test_main.py`      | Implement 20 skipped tests         |
 | `_tests/test_youtube.py`   | Implement duration parsing tests   |
 
@@ -733,20 +733,20 @@ The schedule is healthy as long as it fires once per calendar day.
 
 | File                           | Purpose                  | Status                         |
 |--------------------------------|--------------------------|--------------------------------|
-| `yrt/logging_utils.py`         | Shared logger factory    | ✅ Created                      |
-| `yrt/router.py`                | Video routing logic      | ✅ Created                      |
-| `yrt/constants.py`             | Magic strings/numbers    | ✅ Created                      |
-| `yrt/youtube/__init__.py`      | Package exports          | ✅ Created                      |
-| `yrt/youtube/auth.py`          | Authentication functions | ✅ Created                      |
-| `yrt/youtube/api.py`           | Core API calls           | ✅ Created                      |
-| `yrt/youtube/stats.py`         | Statistics management    | ✅ Created                      |
-| `yrt/youtube/playlist.py`      | Playlist operations      | ✅ Created                      |
-| `yrt/youtube/cleanup.py`       | Cleanup operations       | ✅ Created                      |
+| `yrt/logging_utils.py`         | Shared logger factory    | ✅ Created                     |
+| `yrt/router.py`                | Video routing logic      | ✅ Created                     |
+| `yrt/constants.py`             | Magic strings/numbers    | ✅ Created                     |
+| `yrt/youtube/__init__.py`      | Package exports          | ✅ Created                     |
+| `yrt/youtube/auth.py`          | Authentication functions | ✅ Created                     |
+| `yrt/youtube/api.py`           | Core API calls           | ✅ Created                     |
+| `yrt/youtube/stats.py`         | Statistics management    | ✅ Created                     |
+| `yrt/youtube/playlist.py`      | Playlist operations      | ✅ Created                     |
+| `yrt/youtube/cleanup.py`       | Cleanup operations       | ✅ Created                     |
 | `yrt/youtube/models.py`        | Dataclasses and enums    | Deferred (using yrt/models.py) |
 | `yrt/youtube/retry.py`         | Retry decorator          | Pending                        |
-| `yrt/youtube/utils.py`         | Utilities                | ✅ Created                      |
-| `_tests/test_router.py`        | Router unit tests        | ✅ Created                      |
-| `_tests/test_constants.py`     | Constants unit tests     | ✅ Created                      |
+| `yrt/youtube/utils.py`         | Utilities                | ✅ Created                     |
+| `_tests/test_router.py`        | Router unit tests        | ✅ Created                     |
+| `_tests/test_constants.py`     | Constants unit tests     | ✅ Created                     |
 | `_tests/fixtures/error_*.json` | Error response fixtures  | Pending                        |
 
 ## Implementation Order
