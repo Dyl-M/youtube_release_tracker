@@ -4,7 +4,6 @@ __version__ = '1.0.0'
 __author__ = 'Dylan "dyl-m" Monfret'
 
 __all__ = [
-    'analytics',
     'config',
     'constants',
     'context',
