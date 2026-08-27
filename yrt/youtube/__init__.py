@@ -21,6 +21,9 @@ from . import utils  # noqa: E402
 # Set the logger in utils module
 utils.set_logger(history)
 
+# Retry / quota layer: needs utils (logger) but must exist before the API submodules that call it
+from . import quota, retry  # noqa: E402
+
 # Import all public functions from submodules
 from .api import (  # noqa: E402
     check_if_live,
@@ -103,6 +106,9 @@ __all__ = [
     # Cleanup
     'cleanup_expired_videos',
     'cleanup_ended_streams',
+    # Retry / quota layer (modules)
+    'quota',
+    'retry',
     # Third-party re-exports (for type hints in main.py)
     'pyt',
 ]

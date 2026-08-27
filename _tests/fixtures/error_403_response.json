@@ -1,0 +1,13 @@
+{
+  "error": {
+    "code": 403,
+    "message": "The request is not properly authorized to insert this playlist item.",
+    "errors": [
+      {
+        "message": "The request is not properly authorized to insert this playlist item.",
+        "domain": "youtube.playlistItem",
+        "reason": "forbidden"
+      }
+    ]
+  }
+}
