@@ -2,6 +2,7 @@
 
 # Standard library
 import json
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 # Third-party
@@ -20,7 +21,7 @@ PLAYLIST_KEYS = runtime.REQUIRED_PLAYLISTS
 
 def _playlists_json():
     """Build a playlists.json body with every required key, one retention rule and one stream cleanup flag."""
-    data = {
+    data: dict[str, dict[str, Any]] = {
         key: {'name': f'Playlist {key}', 'description': '', 'id': f'PL{key:0<32}'[:34], 'failed': [], 'pending': []}
         for key in PLAYLIST_KEYS
     }

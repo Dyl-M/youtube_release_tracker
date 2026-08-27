@@ -132,7 +132,8 @@ def archive_stats(cutoff: datetime) -> tuple[int, int]:
     archived_count = 0
     skipped_count = 0
 
-    for year, year_df in to_archive.groupby('year'):
+    for year in sorted(to_archive['year'].unique().tolist()):  # plain ints, one archive file per year
+        year_df = to_archive[to_archive['year'] == year]
         year_dir = paths.ARCHIVE_DATA_DIR / str(year)
         year_dir.mkdir(parents=True, exist_ok=True)
 

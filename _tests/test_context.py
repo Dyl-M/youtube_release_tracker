@@ -133,9 +133,9 @@ class TestExecutionContext:
 
     @staticmethod
     def test_is_frozen():
-        """Test the context cannot be mutated after creation."""
-        with pytest.raises(dataclasses.FrozenInstanceError):
-            _context().now = NOW  # type: ignore[misc]
+        """Test the context is declared frozen (fields are read-only; dataclasses.replace() derives a new one)."""
+        assert ExecutionContext.__dataclass_params__.frozen is True
+        assert dataclasses.replace(_context(), now=LAST_EXE).now == LAST_EXE
 
     @staticmethod
     def test_prog_bar_only_in_local_mode():

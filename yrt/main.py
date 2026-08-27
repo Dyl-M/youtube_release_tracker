@@ -8,7 +8,6 @@ import datetime as dt
 import logging
 import sys
 from collections.abc import Sequence
-from typing import cast
 
 # Third-party
 import pandas as pd
@@ -209,7 +208,9 @@ def run_daily(ctx: ExecutionContext, session: runtime.Session) -> None:
         )
 
         # Add videos to playlists
-        to_add = cast('dict[str, list[str]]', new_data.groupby('dest_playlist')['video_id'].apply(list).to_dict())
+        to_add = {
+            str(destination): group['video_id'].tolist() for destination, group in new_data.groupby('dest_playlist')
+        }
         _add_videos_to_playlists(service, cfg.playlists, to_add, logger, prog_bar)
 
     # Fill the Release Radar playlist (uses config.RELEASE_RADAR_TARGET by default)

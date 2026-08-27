@@ -31,11 +31,11 @@ def _queue_entry(playlists: dict[str, Any], playlist_id: str) -> dict[str, Any]:
     Returns:
         The entry dict, guaranteed to have 'failed' and 'pending' lists.
     """
-    entry: dict[str, Any] | None = next(
-        (data for data in playlists.values() if isinstance(data, dict) and data.get('id') == playlist_id), None
-    )
-    if entry is None:  # Unknown playlist: keyed and named by its ID
-        entry = playlists.setdefault(playlist_id, {'name': playlist_id, 'description': '', 'id': playlist_id})
+    defined = (data for data in playlists.values() if isinstance(data, dict) and data.get('id') == playlist_id)
+    # Unknown playlist: keyed and named by its ID
+    fallback = {'name': playlist_id, 'description': '', 'id': playlist_id}
+    found = next(defined, None)
+    entry: dict[str, Any] = found if found is not None else playlists.setdefault(playlist_id, fallback)
 
     entry.setdefault('failed', [])
     entry.setdefault('pending', [])
