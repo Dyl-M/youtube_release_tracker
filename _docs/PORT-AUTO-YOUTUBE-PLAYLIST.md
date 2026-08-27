@@ -135,7 +135,8 @@ yrt/exceptions.py
     QuotaExhaustedError(APIError)
 ```
 
-Every API call goes through `@api_call`; writes (insert/update/delete, 50 units) check `can_afford()` first. Work in
+Every API call goes through `call_api()` (Phase 1 shipped a helper, not a decorator); from Phase 3 on, writes
+(insert/update/delete, 50 units) check `can_afford()` first. Work in
 each job is ordered by value — **adds → removals → sorting** — so the guard degrades gracefully: sorting is dropped
 first, then removals, and adds spill into `api_failure.json` exactly as today.
 
@@ -222,6 +223,8 @@ L ≈ 2 days.
 
 ### Phase 0 — Stop the bleeding (S, sister repo + docs)
 
+**Status:** ✅ Done 2026-08-27 — sister hotfix `Dyl-M/auto_youtube_playlist#212`, docs PR #169 (both merged).
+
 | Task                                                                                                                             | Where                       |
 |----------------------------------------------------------------------------------------------------------------------------------|-----------------------------|
 | Catch `json.JSONDecodeError` per channel in `find_livestreams` (warn + `return []`)                                              | sister `src/youtube_req.py` |
@@ -232,6 +235,10 @@ L ≈ 2 days.
 Acceptance: sister `Playlists updates` green on the next scheduled run; Mixes additions resume.
 
 ### Phase 1 — Foundations (L) · `feat/api-retry-quota`
+
+**Status:** ✅ Implemented 2026-08-27 on `feat/api-retry-quota` (squash PR to `dev` pending). Shipped as an explicit
+`retry.call_api()` helper (per-call cost/description, `functools.partial` on the client) rather than an `@api_call`
+decorator; quota enforcement stays Phase 3 as decided (account-only here). Coverage 44 % → 68 %.
 
 Covers IMPROVEMENTS-2026 **#8, #17, #9, #14** and a bug.
 

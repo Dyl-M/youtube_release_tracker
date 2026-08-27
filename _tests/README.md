@@ -8,15 +8,26 @@ Comprehensive test suite using pytest for the YouTube Release Tracker project.
 _tests/
 ├── conftest.py              # Shared fixtures and pytest configuration
 ├── fixtures/                # Sample data files for testing
+│   ├── empty_playlist_response.json
+│   ├── error_403_response.json      # forbidden (permanent)
+│   ├── error_404_response.json      # playlistNotFound
+│   ├── error_503_backend.json       # backendError (transient)
+│   ├── error_quota_exceeded.json    # quotaExceeded
 │   ├── sample_playlist_response.json
 │   └── sample_video_stats.json
-├── test_config.py           # Tests for centralized configuration
-├── test_exceptions.py       # Tests for custom exception hierarchy
+├── test_api.py              # Tests for core API calls through the retry layer
+├── test_cleanup.py          # Tests for retention / ended-stream cleanup
+├── test_config.py           # Tests for centralized configuration and validation
+├── test_exceptions.py       # Tests for custom exception hierarchy and context
 ├── test_file_utils.py       # Tests for file operations and validation
 ├── test_logging_utils.py    # Tests for logger factory
 ├── test_main.py             # Tests for main orchestration logic
 ├── test_models.py           # Tests for domain models/dataclasses
 ├── test_paths.py            # Tests for centralized path definitions
+├── test_playlist.py         # Tests for playlist writes and api_failure.json bookkeeping
+├── test_quota.py            # Tests for the quota tracker
+├── test_retry.py            # Tests for retry, error triage and quota charging
+├── test_smoke_flow.py       # Zero-quota integration flow of the daily job's steps
 ├── test_youtube.py          # Tests for YouTube API functions
 └── README.md                # This file
 ```
@@ -97,6 +108,11 @@ Common fixtures are defined in `conftest.py`:
 - `sample_addon_data` - Sample add-on.json config
 - `temp_json_file` - Helper to create temporary JSON files
 - `mock_requests_response` - Mock requests response
+- `api_error(fixture_name)` - Factory building a real `PyYouTubeException` from a JSON error fixture
+- `no_sleep` - Patches the retry layer's `time.sleep` (yields the mock)
+- `quota_tracker` - Installs a small deterministic `QuotaTracker` as the process-wide default
+- `history_mock` - Replaces the shared youtube logger with a `MagicMock`
+- `_reset_quota_tracker` - Autouse: drops the process-wide tracker after each test
 
 ## Test Coverage Goals
 
@@ -153,7 +169,19 @@ Current implementation tests:
     - Service creation functions ✅
     - Duration parsing - skipped (3 tests)
 
-**Total:** 123 tests | **Passing:** 100 | **Skipped:** 23
+9. **Retry layer / quota** (test_retry.py, test_quota.py) ✅
+    - Reason normalisation and extraction, classification, backoff bounds
+    - `call_api` semantics: retried / skipped / saved, charging rules, `MAX_RETRIES = 0`
+    - `QuotaTracker` arithmetic, summary line, process-wide default
+
+10. **API, playlist, cleanup** (test_api.py, test_playlist.py, test_cleanup.py) ✅
+    - 404 handling, transient retry, error re-wrapping with context
+    - `add_to_playlist` triage and `api_failure.json` bookkeeping, deletes, `add_api_fail`
+    - Retention filtering, partial results on quota, ended-stream detection
+
+11. **Smoke flow** (test_smoke_flow.py) ✅ - the daily job's steps end to end against the mock client
+
+**Total:** 307 tests | **Passing:** 287 | **Skipped:** 20 | **Line coverage:** 68%
 
 ## Adding New Tests
 
