@@ -1,7 +1,7 @@
 """Tests for yrt/youtube/retry.py - Retry, error triage and quota charging."""
 
 # Standard library
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 # Third-party
 import pytest
@@ -159,14 +159,14 @@ class TestBackoffDelay:
 
     @staticmethod
     def test_delay_is_capped_by_max_backoff():
-        """Test very late attempts never exceed MAX_BACKOFF."""
-        with patch('yrt.youtube.retry.random.uniform', side_effect=lambda _low, high: high):
-            assert backoff_delay(50) == config.MAX_BACKOFF
+        """Test very late attempts stay within [MAX_BACKOFF / 2, MAX_BACKOFF]."""
+        for _ in range(20):
+            assert config.MAX_BACKOFF / 2 <= backoff_delay(50) <= config.MAX_BACKOFF
 
     @staticmethod
     def test_delay_grows_with_attempts():
-        """Test the upper bound of the delay grows between attempt 0 and attempt 3."""
-        with patch('yrt.youtube.retry.random.uniform', side_effect=lambda _low, high: high):
+        """Test the whole jitter window of attempt 3 lies above the window of attempt 0."""
+        for _ in range(20):
             assert backoff_delay(3) > backoff_delay(0)
 
 

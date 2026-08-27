@@ -1,5 +1,8 @@
 """Tests for custom exception hierarchy."""
 
+# Standard library
+import inspect
+
 # Third-party
 import pytest
 
@@ -110,9 +113,12 @@ class TestExceptionContext:
 
     @staticmethod
     def test_api_error_context_is_keyword_only():
-        """Test context attributes cannot be passed positionally (guards call-site mistakes)."""
-        with pytest.raises(TypeError):
-            APIError('Insert failed', 'forbidden')  # type: ignore[misc]  # skipcq: PYL-E1121 - wrong on purpose
+        """Test context attributes can only be passed by keyword (guards call-site mistakes)."""
+        parameters = inspect.signature(APIError).parameters
+        keyword_only = [name for name, param in parameters.items() if param.kind is inspect.Parameter.KEYWORD_ONLY]
+
+        assert list(parameters) == ['message', 'reason', 'status_code', 'video_id', 'category']
+        assert keyword_only == ['reason', 'status_code', 'video_id', 'category']
 
     @staticmethod
     def test_quota_exhausted_error_is_api_error_with_quota_category():

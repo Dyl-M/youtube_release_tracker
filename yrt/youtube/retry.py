@@ -34,6 +34,9 @@ RETRYABLE_EXCEPTIONS: tuple[type[BaseException], ...] = (
 
 UNKNOWN_REASON = 'unknown'
 
+# Jitter source; SystemRandom is not the module-level PRNG the security linters object to
+_JITTER = random.SystemRandom()
+
 
 @dataclass(frozen=True)
 class ErrorInfo:
@@ -128,7 +131,7 @@ def backoff_delay(attempt: int) -> float:
         Seconds to sleep, within [delay / 2, delay] where delay = min(MAX_BACKOFF, BASE_DELAY * e**attempt).
     """
     delay = min(config.MAX_BACKOFF, int(config.BASE_DELAY * math.exp(attempt)))
-    return delay / 2 + random.uniform(0, delay / 2)  # noqa: S311 - jitter, not cryptography
+    return delay / 2 + _JITTER.uniform(0, delay / 2)
 
 
 def _reached_youtube(error: BaseException) -> bool:

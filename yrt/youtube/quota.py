@@ -96,8 +96,10 @@ class QuotaTracker:
         self._over_budget_logged = False
 
 
-# Module-level default tracker (same dependency-injection pattern as utils.set_logger)
-_tracker: QuotaTracker | None = None
+class _DefaultTracker:
+    """Holder for the process-wide tracker (a class attribute, so no module-level global statements are needed)."""
+
+    instance: QuotaTracker | None = None
 
 
 def get_tracker() -> QuotaTracker:
@@ -106,10 +108,11 @@ def get_tracker() -> QuotaTracker:
     Returns:
         The default QuotaTracker.
     """
-    global _tracker  # skipcq: PYL-W0603 - intentional module-level state for dependency injection
-    if _tracker is None:
-        _tracker = QuotaTracker(config.DAILY_JOB_BUDGET, daily_quota=config.DAILY_QUOTA)
-    return _tracker
+    tracker = _DefaultTracker.instance
+    if tracker is None:
+        tracker = QuotaTracker(config.DAILY_JOB_BUDGET, daily_quota=config.DAILY_QUOTA)
+        _DefaultTracker.instance = tracker
+    return tracker
 
 
 def set_tracker(tracker: QuotaTracker) -> None:
@@ -118,11 +121,9 @@ def set_tracker(tracker: QuotaTracker) -> None:
     Args:
         tracker: Tracker instance to use from now on.
     """
-    global _tracker  # skipcq: PYL-W0603 - intentional module-level state for dependency injection
-    _tracker = tracker
+    _DefaultTracker.instance = tracker
 
 
 def reset_tracker() -> None:
     """Drop the process-wide tracker so the next get_tracker() call rebuilds it from config."""
-    global _tracker  # skipcq: PYL-W0603 - intentional module-level state for dependency injection
-    _tracker = None
+    _DefaultTracker.instance = None

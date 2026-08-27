@@ -28,14 +28,14 @@ from yrt.youtube.utils import (
 class TestIsShorts:
     """Test is_shorts() function for YouTube Shorts detection."""
 
-    @patch('yrt.youtube.utils.requests.head')
-    def test_is_shorts_returns_true_for_shorts(self, mock_head, sample_video_id):
+    @staticmethod
+    def test_is_shorts_returns_true_for_shorts(sample_video_id):
         """Test is_shorts() returns True for actual shorts (200 status)."""
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_head.return_value = mock_response
 
-        result = is_shorts(sample_video_id)
+        with patch('yrt.youtube.utils.requests.head', return_value=mock_response) as mock_head:
+            result = is_shorts(sample_video_id)
 
         assert result is True
         mock_head.assert_called_once()
@@ -43,36 +43,35 @@ class TestIsShorts:
         call_kwargs = mock_head.call_args.kwargs
         assert call_kwargs.get('allow_redirects') is False
 
-    @patch('yrt.youtube.utils.requests.head')
-    def test_is_shorts_returns_false_for_regular_videos(self, mock_head, sample_video_id):
+    @staticmethod
+    def test_is_shorts_returns_false_for_regular_videos(sample_video_id):
         """Test is_shorts() returns False for regular videos (3xx redirect)."""
         mock_response = Mock()
         mock_response.status_code = 301  # Redirect
-        mock_head.return_value = mock_response
 
-        result = is_shorts(sample_video_id)
+        with patch('yrt.youtube.utils.requests.head', return_value=mock_response):
+            result = is_shorts(sample_video_id)
 
         assert result is False
 
-    @patch('yrt.youtube.utils.requests.head')
-    def test_is_shorts_has_timeout(self, mock_head, sample_video_id):
+    @staticmethod
+    def test_is_shorts_has_timeout(sample_video_id):
         """Test is_shorts() uses timeout to prevent hanging."""
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_head.return_value = mock_response
 
-        is_shorts(sample_video_id)
+        with patch('yrt.youtube.utils.requests.head', return_value=mock_response) as mock_head:
+            is_shorts(sample_video_id)
 
         call_kwargs = mock_head.call_args.kwargs
         assert 'timeout' in call_kwargs
         assert call_kwargs['timeout'] > 0
 
-    @patch('yrt.youtube.utils.requests.head')
-    def test_is_shorts_handles_network_error(self, mock_head, sample_video_id):
+    @staticmethod
+    def test_is_shorts_handles_network_error(sample_video_id):
         """Test is_shorts() returns False on network errors."""
-        mock_head.side_effect = Exception('Network error')
-
-        result = is_shorts(sample_video_id)
+        with patch('yrt.youtube.utils.requests.head', side_effect=Exception('Network error')):
+            result = is_shorts(sample_video_id)
 
         # Should return False as safe default
         assert result is False

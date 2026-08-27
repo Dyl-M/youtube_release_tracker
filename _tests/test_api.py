@@ -17,7 +17,7 @@ CHANNEL_ID = 'UCchannel00000000000000'
 PLAYLIST_ID = 'UUchannel00000000000000'
 
 
-def _item(video_id, published_at='2024-01-15T12:00:00Z', status='public'):
+def _item(video_id, published_at: str | None = '2024-01-15T12:00:00Z', status='public'):
     """Build a playlist item shaped like the client's response objects."""
     return SimpleNamespace(
         id=f'item_{video_id}',

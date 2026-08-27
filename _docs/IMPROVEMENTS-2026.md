@@ -308,7 +308,8 @@ def validate_file_path(file_path: str | Path) -> Path:
 
 **Location:** `yrt/youtube.py:576-640` (`add_to_playlist` function)
 
-**Status:** ✅ Fixed (port plan Phase 1, `feat/api-retry-quota`) — shipped as an explicit `retry.call_api()` helper rather than a decorator
+**Status:** ✅ Fixed (port plan Phase 1, `feat/api-retry-quota`) — shipped as an explicit `retry.call_api()` helper
+rather than a decorator
 
 **Issue:** Retry logic with exponential backoff embedded directly in function, making it hard to reuse.
 
@@ -691,7 +692,8 @@ def iter_channels_generator(
   VideoRouter, Constants Module)
 - **🛑 Medium Priority:** 5 code quality improvements (2 fixed: retry layer, config validation; 3 pending)
 - **🧪 Test Suite:** 4 test coverage improvements (2 fixed: test logging isolation, duration parsing)
-- **🛃 Low Priority:** 6 nice-to-have improvements (2 fixed: exception context, error fixtures; 1 accepted: scheduler lag)
+- **🛃 Low Priority:** 6 nice-to-have improvements (2 fixed: exception context, error fixtures; 1 accepted: scheduler
+  lag)
 - **CI/CD:** Test coverage workflow with DeepSource reporting ✅ Added
 
 **Total:** 21 improvement items (12 fixed, 1 accepted, 8 pending)
@@ -701,27 +703,27 @@ def iter_channels_generator(
 
 | Module                    | Coverage | Status         |
 |---------------------------|----------|----------------|
-| `yrt/__init__.py`         | 100%     | ✅ Complete     |
-| `yrt/config.py`           | 100%     | ✅ Complete     |
-| `yrt/constants.py`        | 100%     | ✅ Complete     |
-| `yrt/exceptions.py`       | 100%     | ✅ Complete     |
-| `yrt/logging_utils.py`    | 100%     | ✅ Complete     |
-| `yrt/models.py`           | 100%     | ✅ Complete     |
-| `yrt/paths.py`            | 100%     | ✅ Complete     |
-| `yrt/router.py`           | 95%      | ✅ Complete     |
-| `yrt/file_utils.py`       | 76%      | 🔸 Needs work   |
-| `yrt/youtube/__init__.py` | 100%     | ✅ Complete     |
-| `yrt/youtube/quota.py`    | 100%     | ✅ Complete     |
-| `yrt/youtube/retry.py`    | 99%      | ✅ Complete     |
-| `yrt/youtube/api.py`      | 91%      | ✅ Complete     |
-| `yrt/youtube/cleanup.py`  | 95%      | ✅ Complete     |
-| `yrt/youtube/playlist.py` | 69%      | 🔸 Needs work   |
-| `yrt/youtube/utils.py`    | 65%      | 🔸 Needs work   |
+| `yrt/__init__.py`         | 100%     | ✅ Complete    |
+| `yrt/config.py`           | 100%     | ✅ Complete    |
+| `yrt/constants.py`        | 100%     | ✅ Complete    |
+| `yrt/exceptions.py`       | 100%     | ✅ Complete    |
+| `yrt/logging_utils.py`    | 100%     | ✅ Complete    |
+| `yrt/models.py`           | 100%     | ✅ Complete    |
+| `yrt/paths.py`            | 100%     | ✅ Complete    |
+| `yrt/router.py`           | 95%      | ✅ Complete    |
+| `yrt/file_utils.py`       | 76%      | 🔸 Needs work  |
+| `yrt/youtube/__init__.py` | 100%     | ✅ Complete    |
+| `yrt/youtube/quota.py`    | 100%     | ✅ Complete    |
+| `yrt/youtube/retry.py`    | 99%      | ✅ Complete    |
+| `yrt/youtube/api.py`      | 91%      | ✅ Complete    |
+| `yrt/youtube/cleanup.py`  | 95%      | ✅ Complete    |
+| `yrt/youtube/playlist.py` | 69%      | 🔸 Needs work  |
+| `yrt/youtube/utils.py`    | 65%      | 🔸 Needs work  |
 | `yrt/youtube/stats.py`    | 22%      | ⚠️ Low         |
 | `yrt/youtube/auth.py`     | 16%      | ⚠️ Low         |
-| `yrt/main.py`             | 0%       | ❌ Not covered  |
-| `yrt/analytics.py`        | 0%       | 🚫 Placeholder  |
-| `yrt/_sandbox.py`         | 0%       | 🚫 Dev only     |
+| `yrt/main.py`             | 0%       | ❌ Not covered |
+| `yrt/analytics.py`        | 0%       | 🚫 Placeholder |
+| `yrt/_sandbox.py`         | 0%       | 🚫 Dev only    |
 
 ## Files to Modify
 
@@ -781,8 +783,8 @@ def iter_channels_generator(
 7. ✅ Extract `yrt/youtube/auth.py` (create_service_local, create_service_workflow, encode_key)
 8. ✅ Extract `yrt/youtube/retry.py` - *shipped as `call_api()` helper + `quota.py` (port plan Phase 1)*
 9. ✅ Extract `yrt/youtube/utils.py` (is_shorts, last_exe_date, sort_db) — *`parse_iso8601_duration` was **not**
-    extracted; duration parsing is still inline in `stats.py` (`.seconds`, which drops the days component for ≥ 24 h
-    videos). Tracked by #14 and by the port plan's Phase 1.*
+   extracted; duration parsing is still inline in `stats.py` (`.seconds`, which drops the days component for ≥ 24 h
+   videos). Tracked by #14 and by the port plan's Phase 1.*
 10. ✅ Extract `yrt/youtube/api.py` (get_playlist_items, get_videos, get_subs, iter_channels)
 11. ✅ Extract `yrt/youtube/stats.py` (get_stats, add_stats, weekly_stats)
 12. ✅ Extract `yrt/youtube/playlist.py` (add_to_playlist, del_from_playlist, fill_release_radar)

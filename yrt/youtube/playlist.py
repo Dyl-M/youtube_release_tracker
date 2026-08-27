@@ -3,6 +3,7 @@
 # Standard library
 import datetime as dt
 import math
+from collections.abc import Sequence
 from functools import partial
 from typing import Any
 
@@ -111,7 +112,7 @@ def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list[str
 def del_from_playlist(
     service: pyt.Client,
     playlist_id: str,
-    items_list: list[PlaylistItemRef] | list[dict[str, Any]],
+    items_list: Sequence[PlaylistItemRef | dict[str, Any]],
     prog_bar: bool = True,
 ) -> None:
     """Delete videos inside a YouTube playlist.
@@ -119,7 +120,7 @@ def del_from_playlist(
     Args:
         service: A Python YouTube Client.
         playlist_id: A YouTube playlist ID.
-        items_list: List of PlaylistItemRef instances or dicts with 'item_id' and 'video_id'.
+        items_list: PlaylistItemRef instances and/or dicts with 'item_id' and 'video_id' (mixing is fine).
         prog_bar: Whether to use tqdm progress bar.
     """
     if prog_bar:

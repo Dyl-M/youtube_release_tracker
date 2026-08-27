@@ -139,11 +139,10 @@ def get_playlist_items(
             break
 
         # Parse items, filtering out those without release date
-        p_items += [
-            parsed
-            for item in request.items
-            if (parsed := _parse_playlist_item(item, utils.ISO_DATE_FORMAT, source_channel_id)) is not None
-        ]
+        for item in request.items:
+            parsed = _parse_playlist_item(item, utils.ISO_DATE_FORMAT, source_channel_id)
+            if parsed is not None:
+                p_items.append(parsed)
         p_items = _filter_items_by_date_range(p_items, latest_d, oldest_d=oldest_d, day_ago=day_ago)
 
         next_page_token = request.nextPageToken
@@ -180,12 +179,12 @@ def get_videos(service: pyt.Client, videos_list: list[str]) -> list[Any]:
     ).items
 
 
-def get_subs(service: pyt.Client, channel_list: list[str]) -> list[dict[str, Any]]:
+def get_subs(service: pyt.Client, channel_list: list[str | None]) -> list[dict[str, Any]]:
     """Get the number of subscribers for several YouTube channels.
 
     Args:
         service: A Python YouTube Client.
-        channel_list: List of YouTube channel IDs.
+        channel_list: List of YouTube channel IDs; None entries (videos without an owner channel) are skipped.
 
     Returns:
         Playlist items (channels' information) as a list.

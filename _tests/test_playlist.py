@@ -11,18 +11,13 @@ from pyyoutube.error import ErrorMessage, PyYouTubeException
 # Local
 from yrt.constants import QUOTA_COST_LIST, QUOTA_COST_WRITE
 from yrt.models import PlaylistItemRef
-from yrt.youtube.playlist import (
-    _failure_entry,
-    _get_videos_to_add_count,
-    _playlist_name,
-    add_api_fail,
-    add_to_playlist,
-    del_from_playlist,
-)
+from yrt.youtube.playlist import add_api_fail, add_to_playlist, del_from_playlist, fill_release_radar
 
 KNOWN_PLAYLIST = 'PLknown000000000000000000000000000'
 STREAM_PLAYLIST = 'PLstream00000000000000000000000000'
 UNLISTED_PLAYLIST = 'PLnowhere0000000000000000000000000'
+RE_LISTENING = 'PLrelisten000000000000000000000000'
+LEGACY = 'PLlegacy00000000000000000000000000'
 
 
 @pytest.fixture
@@ -52,9 +47,14 @@ def playlists_file(tmp_path, monkeypatch):
     return path
 
 
+def _saved(path):
+    """Read the whole api_failure.json content."""
+    return json.loads(path.read_text(encoding='utf-8'))
+
+
 def _saved_failures(path, playlist_id):
     """Read the failure list saved for a playlist (empty when the playlist is not in the file)."""
-    return json.loads(path.read_text(encoding='utf-8')).get(playlist_id, {}).get('failure', [])
+    return _saved(path).get(playlist_id, {}).get('failure', [])
 
 
 @pytest.mark.unit
@@ -98,15 +98,17 @@ class TestAddToPlaylist:
         assert any('Permanent error' in call.args[0] for call in history_mock.warning.call_args_list)
 
     @staticmethod
-    def test_quota_error_is_saved_for_next_run(
+    def test_quota_error_is_saved_under_existing_entry(
         mock_youtube_client, quota_tracker, api_failure_file, api_error, no_sleep
     ):
-        """Test a quota rejection saves the video under its playlist and is not charged."""
+        """Test a quota rejection saves the videos under the playlist's existing entry, untouched otherwise."""
         mock_youtube_client.playlistItems.insert.side_effect = api_error('error_quota_exceeded.json')
 
         add_to_playlist(mock_youtube_client, KNOWN_PLAYLIST, ['vid0000001', 'vid0000002'], prog_bar=False)
 
-        assert _saved_failures(api_failure_file, KNOWN_PLAYLIST) == ['vid0000001', 'vid0000002']
+        saved = _saved(api_failure_file)[KNOWN_PLAYLIST]
+        assert saved['failure'] == ['vid0000001', 'vid0000002']
+        assert saved['name'] == 'Release Radar'
         assert quota_tracker.spent == 0
 
     @staticmethod
@@ -140,7 +142,7 @@ class TestAddToPlaylist:
 
         add_to_playlist(mock_youtube_client, STREAM_PLAYLIST, ['vid0000001'], prog_bar=False)
 
-        saved = json.loads(api_failure_file.read_text(encoding='utf-8'))
+        saved = _saved(api_failure_file)
         assert saved[STREAM_PLAYLIST]['name'] == 'My streams'
         assert saved[STREAM_PLAYLIST]['failure'] == ['vid0000001']
         assert saved[KNOWN_PLAYLIST]['failure'] == []  # existing entries untouched
@@ -154,36 +156,33 @@ class TestAddToPlaylist:
 
         add_to_playlist(mock_youtube_client, UNLISTED_PLAYLIST, ['vid0000001'], prog_bar=False)
 
-        saved = json.loads(api_failure_file.read_text(encoding='utf-8'))
-        assert saved[UNLISTED_PLAYLIST]['name'] == UNLISTED_PLAYLIST
-
-
-@pytest.mark.unit
-class TestFailureBookkeeping:
-    """Test the api_failure.json helpers directly."""
+        assert _saved(api_failure_file)[UNLISTED_PLAYLIST]['name'] == UNLISTED_PLAYLIST
 
     @staticmethod
-    def test_failure_entry_returns_existing_entry():
-        """Test an existing entry is returned as-is (same object)."""
-        api_failure = {KNOWN_PLAYLIST: {'name': 'Release Radar', 'failure': ['vid0000001']}}
-
-        assert _failure_entry(api_failure, KNOWN_PLAYLIST) is api_failure[KNOWN_PLAYLIST]
-
-    @staticmethod
-    def test_failure_entry_repairs_missing_failure_list():
-        """Test an entry without a 'failure' key gets one."""
-        api_failure = {KNOWN_PLAYLIST: {'name': 'Release Radar'}}
-
-        assert _failure_entry(api_failure, KNOWN_PLAYLIST)['failure'] == []
-
-    @staticmethod
-    def test_playlist_name_without_config_file_is_the_id(tmp_path, monkeypatch):
-        """Test name lookup degrades to the ID when playlists.json cannot be read."""
+    def test_missing_playlists_config_falls_back_to_id(
+        mock_youtube_client, quota_tracker, api_failure_file, api_error, no_sleep, tmp_path, monkeypatch
+    ):
+        """Test name resolution degrades to the ID when playlists.json cannot be read."""
         from yrt import paths
 
         monkeypatch.setattr(paths, 'PLAYLISTS_JSON', tmp_path / 'missing.json')
+        mock_youtube_client.playlistItems.insert.side_effect = api_error('error_quota_exceeded.json')
 
-        assert _playlist_name(UNLISTED_PLAYLIST) == UNLISTED_PLAYLIST
+        add_to_playlist(mock_youtube_client, UNLISTED_PLAYLIST, ['vid0000001'], prog_bar=False)
+
+        assert _saved(api_failure_file)[UNLISTED_PLAYLIST]['name'] == UNLISTED_PLAYLIST
+
+    @staticmethod
+    def test_entry_without_failure_list_is_repaired(
+        mock_youtube_client, quota_tracker, api_failure_file, api_error, no_sleep
+    ):
+        """Test an existing entry lacking the 'failure' key gets one instead of raising KeyError."""
+        api_failure_file.write_text(json.dumps({KNOWN_PLAYLIST: {'name': 'Release Radar'}}), encoding='utf-8')
+        mock_youtube_client.playlistItems.insert.side_effect = api_error('error_quota_exceeded.json')
+
+        add_to_playlist(mock_youtube_client, KNOWN_PLAYLIST, ['vid0000001'], prog_bar=False)
+
+        assert _saved_failures(api_failure_file, KNOWN_PLAYLIST) == ['vid0000001']
 
 
 @pytest.mark.unit
@@ -193,7 +192,7 @@ class TestDelFromPlaylist:
 
     @staticmethod
     def test_deletes_refs_and_dicts(mock_youtube_client, quota_tracker):
-        """Test both PlaylistItemRef instances and plain dicts are accepted."""
+        """Test both PlaylistItemRef instances and plain dicts are accepted, even mixed."""
         items = [PlaylistItemRef(item_id='item_1', video_id='vid0000001'), {'item_id': 'item_2', 'video_id': 'vid2'}]
 
         del_from_playlist(mock_youtube_client, KNOWN_PLAYLIST, items, prog_bar=False)
@@ -214,35 +213,82 @@ class TestDelFromPlaylist:
         assert 'Deletion Request Failure' in history_mock.warning.call_args.args[0]
 
 
+def _source_item(video_id, added_at='2020-01-01T00:00:00Z'):
+    """Build a source-playlist item as read by fill_release_radar (added long ago by default)."""
+    return SimpleNamespace(
+        id=f'item_{video_id}',
+        contentDetails=SimpleNamespace(videoId=video_id),
+        snippet=SimpleNamespace(publishedAt=added_at),
+    )
+
+
 @pytest.mark.unit
 @pytest.mark.api
-class TestVideosToAddCount:
-    """Test _get_videos_to_add_count() degradation on errors."""
+class TestFillReleaseRadar:
+    """Test fill_release_radar(): the target count, the source allocation and the degraded paths."""
 
     @staticmethod
-    def test_returns_missing_count(mock_youtube_client, quota_tracker):
-        """Test the count is the target size minus the current playlist size."""
-        mock_youtube_client.playlistItems.list.return_value = SimpleNamespace(items=[object()] * 30)
+    def test_moves_videos_from_both_sources(mock_youtube_client, quota_tracker, api_failure_file):
+        """Test a playlist 2 short of its target pulls one video from each source (added, then removed)."""
 
-        assert _get_videos_to_add_count(mock_youtube_client, KNOWN_PLAYLIST, 40) == 10
+        def playlist_items_list(**kwargs):
+            """Answer per playlist: 38/40 in the target, one candidate in each source."""
+            playlist_id = kwargs['playlist_id']
+            if playlist_id == KNOWN_PLAYLIST:
+                return SimpleNamespace(items=[object()] * 38)
+            if playlist_id == RE_LISTENING:
+                return SimpleNamespace(items=[_source_item('relisten01')])
+            if playlist_id == LEGACY:
+                return SimpleNamespace(items=[_source_item('legacy0001')])
+            raise AssertionError(f'unexpected playlist {playlist_id}')
+
+        mock_youtube_client.playlistItems.list.side_effect = playlist_items_list
+        mock_youtube_client.playlists.list.return_value = SimpleNamespace(
+            items=[SimpleNamespace(contentDetails=SimpleNamespace(itemCount=5))] * 2
+        )
+
+        fill_release_radar(mock_youtube_client, KNOWN_PLAYLIST, RE_LISTENING, LEGACY, lmt=40, prog_bar=False)
+
+        inserted = [
+            call.kwargs['body']['snippet']['resourceId']['videoId']
+            for call in mock_youtube_client.playlistItems.insert.call_args_list
+        ]
+        assert sorted(inserted) == ['legacy0001', 'relisten01']
+        assert mock_youtube_client.playlistItems.delete.call_count == 2
+        # 3 playlistItems.list + 1 playlists.list, then 2 inserts + 2 deletes
+        assert quota_tracker.spent == 4 * QUOTA_COST_LIST + 4 * QUOTA_COST_WRITE
+
+    @staticmethod
+    def test_full_playlist_needs_nothing(mock_youtube_client, quota_tracker, history_mock):
+        """Test a playlist at its target stops before touching the sources."""
+        mock_youtube_client.playlistItems.list.return_value = SimpleNamespace(items=[object()] * 40)
+
+        fill_release_radar(mock_youtube_client, KNOWN_PLAYLIST, RE_LISTENING, LEGACY, lmt=40, prog_bar=False)
+
+        assert mock_youtube_client.playlists.list.call_count == 0
+        assert history_mock.info.call_args.args[0] == 'No addition necessary for Release Radar'
         assert quota_tracker.spent == QUOTA_COST_LIST
 
     @staticmethod
-    def test_quota_error_returns_zero_with_warning(mock_youtube_client, quota_tracker, api_error, history_mock):
-        """Test a quota rejection means 'nothing to add' and logs the quota warning."""
+    def test_quota_error_on_count_degrades_to_nothing(mock_youtube_client, quota_tracker, api_error, history_mock):
+        """Test a quota rejection while counting the target logs the quota warning and adds nothing."""
         mock_youtube_client.playlistItems.list.side_effect = api_error('error_quota_exceeded.json')
 
-        assert _get_videos_to_add_count(mock_youtube_client, KNOWN_PLAYLIST, 40) == 0
+        fill_release_radar(mock_youtube_client, KNOWN_PLAYLIST, RE_LISTENING, LEGACY, lmt=40, prog_bar=False)
+
+        assert mock_youtube_client.playlists.list.call_count == 0
         assert history_mock.warning.call_args.args[0] == 'API quota exceeded.'
 
     @staticmethod
-    def test_other_error_returns_zero_with_generic_warning(
+    def test_other_error_on_count_degrades_with_generic_warning(
         mock_youtube_client, quota_tracker, api_error, no_sleep, history_mock
     ):
-        """Test any other failure also degrades to zero, with the generic warning."""
+        """Test any other failure while counting the target also adds nothing, with the generic warning."""
         mock_youtube_client.playlistItems.list.side_effect = api_error('error_404_response.json')
 
-        assert _get_videos_to_add_count(mock_youtube_client, KNOWN_PLAYLIST, 40) == 0
+        fill_release_radar(mock_youtube_client, KNOWN_PLAYLIST, RE_LISTENING, LEGACY, lmt=40, prog_bar=False)
+
+        assert mock_youtube_client.playlists.list.call_count == 0
         assert history_mock.warning.call_args.args[0] == 'Unknown error: %s'
 
 
