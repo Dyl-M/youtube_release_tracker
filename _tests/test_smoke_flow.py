@@ -42,19 +42,29 @@ def _page(items):
 
 @pytest.fixture
 def daily_job_state(tmp_path, monkeypatch):
-    """Pin the date window, the add-on lists and a temp api_failure.json with one saved failure."""
+    """Pin the date window, the add-on lists and a temp playlists.json with one queued failure."""
     from yrt import paths
 
     monkeypatch.setattr(utils, 'LAST_EXE', dt.datetime(2024, 1, 1, tzinfo=dt.UTC))
     monkeypatch.setattr(utils, 'ADD_ON', {'playlistNotFoundPass': [], 'toPass': []})
 
-    api_failure = tmp_path / 'api_failure.json'
-    api_failure.write_text(
-        json.dumps({RELEASE_RADAR: {'name': 'Release Radar', 'description': '', 'failure': ['saved00001']}}),
+    playlists = tmp_path / 'playlists.json'
+    playlists.write_text(
+        json.dumps(
+            {
+                'release': {
+                    'name': 'Release Radar',
+                    'description': '',
+                    'id': RELEASE_RADAR,
+                    'failed': ['saved00001'],
+                    'pending': [],
+                }
+            }
+        ),
         encoding='utf-8',
     )
-    monkeypatch.setattr(paths, 'API_FAILURE_JSON', api_failure)
-    return api_failure
+    monkeypatch.setattr(paths, 'PLAYLISTS_JSON', playlists)
+    return playlists
 
 
 @pytest.mark.integration
@@ -119,6 +129,6 @@ class TestDailyFlowSmoke:
         assert quota.get_tracker().summary().startswith(f'Quota spent: {expected} units')
         assert no_sleep.call_count == 1  # the single 503 retry
 
-        saved = json.loads(daily_job_state.read_text(encoding='utf-8'))[RELEASE_RADAR]['failure']
+        saved = json.loads(daily_job_state.read_text(encoding='utf-8'))['release']['failed']
         assert saved == ['okvideo001', 'flakyvid01']  # replayed one cleared, new ones queued
         assert mock_youtube_client.playlistItems.delete.call_args.kwargs['playlist_item_id'] == 'item_expired01'

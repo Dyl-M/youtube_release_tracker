@@ -21,7 +21,6 @@ ARCHIVE_DATA_DIR: Path = ARCHIVE_DIR / '_data'
 POCKET_TUBE_JSON: Path = CONFIG_DIR / 'pocket_tube.json'
 PLAYLISTS_JSON: Path = CONFIG_DIR / 'playlists.json'
 ADD_ON_JSON: Path = CONFIG_DIR / 'add-on.json'
-API_FAILURE_JSON: Path = CONFIG_DIR / 'api_failure.json'
 CONSTANTS_JSON: Path = CONFIG_DIR / 'constants.json'
 
 # Data files (in _data/)

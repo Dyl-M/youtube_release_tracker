@@ -36,7 +36,6 @@ class TestPathDefinitions:
         assert isinstance(paths.POCKET_TUBE_JSON, Path)
         assert isinstance(paths.PLAYLISTS_JSON, Path)
         assert isinstance(paths.ADD_ON_JSON, Path)
-        assert isinstance(paths.API_FAILURE_JSON, Path)
         assert isinstance(paths.CONSTANTS_JSON, Path)
         # Data files
         assert isinstance(paths.STATS_CSV, Path)
@@ -65,7 +64,6 @@ class TestPathDefinitions:
         assert paths.POCKET_TUBE_JSON.parent == paths.CONFIG_DIR
         assert paths.PLAYLISTS_JSON.parent == paths.CONFIG_DIR
         assert paths.ADD_ON_JSON.parent == paths.CONFIG_DIR
-        assert paths.API_FAILURE_JSON.parent == paths.CONFIG_DIR
         assert paths.CONSTANTS_JSON.parent == paths.CONFIG_DIR
 
         # Data files

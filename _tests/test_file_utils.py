@@ -103,6 +103,17 @@ class TestSaveJson:
         assert '{\n  "nested"' in content
 
     @staticmethod
+    def test_save_json_ends_with_a_newline(tmp_path):
+        """Test the file ends with a newline so job writes to hand-edited files stay diff-clean."""
+        file_path = str(tmp_path / 'newline.json')
+
+        file_utils.save_json(file_path, {'name': '📡 RELEASE RADAR'})
+
+        content = Path(file_path).read_text(encoding='utf-8')
+        assert content.endswith('}\n')
+        assert '📡' in content  # non-ASCII is written verbatim, not escaped
+
+    @staticmethod
     def test_save_json_overwrites_existing(tmp_path):
         """Test saving overwrites existing file."""
         file_path = str(tmp_path / 'overwrite.json')
