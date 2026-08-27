@@ -172,67 +172,74 @@ class TestLoadConfig:
         assert 99 not in DEFAULTS['stats']['week_deltas']
 
 
+def _validate(override):
+    """Validate DEFAULTS merged with an override, returning the raised ConfigurationError or None."""
+    from yrt.config import DEFAULTS, _deep_merge, _validate_config
+    from yrt.exceptions import ConfigurationError
+
+    try:
+        _validate_config(_deep_merge(DEFAULTS, override))
+    except ConfigurationError as error:
+        return error
+    return None
+
+
 class TestValidateConfig:
     """Tests for the _validate_config rules (run on the merged configuration)."""
 
     @staticmethod
-    def _validate(override):
-        """Validate DEFAULTS merged with an override, returning the raised ConfigurationError or None."""
-        from yrt.config import DEFAULTS, _deep_merge, _validate_config
-        from yrt.exceptions import ConfigurationError
-
-        try:
-            _validate_config(_deep_merge(DEFAULTS, override))
-        except ConfigurationError as error:
-            return error
-        return None
-
-    def test_defaults_are_valid(self):
+    def test_defaults_are_valid():
         """Test that DEFAULTS pass validation unchanged."""
-        assert self._validate({}) is None
+        assert _validate({}) is None
 
-    def test_batch_size_bounds(self):
+    @staticmethod
+    def test_batch_size_bounds():
         """Test api.batch_size must be within 1..50 (YouTube maxResults limit)."""
-        assert 'api.batch_size' in str(self._validate({'api': {'batch_size': 0}}))
-        assert 'api.batch_size' in str(self._validate({'api': {'batch_size': 51}}))
-        assert self._validate({'api': {'batch_size': 50}}) is None
+        assert 'api.batch_size' in str(_validate({'api': {'batch_size': 0}}))
+        assert 'api.batch_size' in str(_validate({'api': {'batch_size': 51}}))
+        assert _validate({'api': {'batch_size': 50}}) is None
 
-    def test_max_retries_allows_zero(self):
+    @staticmethod
+    def test_max_retries_allows_zero():
         """Test api.max_retries accepts 0 (single attempt) but not negatives."""
-        assert self._validate({'api': {'max_retries': 0}}) is None
-        assert 'api.max_retries' in str(self._validate({'api': {'max_retries': -1}}))
+        assert _validate({'api': {'max_retries': 0}}) is None
+        assert 'api.max_retries' in str(_validate({'api': {'max_retries': -1}}))
 
-    def test_backoff_must_not_be_below_base_delay(self):
+    @staticmethod
+    def test_backoff_must_not_be_below_base_delay():
         """Test api.max_backoff_seconds must be at least api.base_delay_seconds."""
-        assert 'api.max_backoff_seconds' in str(
-            self._validate({'api': {'base_delay_seconds': 5, 'max_backoff_seconds': 4}})
-        )
-        assert 'api.base_delay_seconds' in str(self._validate({'api': {'base_delay_seconds': 0}}))
+        assert 'api.max_backoff_seconds' in str(_validate({'api': {'base_delay_seconds': 5, 'max_backoff_seconds': 4}}))
+        assert 'api.base_delay_seconds' in str(_validate({'api': {'base_delay_seconds': 0}}))
 
-    def test_timeout_must_be_positive(self):
+    @staticmethod
+    def test_timeout_must_be_positive():
         """Test network.timeout_seconds rejects 0."""
-        assert 'network.timeout_seconds' in str(self._validate({'network': {'timeout_seconds': 0}}))
+        assert 'network.timeout_seconds' in str(_validate({'network': {'timeout_seconds': 0}}))
 
-    def test_quota_budgets_bounded_by_daily_quota(self):
+    @staticmethod
+    def test_quota_budgets_bounded_by_daily_quota():
         """Test quota budgets must be positive and not exceed api.daily_quota."""
-        assert 'api.daily_quota' in str(self._validate({'api': {'daily_quota': 0}}))
-        assert 'quota.daily_job_budget' in str(self._validate({'quota': {'daily_job_budget': 0}}))
-        assert 'quota.daily_job_budget' in str(self._validate({'quota': {'daily_job_budget': 10001}}))
-        assert 'quota.updates_job_budget' in str(self._validate({'quota': {'updates_job_budget': 10001}}))
+        assert 'api.daily_quota' in str(_validate({'api': {'daily_quota': 0}}))
+        assert 'quota.daily_job_budget' in str(_validate({'quota': {'daily_job_budget': 0}}))
+        assert 'quota.daily_job_budget' in str(_validate({'quota': {'daily_job_budget': 10001}}))
+        assert 'quota.updates_job_budget' in str(_validate({'quota': {'updates_job_budget': 10001}}))
 
-    def test_week_deltas_shape(self):
+    @staticmethod
+    def test_week_deltas_shape():
         """Test stats.week_deltas must be a non-empty list of positive integers."""
-        assert 'stats.week_deltas' in str(self._validate({'stats': {'week_deltas': []}}))
-        assert 'stats.week_deltas' in str(self._validate({'stats': {'week_deltas': [0]}}))
-        assert 'stats.week_deltas' in str(self._validate({'stats': {'week_deltas': ['1']}}))
-        assert 'stats.week_deltas' in str(self._validate({'stats': {'week_deltas': 4}}))
+        assert 'stats.week_deltas' in str(_validate({'stats': {'week_deltas': []}}))
+        assert 'stats.week_deltas' in str(_validate({'stats': {'week_deltas': [0]}}))
+        assert 'stats.week_deltas' in str(_validate({'stats': {'week_deltas': ['1']}}))
+        assert 'stats.week_deltas' in str(_validate({'stats': {'week_deltas': 4}}))
 
-    def test_booleans_are_rejected(self):
+    @staticmethod
+    def test_booleans_are_rejected():
         """Test JSON true is not accepted where an integer is expected (bool is an int subclass)."""
-        assert 'api.batch_size' in str(self._validate({'api': {'batch_size': True}}))
-        assert 'stats.week_deltas' in str(self._validate({'stats': {'week_deltas': [True]}}))
+        assert 'api.batch_size' in str(_validate({'api': {'batch_size': True}}))
+        assert 'stats.week_deltas' in str(_validate({'stats': {'week_deltas': [True]}}))
 
-    def test_missing_key_is_reported(self):
+    @staticmethod
+    def test_missing_key_is_reported():
         """Test a section stripped of a required key is reported as missing."""
         from yrt.config import DEFAULTS, _validate_config
         from yrt.exceptions import ConfigurationError

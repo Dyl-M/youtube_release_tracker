@@ -16,6 +16,7 @@ from ..constants import QUOTA_COST_LIST, QUOTA_COST_WRITE
 from ..exceptions import APIError, ConfigurationError, ErrorCategory, FileAccessError
 from ..models import PlaylistItemRef
 from . import retry, utils
+from .api import get_items_count
 
 
 def _playlist_name(playlist_id: str) -> str:
@@ -263,7 +264,7 @@ def fill_release_radar(
         return
 
     # Calculate proportional allocation from each source
-    to_re_listen_count, legacy_count = utils.get_items_count(service, [re_listening_id, legacy_id])
+    to_re_listen_count, legacy_count = get_items_count(service, [re_listening_id, legacy_id])
     n_add_rel, n_add_leg = _calculate_allocation(n_add, to_re_listen_count, legacy_count)
 
     # Fetch and format videos from both playlists

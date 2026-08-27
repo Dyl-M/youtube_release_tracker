@@ -27,10 +27,12 @@ from . import quota, retry  # noqa: E402
 # Import all public functions from submodules
 from .api import (  # noqa: E402
     check_if_live,
+    get_items_count,
     get_playlist_items,
     get_subs,
     get_videos,
     iter_channels,
+    sort_db,
 )
 from .auth import (  # noqa: E402
     create_service_local,
@@ -61,11 +63,9 @@ from .utils import (  # noqa: E402
     PERMANENT_ERRORS,
     QUOTA_ERRORS,
     TRANSIENT_ERRORS,
-    get_items_count,
     is_shorts,
     last_exe_date,
     parse_iso8601_duration,
-    sort_db,
 )
 
 # Pandas options

@@ -5,12 +5,10 @@ import datetime as dt
 import itertools
 import re
 from collections.abc import Sequence
-from functools import partial
 from typing import Any
 
 # Third-party
 import isodate
-import pyyoutube as pyt
 import requests
 import tzlocal
 
@@ -20,11 +18,9 @@ from ..constants import (
     ISO_DATE_FORMAT,
     LOG_DATE_FORMAT,
     PERMANENT_ERRORS,
-    QUOTA_COST_LIST,
     QUOTA_ERRORS,
     TRANSIENT_ERRORS,
 )
-from ..exceptions import APIError
 
 # Re-export for backward compatibility
 __all__ = [
@@ -32,8 +28,7 @@ __all__ = [
     'last_exe_date',
     'parse_iso8601_duration',
     'is_shorts',
-    'sort_db',
-    'get_items_count',
+    'chunked',
     # Module-level state
     'NOW',
     'LAST_EXE',
@@ -101,7 +96,7 @@ def parse_iso8601_duration(duration_str: str | None) -> int:
 
     try:
         parsed = isodate.parse_duration(duration_str)
-    except (isodate.ISO8601Error, TypeError, ValueError):
+    except (TypeError, ValueError):  # isodate.ISO8601Error is a ValueError
         if history:
             history.warning('Could not parse video duration %r, defaulting to 0 seconds.', duration_str)
         return 0
@@ -152,83 +147,3 @@ def is_shorts(video_id: str) -> bool:
         if history:
             history.warning('Failed to check shorts status for video %s: %s', video_id, str(error))
         return False  # Default to non-short on error
-
-
-def get_items_count(service: pyt.Client, playlist_ids: list) -> tuple:
-    """Get the number of videos in YouTube Playlists.
-
-    Args:
-        service: A Python YouTube Client.
-        playlist_ids: List of YouTube playlist IDs.
-
-    Returns:
-        Number of videos by playlist (ordered).
-    """
-    from . import retry  # function-level: retry imports this module
-
-    playlists = retry.call_api(
-        partial(service.playlists.list, part=['contentDetails'], playlist_id=playlist_ids),
-        cost=QUOTA_COST_LIST,
-        description='playlists.list',
-    ).items
-    return tuple(pl.contentDetails.itemCount for pl in playlists)
-
-
-def sort_db(service: pyt.Client, log: bool = True) -> None:
-    """Sort and save the PocketTube database file.
-
-    Args:
-        service: A Python YouTube Client.
-        log: Whether to apply logging or not.
-    """
-
-    def get_channels(_service: pyt.Client, _channel_list: list[str]) -> list[str]:
-        """Get YouTube channels basic information.
-
-        Args:
-            _service: A YouTube service build with 'googleapiclient.discovery'.
-            _channel_list: List of YouTube channel IDs.
-
-        Returns:
-            A list of channel IDs sorted alphabetically by channel name.
-
-        Raises:
-            APIError: If API error occurs while sorting database.
-        """
-        from . import retry  # function-level: retry imports this module
-
-        information = []
-
-        # Split task in chunks to request on a maximum of API_BATCH_SIZE channels at each iteration.
-        for chunk in chunked(_channel_list, config.API_BATCH_SIZE):
-            try:
-                # Request channels
-                request = retry.call_api(
-                    partial(
-                        _service.channels.list, part=['snippet'], channel_id=chunk, max_results=config.API_BATCH_SIZE
-                    ),
-                    cost=QUOTA_COST_LIST,
-                    description='channels.list',
-                ).items
-
-                # Extract upload playlists, channel names and their ID.
-                information += [{'title': an_item.snippet.title, 'id': an_item.id} for an_item in request]
-
-            except APIError as api_error:
-                raise retry.rewrap(api_error, 'API error while sorting database', log=log) from api_error
-
-        # Sort channels' name by alphabetical order
-        information = sorted(information, key=lambda dic: dic['title'].lower())
-        return [info['id'] for info in information]  # Get channel IDs only
-
-    channels_db = file_utils.load_json(str(paths.POCKET_TUBE_JSON))
-
-    categories = [db_keys for db_keys in channels_db if 'ysc' not in db_keys]  # Get PT categories
-    db_sorted = {
-        category: get_channels(_service=service, _channel_list=channels_db[category]) for category in categories
-    }
-
-    for category in categories:  # Rewrite categories in the dict object associated with the PT JSON file
-        channels_db[category] = db_sorted[category]
-
-    file_utils.save_json(str(paths.POCKET_TUBE_JSON), channels_db)

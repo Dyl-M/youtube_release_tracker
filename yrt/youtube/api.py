@@ -11,7 +11,7 @@ import pyyoutube as pyt
 import tqdm
 
 # Local
-from .. import config
+from .. import config, file_utils, paths
 from ..constants import QUOTA_COST_LIST
 from ..exceptions import APIError
 from ..models import PlaylistItem
@@ -275,3 +275,82 @@ def iter_channels(
         ]
 
     return list(itertools.chain.from_iterable(item_it))
+
+
+def get_items_count(service: pyt.Client, playlist_ids: list) -> tuple:
+    """Get the number of videos in YouTube Playlists.
+
+    Args:
+        service: A Python YouTube Client.
+        playlist_ids: List of YouTube playlist IDs.
+
+    Returns:
+        Number of videos by playlist (ordered).
+
+    Raises:
+        APIError: If the request fails.
+    """
+    playlists = retry.call_api(
+        partial(service.playlists.list, part=['contentDetails'], playlist_id=playlist_ids),
+        cost=QUOTA_COST_LIST,
+        description='playlists.list',
+    ).items
+    return tuple(pl.contentDetails.itemCount for pl in playlists)
+
+
+def sort_db(service: pyt.Client, log: bool = True) -> None:
+    """Sort and save the PocketTube database file.
+
+    Args:
+        service: A Python YouTube Client.
+        log: Whether to apply logging or not.
+    """
+
+    def get_channels(_service: pyt.Client, _channel_list: list[str]) -> list[str]:
+        """Get YouTube channels basic information.
+
+        Args:
+            _service: A Python YouTube Client.
+            _channel_list: List of YouTube channel IDs.
+
+        Returns:
+            A list of channel IDs sorted alphabetically by channel name.
+
+        Raises:
+            APIError: If API error occurs while sorting database.
+        """
+        information = []
+
+        # Split task in chunks to request on a maximum of API_BATCH_SIZE channels at each iteration.
+        for chunk in utils.chunked(_channel_list, config.API_BATCH_SIZE):
+            try:
+                # Request channels
+                request = retry.call_api(
+                    partial(
+                        _service.channels.list, part=['snippet'], channel_id=chunk, max_results=config.API_BATCH_SIZE
+                    ),
+                    cost=QUOTA_COST_LIST,
+                    description='channels.list',
+                ).items
+
+                # Extract upload playlists, channel names and their ID.
+                information += [{'title': an_item.snippet.title, 'id': an_item.id} for an_item in request]
+
+            except APIError as api_error:
+                raise retry.rewrap(api_error, 'API error while sorting database', log=log) from api_error
+
+        # Sort channels' name by alphabetical order
+        information = sorted(information, key=lambda dic: dic['title'].lower())
+        return [info['id'] for info in information]  # Get channel IDs only
+
+    channels_db = file_utils.load_json(str(paths.POCKET_TUBE_JSON))
+
+    categories = [db_keys for db_keys in channels_db if 'ysc' not in db_keys]  # Get PT categories
+    db_sorted = {
+        category: get_channels(_service=service, _channel_list=channels_db[category]) for category in categories
+    }
+
+    for category in categories:  # Rewrite categories in the dict object associated with the PT JSON file
+        channels_db[category] = db_sorted[category]
+
+    file_utils.save_json(str(paths.POCKET_TUBE_JSON), channels_db)
