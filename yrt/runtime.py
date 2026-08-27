@@ -250,16 +250,19 @@ def copy_last_exe_log(history_path: Path, last_exe_path: Path) -> None:
         last_exe_path: Last-exe log of the job (overwritten).
 
     Raises:
+        FileAccessError: If a path is outside the allowed directories or not a log file.
         ValueError: If the history log holds no process start marker.
     """
-    history = history_path.read_text(encoding='utf8')
+    history_file = Path(file_utils.validate_file_path(str(history_path)))
+    last_exe_file = Path(file_utils.validate_file_path(str(last_exe_path)))
+    history = history_file.read_text(encoding='utf8')
 
     marker_idx = history.rfind(PROCESS_START_MARKER)
     if marker_idx == -1:
         raise ValueError(f'No "{PROCESS_START_MARKER}" line in {history_path}')
 
     line_start = history.rfind('\n', 0, marker_idx) + 1
-    last_exe_path.write_text(history[line_start:], encoding='utf8')
+    last_exe_file.write_text(history[line_start:], encoding='utf8')
 
 
 def finalize(ctx: ExecutionContext, session: Session) -> None:

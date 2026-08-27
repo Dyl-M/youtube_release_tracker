@@ -1,8 +1,8 @@
 """Execution context: the per-run, per-job state that used to be computed at import time.
 
 Each job (daily, updates) has its own history log and last-exe marker so the frequent job never shrinks the daily
-look-back window. The context is built once by the entry point and passed explicitly to the functions that need the
-time window or the log files - there is no process-wide default on purpose.
+look-back window. The context is built once by runtime.run_job() and passed explicitly to the functions that need
+the time window or the log files - there is no process-wide default on purpose.
 """
 
 # Standard library
@@ -16,7 +16,7 @@ from typing import Self
 import tzlocal
 
 # Local
-from . import paths
+from . import file_utils, paths
 from .constants import EXE_MODE_LOCAL, EXE_MODES, JOB_DAILY, JOB_UPDATES, JOBS, LOG_DATE_FORMAT
 from .exceptions import ConfigurationError
 
@@ -53,10 +53,13 @@ def last_exe_date(log_path: Path) -> dt.datetime:
         Last execution date, or 24 hours ago if the log is missing or empty.
 
     Raises:
+        FileAccessError: If the path is outside the allowed directories or not a log file.
         ConfigurationError: If the first line holds no parseable date (the file was edited or truncated by hand).
     """
+    validated_path = file_utils.validate_file_path(str(log_path))
+
     try:
-        with open(log_path, encoding='utf8') as log_file:
+        with open(validated_path, encoding='utf8') as log_file:
             first_log = log_file.readline()
 
     except FileNotFoundError:
