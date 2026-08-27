@@ -33,6 +33,10 @@ PERMANENT_ERRORS = frozenset(
 )
 QUOTA_ERRORS = frozenset({'quotaexceeded'})
 
+# === YouTube Data API quota costs (units per call) ===
+QUOTA_COST_LIST = 1  # any *.list call, regardless of page size
+QUOTA_COST_WRITE = 50  # playlistItems.insert / update / delete
+
 # === Date/Time Formats ===
 ISO_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S%z'
 LOG_DATE_FORMAT = '%Y-%m-%d %H:%M:%S%z'
