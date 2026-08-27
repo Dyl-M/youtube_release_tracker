@@ -8,6 +8,7 @@ from collections.abc import Sequence
 from typing import Any
 
 # Third-party
+import isodate
 import pyyoutube as pyt
 import requests
 import tzlocal
@@ -27,6 +28,7 @@ from ..exceptions import APIError
 __all__ = [
     # Functions
     'last_exe_date',
+    'parse_iso8601_duration',
     'is_shorts',
     'sort_db',
     'get_items_count',
@@ -79,6 +81,35 @@ def chunked[T](sequence: Sequence[T], size: int) -> list[list[T]]:
         A list of chunks, each a list with at most size items.
     """
     return [list(batch) for batch in itertools.batched(sequence, size)]
+
+
+def parse_iso8601_duration(duration_str: str | None) -> int:
+    """Convert an ISO 8601 duration (e.g. 'PT1H30M') to whole seconds.
+
+    Unlike timedelta.seconds, the result keeps the days component, so a 30-hour stream is 108000 and not 21600.
+
+    Args:
+        duration_str: Duration as returned by the API in contentDetails.duration; None or empty means unknown.
+
+    Returns:
+        Duration in seconds; 0 when unknown or unparseable (logged as a warning).
+    """
+    if not duration_str:
+        return 0
+
+    try:
+        parsed = isodate.parse_duration(duration_str)
+    except (isodate.ISO8601Error, TypeError, ValueError):
+        if history:
+            history.warning('Could not parse video duration %r, defaulting to 0 seconds.', duration_str)
+        return 0
+
+    if not isinstance(parsed, dt.timedelta):  # isodate.Duration (years/months) is never emitted by YouTube
+        if history:
+            history.warning('Unsupported duration %r (years/months), defaulting to 0 seconds.', duration_str)
+        return 0
+
+    return int(parsed.total_seconds())
 
 
 # Module-level state (calculated at import time)

@@ -64,6 +64,7 @@ from .utils import (  # noqa: E402
     get_items_count,
     is_shorts,
     last_exe_date,
+    parse_iso8601_duration,
     sort_db,
 )
 
@@ -74,6 +75,7 @@ pd.set_option('display.max_columns', None)
 __all__ = [
     # Utils
     'last_exe_date',
+    'parse_iso8601_duration',
     'is_shorts',
     'sort_db',
     'get_items_count',
