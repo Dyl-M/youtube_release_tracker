@@ -195,6 +195,30 @@ def history_mock(monkeypatch):
     return mock_logger
 
 
+@pytest.fixture
+def exec_context(tmp_path):
+    """A daily, workflow-mode ExecutionContext with a January 2024 window and log files under tmp_path."""
+    from yrt.constants import EXE_MODE_ACTION, JOB_DAILY
+    from yrt.context import ExecutionContext
+
+    return ExecutionContext(
+        job=JOB_DAILY,
+        exe_mode=EXE_MODE_ACTION,
+        now=dt.datetime(2024, 2, 1, tzinfo=dt.UTC),
+        last_exe=dt.datetime(2024, 1, 1, tzinfo=dt.UTC),
+        history_path=tmp_path / 'history.log',
+        last_exe_path=tmp_path / 'last_exe.log',
+    )
+
+
+@pytest.fixture
+def add_on_config():
+    """An AddOnConfig with empty lists (nothing skipped, nothing whitelisted)."""
+    from yrt.models import AddOnConfig
+
+    return AddOnConfig(favorites={})
+
+
 @pytest.fixture(autouse=True)
 def _reset_quota_tracker():
     """Drop the process-wide quota tracker after each test so tests never share spend."""
@@ -202,6 +226,16 @@ def _reset_quota_tracker():
     from yrt.youtube import quota
 
     quota.reset_tracker()
+
+
+@pytest.fixture(autouse=True)
+def _restore_youtube_logger():
+    """Put back the shared youtube logger after each test (bootstrap() rebinds it to the job's history file)."""
+    from yrt.youtube import utils
+
+    original = utils.history
+    yield
+    utils.set_logger(original)
 
 
 @pytest.fixture(autouse=True)
