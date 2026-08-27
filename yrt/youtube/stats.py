@@ -5,7 +5,6 @@ import datetime as dt
 from typing import Any
 
 # Third-party
-import isodate
 import pandas as pd
 import pyyoutube as pyt
 
@@ -14,7 +13,7 @@ from .. import config
 from ..constants import STATUS_DELETED
 from ..exceptions import APIError
 from ..models import PlaylistItem, VideoData, VideoStats, to_dict_list
-from . import utils
+from . import retry, utils
 from .api import get_videos
 
 
@@ -52,7 +51,7 @@ def get_stats(service: pyt.Client, videos_list: list[Any], check_shorts: bool = 
                     views=item.statistics.viewCount,
                     likes=item.statistics.likeCount,
                     comments=item.statistics.commentCount,
-                    duration=isodate.parse_duration(getattr(item.contentDetails, 'duration', 'PT0S') or 'PT0S').seconds,
+                    duration=utils.parse_iso8601_duration(getattr(item.contentDetails, 'duration', None)),
                     is_shorts=utils.is_shorts(video_id=item.id) if check_shorts else None,
                     live_status=item.snippet.liveBroadcastContent,
                     latest_status=item.status.privacyStatus,
@@ -60,10 +59,8 @@ def get_stats(service: pyt.Client, videos_list: list[Any], check_shorts: bool = 
                 for item in request
             ]
 
-        except pyt.error.PyYouTubeException as api_error:
-            if utils.history:
-                utils.history.error(api_error.message)
-            raise APIError(f'API error while getting stats: {api_error.message}') from api_error
+        except APIError as api_error:
+            raise retry.rewrap(api_error, 'API error while getting stats') from api_error
 
     validated = [video.video_id for video in items]
     missing = [vid_id for vid_id in videos_ids if vid_id not in validated]

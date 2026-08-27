@@ -68,7 +68,7 @@ Issues = "https://github.com/Dyl-M/youtube_release_tracker/issues"
 [tool.ruff]
 target-version = "py312"
 line-length = 120
-extend-exclude = ["*.ipynb"]
+extend-exclude = ["*.ipynb", "*.md"] # ruff >= 0.16 formats Markdown code fences; docs are not code
 
 [tool.ruff.lint]
 select = [
@@ -96,6 +96,7 @@ ignore = [
     "RUF022", # __all__ uses intentional comment-grouped ordering, not alphabetical
     "PLR2004", # magic values in comparisons (HTTP status codes, small literals) are clear in context
     "PLR0913", # API-wrapper functions legitimately take many arguments (service, playlist IDs, ...)
+    "PLR0917", # same rationale: positional-argument count on the same API-wrapper signatures
 ]
 
 [tool.ruff.lint.per-file-ignores]

@@ -5,10 +5,12 @@ import datetime as dt
 import json
 import os
 from pathlib import Path
-from unittest.mock import MagicMock, Mock
+from unittest.mock import MagicMock, Mock, patch
 
 # Third-party
 import pytest
+import requests
+from pyyoutube.error import PyYouTubeException
 from tzlocal import get_localzone
 
 # Disable logging BEFORE importing yrt modules to prevent log file creation
@@ -145,6 +147,61 @@ def mock_requests_response():
     mock_response = Mock()
     mock_response.status_code = 200
     return mock_response
+
+
+@pytest.fixture
+def api_error():
+    """Factory building a real PyYouTubeException from a JSON error fixture in _tests/fixtures/."""
+
+    def _build(fixture_name):
+        """Wrap the fixture body in a Response-shaped mock and raise it through the library's own parser.
+
+        Mock(spec=requests.Response) passes the library's isinstance() check, so .status_code and .message are
+        filled exactly as they would be for a real API error.
+        """
+        body = json.loads((FIXTURES_DIR / fixture_name).read_text(encoding='utf-8'))
+        response = Mock(spec=requests.Response)
+        response.status_code = body['error']['code']
+        response.json.return_value = body
+        return PyYouTubeException(response)
+
+    return _build
+
+
+@pytest.fixture
+def no_sleep():
+    """Patch the retry layer's sleep so transient paths run instantly; yields the mock for call assertions."""
+    with patch('yrt.youtube.retry.time.sleep') as mock_sleep:
+        yield mock_sleep
+
+
+@pytest.fixture
+def quota_tracker():
+    """Install a small, deterministic QuotaTracker as the process-wide default and return it."""
+    from yrt.youtube import quota
+
+    tracker = quota.QuotaTracker(budget=100, daily_quota=1000)
+    quota.set_tracker(tracker)
+    return tracker
+
+
+@pytest.fixture
+def history_mock(monkeypatch):
+    """Replace the shared youtube logger with a MagicMock to assert on log calls."""
+    from yrt.youtube import utils
+
+    mock_logger = MagicMock()
+    monkeypatch.setattr(utils, 'history', mock_logger)
+    return mock_logger
+
+
+@pytest.fixture(autouse=True)
+def _reset_quota_tracker():
+    """Drop the process-wide quota tracker after each test so tests never share spend."""
+    yield
+    from yrt.youtube import quota
+
+    quota.reset_tracker()
 
 
 @pytest.fixture(autouse=True)

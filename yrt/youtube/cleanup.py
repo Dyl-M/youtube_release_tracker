@@ -2,17 +2,86 @@
 
 # Standard library
 import datetime as dt
+from collections.abc import Callable
+from functools import partial
+from typing import Any
 
 # Third-party
 import pyyoutube as pyt
 
 # Local
 from .. import config
-from ..constants import LIVE_STATUS_NONE
+from ..constants import LIVE_STATUS_NONE, QUOTA_COST_LIST
+from ..exceptions import APIError, ErrorCategory
 from ..models import PlaylistConfig, PlaylistItemRef
-from . import utils
+from . import retry, utils
 from .api import get_videos
 from .playlist import del_from_playlist
+
+
+def _is_quota_error(error: APIError) -> bool:
+    """Tell whether an APIError is a quota rejection (by category, or by the historical 403 heuristic).
+
+    Args:
+        error: The error raised by the retry layer.
+
+    Returns:
+        True for quota errors.
+    """
+    return error.category is ErrorCategory.QUOTA or error.status_code == 403
+
+
+def _paginate_playlist_items(
+    service: pyt.Client,
+    playlist_id: str,
+    playlist_name: str,
+    check_label: str,
+    transform: Callable[[Any], PlaylistItemRef | None],
+) -> list[PlaylistItemRef]:
+    """Page through a playlist, keeping what transform() returns; stop with partial results on API errors.
+
+    Args:
+        service: A Python YouTube Client.
+        playlist_id: The playlist ID to fetch items from.
+        playlist_name: The playlist name for logging.
+        check_label: What the caller is checking, for the quota warning (e.g. 'retention', 'streams').
+        transform: Maps one API item to a PlaylistItemRef, or None to skip it.
+
+    Returns:
+        The kept PlaylistItemRef instances, possibly partial if a page failed (logged as a warning).
+    """
+    kept: list[PlaylistItemRef] = []
+    next_page_token = None
+
+    while True:
+        try:
+            response = retry.call_api(
+                partial(
+                    service.playlistItems.list,
+                    part=['snippet', 'contentDetails'],
+                    playlist_id=playlist_id,
+                    max_results=config.API_BATCH_SIZE,
+                    pageToken=next_page_token,
+                ),
+                cost=QUOTA_COST_LIST,
+                description=f'playlistItems.list({playlist_id})',
+            )
+
+        except APIError as error:
+            if _is_quota_error(error):
+                if utils.history:
+                    utils.history.warning('API quota exceeded while checking %s for %s', check_label, playlist_name)
+            elif utils.history:
+                utils.history.warning('Error fetching items from %s: %s', playlist_name, error)
+            break
+
+        kept.extend(ref for item in response.items if (ref := transform(item)) is not None)
+
+        next_page_token = response.nextPageToken
+        if not next_page_token:
+            break
+
+    return kept
 
 
 def _fetch_stream_playlist_items(service: pyt.Client, playlist_id: str, playlist_name: str) -> list[PlaylistItemRef]:
@@ -26,35 +95,13 @@ def _fetch_stream_playlist_items(service: pyt.Client, playlist_id: str, playlist
     Returns:
         List of PlaylistItemRef instances with item_id and video_id.
     """
-    all_items: list[PlaylistItemRef] = []
-    next_page_token = None
-
-    while True:
-        try:
-            response = service.playlistItems.list(
-                part=['snippet', 'contentDetails'],
-                playlist_id=playlist_id,
-                max_results=config.API_BATCH_SIZE,
-                pageToken=next_page_token,
-            )
-
-            all_items.extend(
-                PlaylistItemRef(item_id=item.id, video_id=item.contentDetails.videoId) for item in response.items
-            )
-
-            next_page_token = response.nextPageToken
-            if not next_page_token:
-                break
-
-        except pyt.error.PyYouTubeException as error:
-            if error.status_code == 403:
-                if utils.history:
-                    utils.history.warning('API quota exceeded while checking streams for %s', playlist_name)
-            elif utils.history:
-                utils.history.warning('Error fetching items from %s: %s', playlist_name, error.message)
-            break
-
-    return all_items
+    return _paginate_playlist_items(
+        service,
+        playlist_id,
+        playlist_name,
+        'streams',
+        lambda item: PlaylistItemRef(item_id=item.id, video_id=item.contentDetails.videoId),
+    )
 
 
 def _fetch_expired_items(
@@ -71,43 +118,20 @@ def _fetch_expired_items(
     Returns:
         List of PlaylistItemRef instances for expired items.
     """
-    expired_items: list[PlaylistItemRef] = []
-    next_page_token = None
 
-    while True:
-        try:
-            response = service.playlistItems.list(
-                part=['snippet', 'contentDetails'],
-                playlist_id=playlist_id,
-                max_results=config.API_BATCH_SIZE,
-                pageToken=next_page_token,
-            )
+    def expired_ref(item: Any) -> PlaylistItemRef | None:
+        """Keep the item only if it was added to the playlist before the cutoff (snippet.publishedAt)."""
+        added_date_str = item.snippet.publishedAt
+        if not added_date_str:
+            return None
 
-            for item in response.items:
-                # snippet.publishedAt is when the video was added to the playlist
-                added_date_str = item.snippet.publishedAt
-                if added_date_str:
-                    added_date = dt.datetime.strptime(added_date_str, utils.ISO_DATE_FORMAT)
-                    if added_date < cutoff_date:
-                        expired_items.append(
-                            PlaylistItemRef(item_id=item.id, video_id=item.contentDetails.videoId, add_date=added_date)
-                        )
+        added_date = dt.datetime.strptime(added_date_str, utils.ISO_DATE_FORMAT)
+        if added_date >= cutoff_date:
+            return None
 
-            next_page_token = response.nextPageToken
-            if not next_page_token:
-                break
+        return PlaylistItemRef(item_id=item.id, video_id=item.contentDetails.videoId, add_date=added_date)
 
-        except pyt.error.PyYouTubeException as error:
-            if error.status_code == 403:
-                if utils.history:
-                    utils.history.warning('API quota exceeded while checking retention for %s', playlist_name)
-
-            elif utils.history:
-                utils.history.warning('Error fetching items from %s: %s', playlist_name, error.message)
-
-            break
-
-    return expired_items
+    return _paginate_playlist_items(service, playlist_id, playlist_name, 'retention', expired_ref)
 
 
 def _find_ended_streams(service: pyt.Client, all_items: list[PlaylistItemRef]) -> list[PlaylistItemRef]:
@@ -132,9 +156,9 @@ def _find_ended_streams(service: pyt.Client, all_items: list[PlaylistItemRef]) -
                 if video.snippet.liveBroadcastContent == LIVE_STATUS_NONE and video.id in video_id_to_item:
                     ended_items.append(video_id_to_item[video.id])
 
-        except pyt.error.PyYouTubeException as error:
+        except APIError as error:
             if utils.history:
-                utils.history.warning('Error checking stream status: %s', error.message)
+                utils.history.warning('Error checking stream status: %s', error)
 
     return ended_items
 
