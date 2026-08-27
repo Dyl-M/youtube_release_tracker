@@ -183,6 +183,7 @@ def validate(tmp_path, monkeypatch):
     monkeypatch.setattr(paths, 'CONSTANTS_JSON', config_file)
 
     def _run(override):
+        """Write the override as constants.json, load it, and return the ConfigurationError raised (or None)."""
         from yrt.config import load_constants
 
         config_file.write_text(json.dumps(override), encoding='utf-8')
