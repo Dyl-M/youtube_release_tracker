@@ -52,7 +52,7 @@ def _failure_entry(api_failure: dict[str, Any], playlist_id: str) -> dict[str, A
     if playlist_id not in api_failure:
         api_failure[playlist_id] = {'name': _playlist_name(playlist_id), 'description': '', 'failure': []}
 
-    entry = api_failure[playlist_id]
+    entry: dict[str, Any] = api_failure[playlist_id]
     entry.setdefault('failure', [])
     return entry
 
