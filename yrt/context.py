@@ -95,14 +95,15 @@ class ExecutionContext:
 
     def __post_init__(self) -> None:
         """Validate the job name, the execution mode and the timezone awareness of both datetimes."""
-        if self.job not in JOBS:
-            raise ValueError(f'Unknown job {self.job!r}, expected one of {JOBS}')
-        if self.exe_mode not in EXE_MODES:
-            raise ValueError(f'Unknown execution mode {self.exe_mode!r}, expected one of {EXE_MODES}')
-        if self.now.utcoffset() is None:
-            raise ValueError('now must be timezone-aware')
-        if self.last_exe.utcoffset() is None:
-            raise ValueError('last_exe must be timezone-aware')
+        checks = (
+            (self.job in JOBS, f'Unknown job {self.job!r}, expected one of {JOBS}'),
+            (self.exe_mode in EXE_MODES, f'Unknown execution mode {self.exe_mode!r}, expected one of {EXE_MODES}'),
+            (self.now.utcoffset() is not None, 'now must be timezone-aware'),
+            (self.last_exe.utcoffset() is not None, 'last_exe must be timezone-aware'),
+        )
+        for valid, message in checks:
+            if not valid:
+                raise ValueError(message)
 
     @property
     def prog_bar(self) -> bool:
