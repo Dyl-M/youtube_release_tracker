@@ -181,7 +181,7 @@ Current implementation tests:
 
 11. **Smoke flow** (test_smoke_flow.py) ✅ - the daily job's steps end to end against the mock client
 
-**Total:** 307 tests | **Passing:** 287 | **Skipped:** 20 | **Line coverage:** 68%
+**Total:** 313 tests | **Passing:** 293 | **Skipped:** 20 | **Line coverage:** 69%
 
 ## Adding New Tests
 

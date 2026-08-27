@@ -236,9 +236,9 @@ Acceptance: sister `Playlists updates` green on the next scheduled run; Mixes ad
 
 ### Phase 1 — Foundations (L) · `feat/api-retry-quota`
 
-**Status:** ✅ Implemented 2026-08-27 on `feat/api-retry-quota` (squash PR to `dev` pending). Shipped as an explicit
+**Status:** ✅ Implemented 2026-08-27 on `feat/api-retry-quota` (PR #170 → `dev`). Shipped as an explicit
 `retry.call_api()` helper (per-call cost/description, `functools.partial` on the client) rather than an `@api_call`
-decorator; quota enforcement stays Phase 3 as decided (account-only here). Coverage 44 % → 68 %.
+decorator; quota enforcement stays Phase 3 as decided (account-only here). Coverage 44 % → 69 %.
 
 Covers IMPROVEMENTS-2026 **#8, #17, #9, #14** and a bug.
 

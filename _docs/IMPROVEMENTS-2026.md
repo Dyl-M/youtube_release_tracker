@@ -10,7 +10,7 @@ Pythonic implementation, and readability.
 - **Test Coverage:** Target 90% code coverage by the end of improvements (reported to DeepSource). Coverage should
   improve incrementally phase by phase.
     - **Baseline (Phase 1 complete):** 43% code coverage (177 tests passing)
-    - **Measured 2026-08-27:** 44% (177 passed, 23 skipped); **68%** after port plan Phase 1 (287 passed, 20 skipped)
+    - **Measured 2026-08-27:** 44% (177 passed, 23 skipped); **69%** after port plan Phase 1 (293 passed, 20 skipped)
     - **Note:** This is *code line coverage*, not *test pass rate* (which is 88.5%)
 
 > **See also:** [`PORT-AUTO-YOUTUBE-PLAYLIST.md`](PORT-AUTO-YOUTUBE-PLAYLIST.md) folds items #8, #9, #10, #11, #14,
@@ -697,7 +697,7 @@ def iter_channels_generator(
 **Total:** 21 improvement items (12 fixed, 1 accepted, 8 pending)
 **PR #141:** Merged - Phase 1-3 (partial) complete
 
-### Current Code Coverage Breakdown (68% total, measured 2026-08-27 after port plan Phase 1)
+### Current Code Coverage Breakdown (69% total, measured 2026-08-27 after port plan Phase 1)
 
 | Module                    | Coverage | Status         |
 |---------------------------|----------|----------------|
@@ -713,8 +713,8 @@ def iter_channels_generator(
 | `yrt/youtube/__init__.py` | 100%     | ✅ Complete     |
 | `yrt/youtube/quota.py`    | 100%     | ✅ Complete     |
 | `yrt/youtube/retry.py`    | 99%      | ✅ Complete     |
-| `yrt/youtube/api.py`      | 90%      | ✅ Complete     |
-| `yrt/youtube/cleanup.py`  | 89%      | ✅ Complete     |
+| `yrt/youtube/api.py`      | 91%      | ✅ Complete     |
+| `yrt/youtube/cleanup.py`  | 95%      | ✅ Complete     |
 | `yrt/youtube/playlist.py` | 69%      | 🔸 Needs work   |
 | `yrt/youtube/utils.py`    | 65%      | 🔸 Needs work   |
 | `yrt/youtube/stats.py`    | 22%      | ⚠️ Low         |
