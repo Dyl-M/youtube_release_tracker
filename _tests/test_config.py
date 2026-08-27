@@ -31,7 +31,7 @@ class TestDeepMerge:
         overrides = {'api': {'batch_size': 100}}
         result = _deep_merge(defaults, overrides)
 
-        assert result['api']['batch_size'] == 25
+        assert result['api']['batch_size'] == 100
         assert result['api']['timeout'] == 5
 
     @staticmethod
