@@ -208,8 +208,10 @@ def run_daily(ctx: ExecutionContext, session: runtime.Session) -> None:
         )
 
         # Add videos to playlists
+        destinations = new_data['dest_playlist'].unique().tolist()  # plain strings, one list of IDs per playlist
         to_add = {
-            str(destination): group['video_id'].tolist() for destination, group in new_data.groupby('dest_playlist')
+            destination: new_data.loc[new_data['dest_playlist'] == destination, 'video_id'].tolist()
+            for destination in destinations
         }
         _add_videos_to_playlists(service, cfg.playlists, to_add, logger, prog_bar)
 
