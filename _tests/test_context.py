@@ -13,6 +13,7 @@ from tzlocal import get_localzone
 from yrt import paths
 from yrt.constants import EXE_MODE_ACTION, EXE_MODE_LOCAL, JOB_DAILY, JOB_UPDATES
 from yrt.context import ExecutionContext, job_log_files, last_exe_date
+from yrt.exceptions import ConfigurationError
 
 NOW = dt.datetime(2024, 2, 1, 12, 30, tzinfo=dt.UTC)
 LAST_EXE = dt.datetime(2024, 1, 31, 7, 0, tzinfo=dt.UTC)
@@ -97,12 +98,14 @@ class TestLastExeDate:
 
     @staticmethod
     def test_unparseable_first_line_raises(tmp_path):
-        """Test a first line without a date raises ValueError."""
+        """Test a first line without a date raises ConfigurationError (caught and logged by run_job)."""
         log = tmp_path / 'last_exe.log'
         log.write_text('garbage\n', encoding='utf-8')
 
-        with pytest.raises(ValueError, match='Could not parse date'):
+        with pytest.raises(ConfigurationError, match='Could not parse date') as exc_info:
             last_exe_date(log)
+
+        assert exc_info.value.file_path == str(log)
 
 
 @pytest.mark.unit

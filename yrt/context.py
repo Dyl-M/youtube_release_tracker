@@ -18,6 +18,7 @@ import tzlocal
 # Local
 from . import paths
 from .constants import EXE_MODE_LOCAL, EXE_MODES, JOB_DAILY, JOB_UPDATES, JOBS, LOG_DATE_FORMAT
+from .exceptions import ConfigurationError
 
 # First token of a log line: "2026-08-27 09:12:00+0200"
 _LOG_DATE_PATTERN = re.compile(r'(\d{4}(-\d{2}){2})\s(\d{2}:?){3}.[\d:]+')
@@ -52,7 +53,7 @@ def last_exe_date(log_path: Path) -> dt.datetime:
         Last execution date, or 24 hours ago if the log is missing or empty.
 
     Raises:
-        ValueError: If the first line holds no parseable date.
+        ConfigurationError: If the first line holds no parseable date (the file was edited or truncated by hand).
     """
     try:
         with open(log_path, encoding='utf8') as log_file:
@@ -68,7 +69,7 @@ def last_exe_date(log_path: Path) -> dt.datetime:
 
     match = _LOG_DATE_PATTERN.search(first_log)
     if match is None:
-        raise ValueError(f'Could not parse date from log line: {first_log}')
+        raise ConfigurationError(f'Could not parse date from log line: {first_log!r}', file_path=str(log_path))
 
     return dt.datetime.strptime(match.group(), LOG_DATE_FORMAT)
 

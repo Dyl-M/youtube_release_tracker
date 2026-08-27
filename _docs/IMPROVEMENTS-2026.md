@@ -280,7 +280,7 @@ class VideoRouter:
 **Locations:**
 
 - `yrt/file_utils.py:58-63` - Uses string operations for path validation
-- `yrt/main.py:144-154` - Manual file I/O in `copy_last_exe_log()`
+- ~~`yrt/main.py` - Manual file I/O in `copy_last_exe_log()`~~ ✅ now `runtime.copy_last_exe_log()` on `Path`
 
 **Status:** Pending
 

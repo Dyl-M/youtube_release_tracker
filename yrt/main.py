@@ -209,7 +209,6 @@ def run_daily(ctx: ExecutionContext, session: runtime.Session) -> None:
         )
 
         # Add videos to playlists
-        # noinspection PyTypeChecker
         to_add = cast('dict[str, list[str]]', new_data.groupby('dest_playlist')['video_id'].apply(list).to_dict())
         _add_videos_to_playlists(service, cfg.playlists, to_add, logger, prog_bar)
 
@@ -238,8 +237,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         Process exit code (0 on success, 1 on a handled fatal error).
     """
     exe_mode = runtime.parse_exe_mode(argv, prog='python -m yrt.main')
-    ctx = ExecutionContext.create(JOB_DAILY, exe_mode)
-    return runtime.run_job(ctx, run_daily)
+    return runtime.run_job(JOB_DAILY, exe_mode, run_daily)
 
 
 if __name__ == '__main__':

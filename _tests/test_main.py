@@ -15,7 +15,6 @@ import pytest
 from yrt import main, paths, router, runtime
 from yrt.constants import EXE_MODE_ACTION, EXE_MODE_LOCAL, JOB_DAILY, PROCESS_END_MARKER, PROCESS_START_MARKER
 from yrt.exceptions import APIError, CredentialsError
-from yrt.logging_utils import create_file_logger
 from yrt.models import AddOnConfig, AppConfig, PlaylistConfig, PlaylistItem
 
 MUSIC_CHANNEL = 'UCmusic0000000000000000'
@@ -65,11 +64,6 @@ def _new_video_frame(video_id):
     )
 
 
-def _lines(path):
-    """Read a log file as a list of message parts (without timestamps)."""
-    return [line.split(' - ', 1)[1] for line in path.read_text(encoding='utf-8').splitlines()]
-
-
 @pytest.fixture
 def daily_config(tmp_path, monkeypatch):
     """Serve a minimal AppConfig, an empty temp stats.csv and a fresh router singleton; returns the config."""
@@ -83,10 +77,9 @@ def daily_config(tmp_path, monkeypatch):
 
 
 @pytest.fixture
-def session(exec_context):
+def session(session_factory):
     """A Session with a mock service and a logger on the context's history file."""
-    logger = create_file_logger('history_main', exec_context.history_path, respect_no_logging=False)
-    return runtime.Session(service=MagicMock(), creds_b64=None, github=None, logger=logger)
+    return session_factory()
 
 
 @pytest.fixture
@@ -119,30 +112,20 @@ class TestMainEntryPoint:
     """Test main() builds a daily context and hands it to the runtime."""
 
     @staticmethod
-    def test_builds_a_daily_context_and_runs_the_job(tmp_path, monkeypatch):
-        """Test 'action' yields a workflow-mode daily context and the exit code of run_job()."""
-        monkeypatch.setattr(paths, 'HISTORY_LOG', tmp_path / 'history.log')
-        monkeypatch.setattr(paths, 'LAST_EXE_LOG', tmp_path / 'last_exe.log')
-
+    def test_runs_the_daily_job_in_the_requested_mode():
+        """Test 'action' hands the daily job and the workflow mode to run_job() and returns its exit code."""
         with patch('yrt.main.runtime.run_job', return_value=0) as run_job:
             assert main.main(['action']) == 0
 
-        ctx, body = run_job.call_args.args
-        assert ctx.job == JOB_DAILY
-        assert ctx.exe_mode == EXE_MODE_ACTION
-        assert body is main.run_daily
+        assert run_job.call_args.args == (JOB_DAILY, EXE_MODE_ACTION, main.run_daily)
 
     @staticmethod
-    def test_defaults_to_local_mode(tmp_path, monkeypatch):
+    def test_defaults_to_local_mode():
         """Test no argument means local mode (token files, progress bars)."""
-        monkeypatch.setattr(paths, 'HISTORY_LOG', tmp_path / 'history.log')
-        monkeypatch.setattr(paths, 'LAST_EXE_LOG', tmp_path / 'last_exe.log')
-
         with patch('yrt.main.runtime.run_job', return_value=0) as run_job:
             main.main([])
 
-        assert run_job.call_args.args[0].exe_mode == EXE_MODE_LOCAL
-        assert run_job.call_args.args[0].prog_bar is True
+        assert run_job.call_args.args == (JOB_DAILY, EXE_MODE_LOCAL, main.run_daily)
 
     @staticmethod
     def test_invalid_mode_exits():
@@ -151,7 +134,7 @@ class TestMainEntryPoint:
             main.main(['bogus'])
 
     @staticmethod
-    def test_handles_tracker_errors(tmp_path, monkeypatch, quota_tracker):
+    def test_handles_tracker_errors(tmp_path, monkeypatch, quota_tracker, log_lines):
         """Test a YouTubeTrackerError raised while bootstrapping is logged as fatal and mapped to exit code 1."""
         monkeypatch.setattr(paths, 'HISTORY_LOG', tmp_path / 'history.log')
         monkeypatch.setattr(paths, 'LAST_EXE_LOG', tmp_path / 'last_exe.log')
@@ -159,7 +142,7 @@ class TestMainEntryPoint:
         with patch('yrt.main.youtube.create_service_local', side_effect=CredentialsError('no token')):
             assert main.main([]) == 1
 
-        lines = _lines(tmp_path / 'history.log')
+        lines = log_lines(tmp_path / 'history.log')
         assert lines[0] == PROCESS_START_MARKER
         assert lines[-2] == 'Fatal error: no token'
         assert lines[-1].startswith('Quota spent: 0 units')
@@ -171,7 +154,7 @@ class TestLastExeLog:
     """Test the last-exe log follows the outcome of a full local run."""
 
     @staticmethod
-    def test_rewritten_on_success(tmp_path, monkeypatch, quota_tracker, daily_config, youtube_mocks):
+    def test_rewritten_on_success(tmp_path, monkeypatch, quota_tracker, daily_config, youtube_mocks, log_lines):
         """Test a successful run ends with the end marker and refreshes last_exe.log with the whole run."""
         monkeypatch.setattr(paths, 'HISTORY_LOG', tmp_path / 'history.log')
         monkeypatch.setattr(paths, 'LAST_EXE_LOG', tmp_path / 'last_exe.log')
@@ -182,12 +165,12 @@ class TestLastExeLog:
         ):
             assert main.main([]) == 0
 
-        lines = _lines(tmp_path / 'last_exe.log')
+        lines = log_lines(tmp_path / 'last_exe.log')
         assert lines[0] == PROCESS_START_MARKER
         assert lines[-1] == PROCESS_END_MARKER
 
     @staticmethod
-    def test_kept_when_the_job_fails(tmp_path, monkeypatch, quota_tracker, daily_config, youtube_mocks):
+    def test_kept_when_the_job_fails(tmp_path, monkeypatch, quota_tracker, daily_config, youtube_mocks, log_lines):
         """Test a failing run leaves last_exe.log untouched so the next run re-scans the missed window."""
         monkeypatch.setattr(paths, 'HISTORY_LOG', tmp_path / 'history.log')
         monkeypatch.setattr(paths, 'LAST_EXE_LOG', tmp_path / 'last_exe.log')
@@ -199,7 +182,7 @@ class TestLastExeLog:
             assert main.main([]) == 1
 
         assert (tmp_path / 'last_exe.log').read_text(encoding='utf-8') == previous_run
-        assert 'Fatal error: quota wall' in _lines(tmp_path / 'history.log')
+        assert 'Fatal error: quota wall' in log_lines(tmp_path / 'history.log')
 
 
 @pytest.mark.integration
@@ -207,11 +190,11 @@ class TestRunDaily:
     """Test run_daily() orchestration against patched youtube functions."""
 
     @staticmethod
-    def test_no_new_videos(exec_context, session, daily_config, youtube_mocks):
+    def test_no_new_videos(exec_context, session, daily_config, youtube_mocks, log_lines):
         """Test an empty discovery still updates stats, fills Release Radar and runs both cleanups with the context."""
         main.run_daily(exec_context, session)
 
-        assert 'No addition to perform.' in _lines(exec_context.history_path)
+        assert 'No addition to perform.' in log_lines(exec_context.history_path)
         youtube_mocks['add_api_fail'].assert_called_once_with(service=session.service, prog_bar=False)
         youtube_mocks['iter_channels'].assert_called_once_with(
             session.service, [MUSIC_CHANNEL], exec_context, daily_config.add_on, prog_bar=False
@@ -236,7 +219,7 @@ class TestRunDaily:
         assert paths.STATS_CSV.exists()
 
     @staticmethod
-    def test_new_video_is_stored_and_routed(exec_context, session, daily_config, youtube_mocks):
+    def test_new_video_is_stored_and_routed(exec_context, session, daily_config, youtube_mocks, log_lines):
         """Test a discovered music video is written to stats.csv and added to Release Radar."""
         youtube_mocks['iter_channels'].return_value = [
             PlaylistItem(
@@ -254,7 +237,7 @@ class TestRunDaily:
 
         main.run_daily(exec_context, session)
 
-        lines = _lines(exec_context.history_path)
+        lines = log_lines(exec_context.history_path)
         assert 'Add statistics for 1 video(s).' in lines
         assert 'Addition to "Release Radar": 1 video(s).' in lines
         youtube_mocks['add_to_playlist'].assert_called_once_with(

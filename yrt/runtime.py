@@ -29,7 +29,7 @@ from .constants import (
     PROCESS_END_MARKER,
     PROCESS_START_MARKER,
 )
-from .context import ExecutionContext
+from .context import ExecutionContext, job_log_files
 from .exceptions import ConfigurationError, GitHubError, YouTubeTrackerError
 from .logging_utils import create_file_logger
 from .models import AddOnConfig, AppConfig, PlaylistConfig
@@ -285,19 +285,22 @@ def finalize(ctx: ExecutionContext, session: Session) -> None:
     copy_last_exe_log(ctx.history_path, ctx.last_exe_path)  # only reached on success: failed runs keep the marker
 
 
-def run_job(ctx: ExecutionContext, body: JobBody) -> int:
+def run_job(job: str, exe_mode: str, body: JobBody) -> int:
     """Run a job end to end and translate the outcome into an exit code.
 
     Args:
-        ctx: Execution context of the run.
+        job: Job name, one of JOBS.
+        exe_mode: Execution mode, one of EXE_MODES.
         body: The job's own work, called between bootstrap() and finalize().
 
     Returns:
         0 on success, 1 when a YouTubeTrackerError stopped the run (logged as a fatal error with the quota spent).
     """
-    top_level = create_file_logger('top_level', ctx.history_path, respect_no_logging=False)
+    history_path, _ = job_log_files(job)
+    top_level = create_file_logger('top_level', history_path, respect_no_logging=False)
 
     try:
+        ctx = ExecutionContext.create(job, exe_mode)  # reads the job's last-exe log, a corrupt one is fatal
         session = bootstrap(ctx)
         body(ctx, session)
         finalize(ctx, session)

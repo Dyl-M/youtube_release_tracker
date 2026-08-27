@@ -219,6 +219,34 @@ def add_on_config():
     return AddOnConfig(favorites={})
 
 
+@pytest.fixture
+def log_lines():
+    """Factory reading a log file as a list of message parts (without timestamps)."""
+
+    def _read(path):
+        """Return the message part of every line of a log file."""
+        return [line.split(' - ', 1)[1] for line in path.read_text(encoding='utf-8').splitlines()]
+
+    return _read
+
+
+@pytest.fixture
+def session_factory(exec_context):
+    """Factory building a runtime.Session with a mock service and a logger on the context's history file."""
+    from yrt import runtime
+    from yrt.constants import PROCESS_START_MARKER
+    from yrt.logging_utils import create_file_logger
+
+    def _build(*, creds_b64=None, target=None, mark_started=False):
+        """Build the session; mark_started writes the start marker as bootstrap() would."""
+        logger = create_file_logger('history_main', exec_context.history_path, respect_no_logging=False)
+        if mark_started:
+            logger.info(PROCESS_START_MARKER)
+        return runtime.Session(service=MagicMock(), creds_b64=creds_b64, github=target, logger=logger)
+
+    return _build
+
+
 @pytest.fixture(autouse=True)
 def _reset_quota_tracker():
     """Drop the process-wide quota tracker after each test so tests never share spend."""
