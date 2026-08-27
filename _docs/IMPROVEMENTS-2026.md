@@ -10,7 +10,12 @@ Pythonic implementation, and readability.
 - **Test Coverage:** Target 90% code coverage by the end of improvements (reported to DeepSource). Coverage should
   improve incrementally phase by phase.
     - **Baseline (Phase 1 complete):** 43% code coverage (177 tests passing)
+    - **Measured 2026-08-27:** 44% (177 passed, 23 skipped)
     - **Note:** This is *code line coverage*, not *test pass rate* (which is 88.5%)
+
+> **See also:** [`PORT-AUTO-YOUTUBE-PLAYLIST.md`](PORT-AUTO-YOUTUBE-PLAYLIST.md) folds items #8, #9, #10, #11, #14,
+> #15, #17 and #19 into its phases (foundations for the `auto_youtube_playlist` port). Items #7, #16, #18 and #21 stay
+> in this backlog.
 
 ---
 
@@ -519,37 +524,6 @@ except (YouTubeServiceError, CredentialsError, APIError) as e:
 
 ## 🛃 Low Priority - Nice to Have
 
-### 15. Use Generators for Memory Efficiency
-
-**Location:** `yrt/youtube.py:537-574` (`iter_channels` function)
-
-**Status:** Pending
-
-**Issue:** Function accumulates all items in a list before returning, using more memory than necessary.
-
-**Solution:** Convert to generator:
-
-```python
-def iter_channels_generator(
-    service: pyt.Client,
-    channels: list[str],
-    day_ago: int | None = None,
-    latest_d: dt.datetime = NOW,
-    prog_bar: bool = True
-) -> Generator[PlaylistItem, None, None]:
-    """Generator that yields playlist items from channels."""
-    for ch_id in channels:
-        if ch_id in ADD_ON['toPass']:
-            continue
-
-        pl_id = f'UU{ch_id[2:]}'
-        items = get_playlist_items(service, pl_id, day_ago, latest_d)
-
-        for item in items:
-            if playlist_item := PlaylistItem.from_api_response(item, ch_id):
-                yield playlist_item
-```
-
 ### 16. Add Context Manager for YouTube Service
 
 **Status:** Pending
@@ -674,6 +648,40 @@ timezone key. If minimizing lag ever matters:
 
 The schedule is healthy as long as it fires once per calendar day.
 
+### 21. Use Generators for Memory Efficiency
+
+**Location:** `yrt/youtube/api.py` (`iter_channels` function)
+
+**Status:** Pending
+
+**Note:** Previously numbered 15, which collided with *Improve archive_data.py Error Handling*; renumbered to 21 so
+cross-references stay stable.
+
+**Issue:** Function accumulates all items in a list before returning, using more memory than necessary.
+
+**Solution:** Convert to generator:
+
+```python
+def iter_channels_generator(
+    service: pyt.Client,
+    channels: list[str],
+    day_ago: int | None = None,
+    latest_d: dt.datetime = NOW,
+    prog_bar: bool = True
+) -> Generator[PlaylistItem, None, None]:
+    """Generator that yields playlist items from channels."""
+    for ch_id in channels:
+        if ch_id in ADD_ON['toPass']:
+            continue
+
+        pl_id = f'UU{ch_id[2:]}'
+        items = get_playlist_items(service, pl_id, day_ago, latest_d)
+
+        for item in items:
+            if playlist_item := PlaylistItem.from_api_response(item, ch_id):
+                yield playlist_item
+```
+
 ---
 
 ## 📄 Summary
@@ -681,15 +689,15 @@ The schedule is healthy as long as it fires once per calendar day.
 - **☢️ Critical:** 1 bug ~~requiring immediate fix~~ ✅ Fixed
 - **⚠️ High Priority:** 5 structural improvements ✅ All done (Logger Factory, Split youtube.py, Domain Models,
   VideoRouter, Constants Module)
-- **🛑 Medium Priority:** 5 code quality improvements (2 pending: config validation, pathlib consistency)
+- **🛑 Medium Priority:** 5 code quality improvements (all pending)
 - **🧪 Test Suite:** 4 test coverage improvements (1 fixed: Test logging isolation)
-- **🛃 Low Priority:** 5 nice-to-have improvements
+- **🛃 Low Priority:** 6 nice-to-have improvements (1 accepted as documented limitation: scheduler lag)
 - **CI/CD:** Test coverage workflow with DeepSource reporting ✅ Added
 
-**Total:** 20 improvement items (7 fixed, 13 remaining)
+**Total:** 21 improvement items (7 fixed, 1 accepted, 13 pending)
 **PR #141:** Merged - Phase 1-3 (partial) complete
 
-### Current Code Coverage Breakdown (43% total)
+### Current Code Coverage Breakdown (44% total, measured 2026-08-27)
 
 | Module                    | Coverage | Status         |
 |---------------------------|----------|----------------|
@@ -703,12 +711,12 @@ The schedule is healthy as long as it fires once per calendar day.
 | `yrt/router.py`           | 95%      | ✅ Complete    |
 | `yrt/file_utils.py`       | 76%      | 🔸 Needs work  |
 | `yrt/youtube/__init__.py` | 100%     | ✅ Complete    |
-| `yrt/youtube/utils.py`    | 58%      | 🔸 Needs work  |
+| `yrt/youtube/utils.py`    | 61%      | 🔸 Needs work  |
 | `yrt/youtube/stats.py`    | 23%      | ⚠️ Low         |
-| `yrt/youtube/api.py`      | 20%      | ⚠️ Low         |
-| `yrt/youtube/auth.py`     | 17%      | ⚠️ Low         |
-| `yrt/youtube/playlist.py` | 15%      | ⚠️ Low         |
-| `yrt/youtube/cleanup.py`  | 12%      | ⚠️ Low         |
+| `yrt/youtube/api.py`      | 22%      | ⚠️ Low         |
+| `yrt/youtube/auth.py`     | 16%      | ⚠️ Low         |
+| `yrt/youtube/playlist.py` | 13%      | ⚠️ Low         |
+| `yrt/youtube/cleanup.py`  | 13%      | ⚠️ Low         |
 | `yrt/main.py`             | 0%       | ❌ Not covered |
 | `yrt/analytics.py`        | 0%       | 🚫 Placeholder |
 | `yrt/_sandbox.py`         | 0%       | 🚫 Dev only    |
@@ -718,7 +726,7 @@ The schedule is healthy as long as it fires once per calendar day.
 | File                       | Changes                            |
 |----------------------------|------------------------------------|
 | `yrt/file_utils.py`        | Fix logging bug, use pathlib       |
-| `yrt/youtube.py`           | Split into submodules              |
+| `yrt/youtube/` (package)   | ✅ Split into submodules           |
 | `yrt/main.py`              | Extract VideoRouter, use pathlib   |
 | `yrt/config.py`            | Add validation, use logger factory |
 | `yrt/paths.py`             | Keep ALLOWED_DIRS as Path objects  |
@@ -770,7 +778,9 @@ The schedule is healthy as long as it fires once per calendar day.
 6. ✅ Extract `yrt/models.py` with dataclasses (PlaylistItem, VideoStats, etc.) - *Note: at package level, not youtube/*
 7. ✅ Extract `yrt/youtube/auth.py` (create_service_local, create_service_workflow, encode_key)
 8. ⏸️ Extract `yrt/youtube/retry.py` with retry decorator - *Deferred to Phase 5*
-9. ✅ Extract `yrt/youtube/utils.py` (is_shorts, last_exe_date, sort_db, parse_iso8601_duration)
+9. ✅ Extract `yrt/youtube/utils.py` (is_shorts, last_exe_date, sort_db) — *`parse_iso8601_duration` was **not**
+    extracted; duration parsing is still inline in `stats.py` (`.seconds`, which drops the days component for ≥ 24 h
+    videos). Tracked by #14 and by the port plan's Phase 1.*
 10. ✅ Extract `yrt/youtube/api.py` (get_playlist_items, get_videos, get_subs, iter_channels)
 11. ✅ Extract `yrt/youtube/stats.py` (get_stats, add_stats, weekly_stats)
 12. ✅ Extract `yrt/youtube/playlist.py` (add_to_playlist, del_from_playlist, fill_release_radar)
