@@ -5,6 +5,7 @@ import datetime as dt
 import itertools
 import re
 from collections.abc import Sequence
+from functools import partial
 from typing import Any
 
 # Third-party
@@ -19,6 +20,7 @@ from ..constants import (
     ISO_DATE_FORMAT,
     LOG_DATE_FORMAT,
     PERMANENT_ERRORS,
+    QUOTA_COST_LIST,
     QUOTA_ERRORS,
     TRANSIENT_ERRORS,
 )
@@ -162,7 +164,13 @@ def get_items_count(service: pyt.Client, playlist_ids: list) -> tuple:
     Returns:
         Number of videos by playlist (ordered).
     """
-    playlists = service.playlists.list(part=['contentDetails'], playlist_id=playlist_ids).items
+    from . import retry  # function-level: retry imports this module
+
+    playlists = retry.call_api(
+        partial(service.playlists.list, part=['contentDetails'], playlist_id=playlist_ids),
+        cost=QUOTA_COST_LIST,
+        description='playlists.list',
+    ).items
     return tuple(pl.contentDetails.itemCount for pl in playlists)
 
 
@@ -187,23 +195,34 @@ def sort_db(service: pyt.Client, log: bool = True) -> None:
         Raises:
             APIError: If API error occurs while sorting database.
         """
+        from . import retry  # function-level: retry imports this module
+
         information = []
 
         # Split task in chunks to request on a maximum of API_BATCH_SIZE channels at each iteration.
         for chunk in chunked(_channel_list, config.API_BATCH_SIZE):
             try:
                 # Request channels
-                request = _service.channels.list(
-                    part=['snippet'], channel_id=chunk, max_results=config.API_BATCH_SIZE
+                request = retry.call_api(
+                    partial(
+                        _service.channels.list, part=['snippet'], channel_id=chunk, max_results=config.API_BATCH_SIZE
+                    ),
+                    cost=QUOTA_COST_LIST,
+                    description='channels.list',
                 ).items
 
                 # Extract upload playlists, channel names and their ID.
                 information += [{'title': an_item.snippet.title, 'id': an_item.id} for an_item in request]
 
-            except pyt.error.PyYouTubeException as api_error:
+            except APIError as api_error:
                 if log and history:
-                    history.error(api_error.message)
-                raise APIError(f'API error while sorting database: {api_error.message}') from api_error
+                    history.error(str(api_error))
+                raise APIError(
+                    f'API error while sorting database: {api_error}',
+                    reason=api_error.reason,
+                    status_code=api_error.status_code,
+                    category=api_error.category,
+                ) from api_error
 
         # Sort channels' name by alphabetical order
         information = sorted(information, key=lambda dic: dic['title'].lower())

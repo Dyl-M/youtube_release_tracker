@@ -3,6 +3,7 @@
 # Standard library
 import datetime as dt
 import itertools
+from functools import partial
 from typing import Any
 
 # Third-party
@@ -11,9 +12,10 @@ import tqdm
 
 # Local
 from .. import config
+from ..constants import QUOTA_COST_LIST
 from ..exceptions import APIError
 from ..models import PlaylistItem
-from . import utils
+from . import retry, utils
 
 
 def _parse_playlist_item(item: Any, date_format: str, source_channel_id: str) -> PlaylistItem | None:
@@ -42,13 +44,11 @@ def _parse_playlist_item(item: Any, date_format: str, source_channel_id: str) ->
     )
 
 
-def _handle_playlist_error(
-    error: pyt.error.PyYouTubeException, playlist_id: str, add_on: dict[str, Any] | None = None
-) -> bool:
+def _handle_playlist_error(error: APIError, playlist_id: str, add_on: dict[str, Any] | None = None) -> bool:
     """Handle playlist API errors. Raises APIError for fatal errors.
 
     Args:
-        error: The PyYouTubeException that was raised.
+        error: The APIError raised by the retry layer.
         playlist_id: The playlist ID that caused the error.
         add_on: Configuration dict containing playlistNotFoundPass list. Defaults to global ADD_ON.
 
@@ -68,8 +68,13 @@ def _handle_playlist_error(
         return True
 
     if utils.history:
-        utils.history.error('[%s] Unknown error: %s', playlist_id, error.message)
-    raise APIError(f'[{playlist_id}] Unknown error: {error.message}')
+        utils.history.error('[%s] Unknown error: %s', playlist_id, error)
+    raise APIError(
+        f'[{playlist_id}] Unknown error: {error}',
+        reason=error.reason,
+        status_code=error.status_code,
+        category=error.category,
+    ) from error
 
 
 def _filter_items_by_date_range(
@@ -112,6 +117,9 @@ def get_playlist_items(
 
     Returns:
         Playlist items as list of PlaylistItem dataclasses.
+
+    Raises:
+        APIError: If the playlist request fails for a reason other than "not found".
     """
     if latest_d is None:
         latest_d = utils.NOW
@@ -124,30 +132,36 @@ def get_playlist_items(
 
     while True:
         try:
-            request = service.playlistItems.list(
-                part=['snippet', 'contentDetails', 'status'],
-                playlist_id=playlist_id,
-                max_results=config.API_BATCH_SIZE,
-                pageToken=next_page_token,
+            request = retry.call_api(
+                partial(
+                    service.playlistItems.list,
+                    part=['snippet', 'contentDetails', 'status'],
+                    playlist_id=playlist_id,
+                    max_results=config.API_BATCH_SIZE,
+                    pageToken=next_page_token,
+                ),
+                cost=QUOTA_COST_LIST,
+                description=f'playlistItems.list({playlist_id})',
             )
 
-            # Parse items, filtering out those without release date
-            p_items += [
-                parsed
-                for item in request.items
-                if (parsed := _parse_playlist_item(item, utils.ISO_DATE_FORMAT, source_channel_id)) is not None
-            ]
-            p_items = _filter_items_by_date_range(p_items, latest_d, oldest_d=oldest_d, day_ago=day_ago)
-
-            next_page_token = request.nextPageToken
-
-            # No need for more requests (the playlist must be ordered chronologically!)
-            if len(p_items) <= config.API_BATCH_SIZE or next_page_token is None:
-                break
-
-        except pyt.error.PyYouTubeException as error:
+        except APIError as error:
             if _handle_playlist_error(error, playlist_id):
                 break
+            continue
+
+        # Parse items, filtering out those without release date
+        p_items += [
+            parsed
+            for item in request.items
+            if (parsed := _parse_playlist_item(item, utils.ISO_DATE_FORMAT, source_channel_id)) is not None
+        ]
+        p_items = _filter_items_by_date_range(p_items, latest_d, oldest_d=oldest_d, day_ago=day_ago)
+
+        next_page_token = request.nextPageToken
+
+        # No need for more requests (the playlist must be ordered chronologically!)
+        if len(p_items) <= config.API_BATCH_SIZE or next_page_token is None:
+            break
 
     return p_items
 
@@ -161,11 +175,19 @@ def get_videos(service: pyt.Client, videos_list: list[str]) -> list[Any]:
 
     Returns:
         Request results.
+
+    Raises:
+        APIError: If the request fails.
     """
-    return service.videos.list(  # type: ignore[no-any-return]
-        part=['snippet', 'contentDetails', 'statistics', 'status'],
-        video_id=videos_list,
-        max_results=config.API_BATCH_SIZE,
+    return retry.call_api(  # type: ignore[no-any-return]
+        partial(
+            service.videos.list,
+            part=['snippet', 'contentDetails', 'statistics', 'status'],
+            video_id=videos_list,
+            max_results=config.API_BATCH_SIZE,
+        ),
+        cost=QUOTA_COST_LIST,
+        description='videos.list',
     ).items
 
 
@@ -178,6 +200,9 @@ def get_subs(service: pyt.Client, channel_list: list[str]) -> list[dict[str, Any
 
     Returns:
         Playlist items (channels' information) as a list.
+
+    Raises:
+        APIError: If a request fails.
     """
     ch_filter = [channel_id for channel_id in channel_list if channel_id is not None]
 
@@ -185,7 +210,11 @@ def get_subs(service: pyt.Client, channel_list: list[str]) -> list[dict[str, Any
     raw_chunk = []
 
     for chunk in utils.chunked(ch_filter, config.API_BATCH_SIZE):
-        req = service.channels.list(part=['statistics'], channel_id=chunk, max_results=config.API_BATCH_SIZE).items
+        req = retry.call_api(
+            partial(service.channels.list, part=['statistics'], channel_id=chunk, max_results=config.API_BATCH_SIZE),
+            cost=QUOTA_COST_LIST,
+            description='channels.list',
+        ).items
         raw_chunk += req
 
     return [{'channel_id': item.id, 'subscribers': item.statistics.subscriberCount} for item in raw_chunk]
@@ -214,10 +243,15 @@ def check_if_live(service: pyt.Client, videos_list: list[str]) -> list[dict[str,
             # Keep necessary data
             items += [{'video_id': video.id, 'live_status': video.snippet.liveBroadcastContent} for video in request]
 
-        except pyt.error.PyYouTubeException as api_error:
+        except APIError as api_error:
             if utils.history:
-                utils.history.error(api_error.message)
-            raise APIError(f'API error while checking live status: {api_error.message}') from api_error
+                utils.history.error(str(api_error))
+            raise APIError(
+                f'API error while checking live status: {api_error}',
+                reason=api_error.reason,
+                status_code=api_error.status_code,
+                category=api_error.category,
+            ) from api_error
 
     return items
 

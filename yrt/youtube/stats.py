@@ -59,10 +59,15 @@ def get_stats(service: pyt.Client, videos_list: list[Any], check_shorts: bool = 
                 for item in request
             ]
 
-        except pyt.error.PyYouTubeException as api_error:
+        except APIError as api_error:
             if utils.history:
-                utils.history.error(api_error.message)
-            raise APIError(f'API error while getting stats: {api_error.message}') from api_error
+                utils.history.error(str(api_error))
+            raise APIError(
+                f'API error while getting stats: {api_error}',
+                reason=api_error.reason,
+                status_code=api_error.status_code,
+                category=api_error.category,
+            ) from api_error
 
     validated = [video.video_id for video in items]
     missing = [vid_id for vid_id in videos_ids if vid_id not in validated]
