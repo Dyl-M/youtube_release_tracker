@@ -219,7 +219,7 @@ class TestFillReleaseRadar:
     """Test fill_release_radar(): the target count, the source allocation and the degraded paths."""
 
     @staticmethod
-    def test_moves_videos_from_both_sources(mock_youtube_client, quota_tracker, playlists_file):
+    def test_moves_videos_from_both_sources(mock_youtube_client, quota_tracker, playlists_file, exec_context):
         """Test a playlist 2 short of its target pulls one video from each source (added, then removed)."""
 
         def playlist_items_list(**kwargs):
@@ -238,7 +238,9 @@ class TestFillReleaseRadar:
             items=[SimpleNamespace(contentDetails=SimpleNamespace(itemCount=5))] * 2
         )
 
-        fill_release_radar(mock_youtube_client, KNOWN_PLAYLIST, RE_LISTENING, LEGACY, lmt=40, prog_bar=False)
+        fill_release_radar(
+            mock_youtube_client, KNOWN_PLAYLIST, RE_LISTENING, LEGACY, exec_context, lmt=40, prog_bar=False
+        )
 
         inserted = [
             call.kwargs['body']['snippet']['resourceId']['videoId']
@@ -250,34 +252,42 @@ class TestFillReleaseRadar:
         assert quota_tracker.spent == 4 * QUOTA_COST_LIST + 4 * QUOTA_COST_WRITE
 
     @staticmethod
-    def test_full_playlist_needs_nothing(mock_youtube_client, quota_tracker, history_mock):
+    def test_full_playlist_needs_nothing(mock_youtube_client, quota_tracker, history_mock, exec_context):
         """Test a playlist at its target stops before touching the sources."""
         mock_youtube_client.playlistItems.list.return_value = SimpleNamespace(items=[object()] * 40)
 
-        fill_release_radar(mock_youtube_client, KNOWN_PLAYLIST, RE_LISTENING, LEGACY, lmt=40, prog_bar=False)
+        fill_release_radar(
+            mock_youtube_client, KNOWN_PLAYLIST, RE_LISTENING, LEGACY, exec_context, lmt=40, prog_bar=False
+        )
 
         assert mock_youtube_client.playlists.list.call_count == 0
         assert history_mock.info.call_args.args[0] == 'No addition necessary for Release Radar'
         assert quota_tracker.spent == QUOTA_COST_LIST
 
     @staticmethod
-    def test_quota_error_on_count_degrades_to_nothing(mock_youtube_client, quota_tracker, api_error, history_mock):
+    def test_quota_error_on_count_degrades_to_nothing(
+        mock_youtube_client, quota_tracker, api_error, history_mock, exec_context
+    ):
         """Test a quota rejection while counting the target logs the quota warning and adds nothing."""
         mock_youtube_client.playlistItems.list.side_effect = api_error('error_quota_exceeded.json')
 
-        fill_release_radar(mock_youtube_client, KNOWN_PLAYLIST, RE_LISTENING, LEGACY, lmt=40, prog_bar=False)
+        fill_release_radar(
+            mock_youtube_client, KNOWN_PLAYLIST, RE_LISTENING, LEGACY, exec_context, lmt=40, prog_bar=False
+        )
 
         assert mock_youtube_client.playlists.list.call_count == 0
         assert history_mock.warning.call_args.args[0] == 'API quota exceeded.'
 
     @staticmethod
     def test_other_error_on_count_degrades_with_generic_warning(
-        mock_youtube_client, quota_tracker, api_error, no_sleep, history_mock
+        mock_youtube_client, quota_tracker, api_error, no_sleep, history_mock, exec_context
     ):
         """Test any other failure while counting the target also adds nothing, with the generic warning."""
         mock_youtube_client.playlistItems.list.side_effect = api_error('error_404_response.json')
 
-        fill_release_radar(mock_youtube_client, KNOWN_PLAYLIST, RE_LISTENING, LEGACY, lmt=40, prog_bar=False)
+        fill_release_radar(
+            mock_youtube_client, KNOWN_PLAYLIST, RE_LISTENING, LEGACY, exec_context, lmt=40, prog_bar=False
+        )
 
         assert mock_youtube_client.playlists.list.call_count == 0
         assert history_mock.warning.call_args.args[0] == 'Unknown error: %s'

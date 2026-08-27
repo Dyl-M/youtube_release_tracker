@@ -25,7 +25,7 @@ def create_file_logger(
     if respect_no_logging and os.environ.get('YRT_NO_LOGGING'):
         return logger
 
-    handler = logging.FileHandler(filename=log_file)
+    handler = logging.FileHandler(filename=log_file, delay=True)  # open the file on the first record only
     handler.setLevel(level)
 
     formatter = logging.Formatter(fmt='%(asctime)s [%(levelname)s] - %(message)s', datefmt='%Y-%m-%d %H:%M:%S%z')

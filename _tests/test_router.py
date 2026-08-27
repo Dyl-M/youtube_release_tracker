@@ -3,10 +3,10 @@
 # Third-party
 import pytest
 
-from yrt.models import AddOnConfig, PlaylistConfig
-
 # Local
-from yrt.router import RouterConfig, VideoRouter, create_router_from_config
+from yrt import router as router_module
+from yrt.models import AddOnConfig, PlaylistConfig
+from yrt.router import RouterConfig, VideoRouter, create_router_from_config, dest_playlist, set_default_router
 
 # === Fixtures ===
 
@@ -491,3 +491,28 @@ class TestVideoRouterConstants:
     def test_special_none_value(router):
         """Test SPECIAL_NONE constant value."""
         assert router.SPECIAL_NONE == 'none'
+
+
+# === Default Router Tests ===
+
+
+@pytest.mark.unit
+class TestDefaultRouter:
+    """Tests for the module-level default router used by dest_playlist()."""
+
+    @staticmethod
+    def test_dest_playlist_requires_a_default_router(monkeypatch):
+        """Test dest_playlist() raises RuntimeError until run_daily installs a router."""
+        monkeypatch.setattr(router_module, '_default_router', None)
+
+        with pytest.raises(RuntimeError, match='Router not initialized'):
+            dest_playlist('UC_music_2', False, 200)
+
+    @staticmethod
+    def test_dest_playlist_delegates_to_the_default_router(router, monkeypatch):
+        """Test dest_playlist() routes through the router installed by set_default_router()."""
+        monkeypatch.setattr(router_module, '_default_router', None)
+        set_default_router(router)
+
+        assert dest_playlist('UC_music_2', False, 200) == router.route('UC_music_2', False, 200)
+        assert dest_playlist('UC_music_2', False, 200) == router.config.release_radar_id

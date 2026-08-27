@@ -14,6 +14,7 @@ import tqdm
 # Local
 from .. import config, file_utils, paths
 from ..constants import QUOTA_COST_LIST, QUOTA_COST_WRITE
+from ..context import ExecutionContext
 from ..exceptions import APIError, ErrorCategory
 from ..models import PlaylistItemRef
 from . import retry, utils
@@ -221,6 +222,7 @@ def fill_release_radar(
     target_playlist: str,
     re_listening_id: str,
     legacy_id: str,
+    ctx: ExecutionContext,
     lmt: int | None = None,
     prog_bar: bool = True,
 ) -> None:
@@ -231,6 +233,7 @@ def fill_release_radar(
         target_playlist: YouTube playlist ID where videos need to be added.
         re_listening_id: YouTube playlist ID for music to re-listen to.
         legacy_id: An older YouTube playlist to clear out.
+        ctx: Execution context; ctx.now is the reference for the re-listening age.
         lmt: The addition threshold (uses config.RELEASE_RADAR_TARGET by default).
         prog_bar: Whether to use tqdm progress bar.
 
@@ -251,7 +254,7 @@ def fill_release_radar(
     n_add_rel, n_add_leg = _calculate_allocation(n_add, to_re_listen_count, legacy_count)
 
     # Fetch and format videos from both playlists
-    week_ago = utils.NOW - dt.timedelta(weeks=config.RELISTENING_AGE_WEEKS)
+    week_ago = ctx.now - dt.timedelta(weeks=config.RELISTENING_AGE_WEEKS)
 
     to_re_listen_items = retry.call_api(
         partial(
