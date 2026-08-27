@@ -215,14 +215,7 @@ def sort_db(service: pyt.Client, log: bool = True) -> None:
                 information += [{'title': an_item.snippet.title, 'id': an_item.id} for an_item in request]
 
             except APIError as api_error:
-                if log and history:
-                    history.error(str(api_error))
-                raise APIError(
-                    f'API error while sorting database: {api_error}',
-                    reason=api_error.reason,
-                    status_code=api_error.status_code,
-                    category=api_error.category,
-                ) from api_error
+                raise retry.rewrap(api_error, 'API error while sorting database', log=log) from api_error
 
         # Sort channels' name by alphabetical order
         information = sorted(information, key=lambda dic: dic['title'].lower())

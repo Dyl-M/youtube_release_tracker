@@ -70,7 +70,8 @@ class TestFetchExpiredItems:
         expired = _fetch_expired_items(mock_youtube_client, PLAYLIST_ID, 'Test', CUTOFF)
 
         assert [item.video_id for item in expired] == ['old0000001']
-        assert 'API quota exceeded while checking retention' in history_mock.warning.call_args.args[0]
+        message, *args = history_mock.warning.call_args.args
+        assert message % tuple(args) == 'API quota exceeded while checking retention for Test'
 
     @staticmethod
     def test_other_error_is_logged_generically(mock_youtube_client, quota_tracker, api_error, no_sleep, history_mock):

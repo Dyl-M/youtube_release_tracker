@@ -12,7 +12,15 @@ from pyyoutube.error import ErrorMessage, PyYouTubeException
 from yrt import config
 from yrt.constants import QUOTA_COST_LIST, QUOTA_COST_WRITE
 from yrt.exceptions import APIError, ErrorCategory, QuotaExhaustedError
-from yrt.youtube.retry import UNKNOWN_REASON, backoff_delay, call_api, classify, extract_reason, normalise_reason
+from yrt.youtube.retry import (
+    UNKNOWN_REASON,
+    backoff_delay,
+    call_api,
+    classify,
+    extract_reason,
+    normalise_reason,
+    rewrap,
+)
 
 
 @pytest.mark.unit
@@ -119,6 +127,14 @@ class TestClassify:
 
         assert info.category is ErrorCategory.TRANSIENT
         assert info.reason == 'timeout'
+
+    @staticmethod
+    def test_invalid_json_body_is_transient():
+        """Test a JSONDecodeError (non-JSON 5xx page) is TRANSIENT."""
+        info = classify(requests.exceptions.JSONDecodeError('Expecting value', '<html>', 0))
+
+        assert info.category is ErrorCategory.TRANSIENT
+        assert info.reason == 'invalidresponse'
 
     @staticmethod
     def test_unrelated_exception_is_unknown():
@@ -248,13 +264,32 @@ class TestCallApi:
         assert exc_info.value.reason == UNKNOWN_REASON
 
     @staticmethod
-    def test_network_error_is_retried(quota_tracker, no_sleep):
-        """Test a requests ConnectionError escaping the client is retried like a transient API error."""
+    def test_connection_error_is_retried_but_not_charged(quota_tracker, no_sleep):
+        """Test a requests ConnectionError is retried, and only the attempt that reached YouTube is charged."""
         fn = Mock(side_effect=[requests.ConnectionError('reset'), 'ok'])
 
         assert call_api(fn, cost=QUOTA_COST_LIST, description='videos.list') == 'ok'
         assert fn.call_count == 2
         assert no_sleep.call_count == 1
+        assert quota_tracker.spent == QUOTA_COST_LIST
+
+    @staticmethod
+    def test_invalid_json_response_is_retried_and_charged(quota_tracker, no_sleep):
+        """Test a 5xx served as HTML (JSONDecodeError inside the client) is transient and billed."""
+        fn = Mock(side_effect=[requests.exceptions.JSONDecodeError('Expecting value', '<html>', 0), 'ok'])
+
+        assert call_api(fn, cost=QUOTA_COST_LIST, description='videos.list') == 'ok'
+        assert fn.call_count == 2
+        assert quota_tracker.spent == 2 * QUOTA_COST_LIST
+
+    @staticmethod
+    def test_read_timeout_is_charged(quota_tracker, no_sleep):
+        """Test a read timeout (the request may have reached YouTube) is charged like any other attempt."""
+        fn = Mock(side_effect=[requests.ReadTimeout('read timed out'), 'ok'])
+
+        call_api(fn, cost=QUOTA_COST_LIST, description='videos.list')
+
+        assert quota_tracker.spent == 2 * QUOTA_COST_LIST
 
     @staticmethod
     def test_zero_max_retries_means_one_attempt(api_error, quota_tracker, no_sleep, monkeypatch):
@@ -290,3 +325,39 @@ class TestCallApi:
             call_api(fn, cost=QUOTA_COST_LIST, description='videos.list')
 
         assert quota_tracker.spent == 0
+
+
+@pytest.mark.unit
+class TestRewrap:
+    """Test rewrap() adds a prefix while keeping the error's type and context."""
+
+    @staticmethod
+    def test_keeps_api_error_context(history_mock):
+        """Test an APIError is re-created with the prefix and the same reason / status / category."""
+        original = APIError('videos.list: boom', reason='forbidden', status_code=403, category=ErrorCategory.PERMANENT)
+
+        wrapped = rewrap(original, 'API error while getting stats')
+
+        assert str(wrapped) == 'API error while getting stats: videos.list: boom'
+        assert wrapped.reason == 'forbidden'
+        assert wrapped.status_code == 403
+        assert wrapped.category is ErrorCategory.PERMANENT
+        assert history_mock.error.call_count == 1
+
+    @staticmethod
+    def test_keeps_quota_exhausted_type_and_video_id(history_mock):
+        """Test a QuotaExhaustedError stays a QuotaExhaustedError and keeps its video ID."""
+        original = QuotaExhaustedError('insert: quota', video_id='dQw4w9WgXcQ')
+
+        wrapped = rewrap(original, 'API error while adding')
+
+        assert isinstance(wrapped, QuotaExhaustedError)
+        assert wrapped.category is ErrorCategory.QUOTA
+        assert wrapped.video_id == 'dQw4w9WgXcQ'
+
+    @staticmethod
+    def test_log_can_be_disabled(history_mock):
+        """Test log=False keeps the shared logger quiet (maintenance scripts)."""
+        rewrap(APIError('x'), 'prefix', log=False)
+
+        assert history_mock.error.call_count == 0

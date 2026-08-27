@@ -44,19 +44,16 @@ def _parse_playlist_item(item: Any, date_format: str, source_channel_id: str) ->
     )
 
 
-def _handle_playlist_error(error: APIError, playlist_id: str, add_on: dict[str, Any] | None = None) -> bool:
-    """Handle playlist API errors. Raises APIError for fatal errors.
+def _handle_playlist_error(error: APIError, playlist_id: str, add_on: dict[str, Any] | None = None) -> None:
+    """Handle a playlist read failure: swallow "not found" (with a warning unless whitelisted), raise anything else.
 
     Args:
         error: The APIError raised by the retry layer.
         playlist_id: The playlist ID that caused the error.
         add_on: Configuration dict containing playlistNotFoundPass list. Defaults to global ADD_ON.
 
-    Returns:
-        True if should break loop, False otherwise.
-
     Raises:
-        APIError: For unrecognized API errors.
+        APIError: For any failure other than a 404.
     """
     if add_on is None:
         add_on = utils.ADD_ON
@@ -65,16 +62,9 @@ def _handle_playlist_error(error: APIError, playlist_id: str, add_on: dict[str, 
         channel_id = f'UC{playlist_id[2:]}'
         if channel_id not in add_on['playlistNotFoundPass'] and utils.history:
             utils.history.warning('Playlist not found: %s', playlist_id)
-        return True
+        return
 
-    if utils.history:
-        utils.history.error('[%s] Unknown error: %s', playlist_id, error)
-    raise APIError(
-        f'[{playlist_id}] Unknown error: {error}',
-        reason=error.reason,
-        status_code=error.status_code,
-        category=error.category,
-    ) from error
+    raise retry.rewrap(error, f'[{playlist_id}] Unknown error') from error
 
 
 def _filter_items_by_date_range(
@@ -145,9 +135,8 @@ def get_playlist_items(
             )
 
         except APIError as error:
-            if _handle_playlist_error(error, playlist_id):
-                break
-            continue
+            _handle_playlist_error(error, playlist_id)  # raises unless it was a 404
+            break
 
         # Parse items, filtering out those without release date
         p_items += [
@@ -244,14 +233,7 @@ def check_if_live(service: pyt.Client, videos_list: list[str]) -> list[dict[str,
             items += [{'video_id': video.id, 'live_status': video.snippet.liveBroadcastContent} for video in request]
 
         except APIError as api_error:
-            if utils.history:
-                utils.history.error(str(api_error))
-            raise APIError(
-                f'API error while checking live status: {api_error}',
-                reason=api_error.reason,
-                status_code=api_error.status_code,
-                category=api_error.category,
-            ) from api_error
+            raise retry.rewrap(api_error, 'API error while checking live status') from api_error
 
     return items
 

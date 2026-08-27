@@ -24,10 +24,12 @@ from ..exceptions import APIError, ErrorCategory, QuotaExhaustedError
 from . import quota, utils
 
 # Exceptions the retry loop understands; anything else propagates untouched.
+# JSONDecodeError: the client parses every body as JSON, so a 5xx served with an HTML page surfaces this way.
 RETRYABLE_EXCEPTIONS: tuple[type[BaseException], ...] = (
     pyt.error.PyYouTubeException,
     requests.ConnectionError,
     requests.Timeout,
+    requests.exceptions.JSONDecodeError,
 )
 
 UNKNOWN_REASON = 'unknown'
@@ -96,6 +98,9 @@ def classify(error: BaseException) -> ErrorInfo:
     if isinstance(error, requests.Timeout):
         return ErrorInfo(ErrorCategory.TRANSIENT, 'timeout', None, str(error))
 
+    if isinstance(error, requests.exceptions.JSONDecodeError):
+        return ErrorInfo(ErrorCategory.TRANSIENT, 'invalidresponse', None, str(error))
+
     if isinstance(error, pyt.error.PyYouTubeException):
         reason = extract_reason(error)
 
@@ -126,6 +131,21 @@ def backoff_delay(attempt: int) -> float:
     return delay / 2 + random.uniform(0, delay / 2)  # noqa: S311 - jitter, not cryptography
 
 
+def _reached_youtube(error: BaseException) -> bool:
+    """Tell whether a failed attempt was actually received by YouTube (and therefore billed).
+
+    A connection error (DNS, refused, reset before a response) never reached the API; everything else - including a
+    read timeout, which is ambiguous - is charged, matching YouTube's "every request costs" rule.
+
+    Args:
+        error: The exception the attempt raised.
+
+    Returns:
+        False for connection-level failures, True otherwise.
+    """
+    return not isinstance(error, requests.ConnectionError)
+
+
 def _to_api_error(info: ErrorInfo, description: str, video_id: str | None) -> APIError:
     """Turn a classified failure into the exception raised to the call site.
 
@@ -144,6 +164,37 @@ def _to_api_error(info: ErrorInfo, description: str, video_id: str | None) -> AP
 
     return APIError(
         message, reason=info.reason, status_code=info.status_code, video_id=video_id, category=info.category
+    )
+
+
+def rewrap(error: APIError, description: str, *, video_id: str | None = None, log: bool = True) -> APIError:
+    """Add a call-site prefix to an APIError raised further down, keeping its type and context.
+
+    Use as ``raise retry.rewrap(error, 'API error while getting stats') from error``.
+
+    Args:
+        error: The error raised by call_api() or a function built on it.
+        description: Prefix naming the operation that failed.
+        video_id: Video the operation was about; defaults to the one already on the error.
+        log: Whether to log the failure on the shared logger before returning.
+
+    Returns:
+        A QuotaExhaustedError if the original was one, otherwise an APIError with the same reason, status and
+        category.
+    """
+    message = f'{description}: {error}'
+    video = video_id if video_id is not None else error.video_id
+
+    if log and utils.history:
+        utils.history.error(message)
+
+    if isinstance(error, QuotaExhaustedError):
+        return QuotaExhaustedError(
+            message, reason=error.reason or 'quotaexceeded', status_code=error.status_code, video_id=video
+        )
+
+    return APIError(
+        message, reason=error.reason, status_code=error.status_code, video_id=video, category=error.category
     )
 
 
@@ -175,8 +226,8 @@ def call_api[T](fn: Callable[[], T], *, cost: int, description: str, video_id: s
         except RETRYABLE_EXCEPTIONS as error:
             info = classify(error)
 
-            # A quota rejection is the only failure that does not consume units
-            if info.category is not ErrorCategory.QUOTA:
+            # Quota rejections and connection-level failures never consumed units
+            if info.category is not ErrorCategory.QUOTA and _reached_youtube(error):
                 tracker.charge(cost)
 
             if info.category is ErrorCategory.TRANSIENT and attempt < attempts - 1:
