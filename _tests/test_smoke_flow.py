@@ -1,7 +1,7 @@
 """Zero-quota smoke test: the daily job's orchestration functions flow through the retry/quota layer together.
 
 This is the offline stand-in for "does the daily job still run": the real functions are driven against the mock
-client with fixture-shaped responses and a temp api_failure.json, and the exact quota total is asserted.
+client with fixture-shaped responses and a temp playlists.json, and the exact quota total is asserted.
 """
 
 # Standard library
