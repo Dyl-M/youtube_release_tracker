@@ -3,8 +3,7 @@
 # Standard library
 import datetime as dt
 import math
-import random
-import time
+from functools import partial
 from typing import Any
 
 # Third-party
@@ -13,12 +12,56 @@ import tqdm
 
 # Local
 from .. import config, file_utils, paths
+from ..constants import QUOTA_COST_LIST, QUOTA_COST_WRITE
+from ..exceptions import APIError, ConfigurationError, ErrorCategory, FileAccessError
 from ..models import PlaylistItemRef
-from . import utils
+from . import retry, utils
+
+
+def _playlist_name(playlist_id: str) -> str:
+    """Look up a playlist's display name in the playlists configuration.
+
+    Args:
+        playlist_id: YouTube playlist ID.
+
+    Returns:
+        The configured name, or the ID itself when the playlist is unknown or the file cannot be read.
+    """
+    try:
+        playlists = file_utils.load_json(str(paths.PLAYLISTS_JSON))
+    except (ConfigurationError, FileAccessError):
+        return playlist_id
+
+    for entry in playlists.values():
+        if isinstance(entry, dict) and entry.get('id') == playlist_id:
+            return str(entry.get('name', playlist_id))
+
+    return playlist_id
+
+
+def _failure_entry(api_failure: dict[str, Any], playlist_id: str) -> dict[str, Any]:
+    """Return the api_failure.json entry for a playlist, creating it when the playlist is not listed yet.
+
+    Args:
+        api_failure: Parsed content of api_failure.json.
+        playlist_id: YouTube playlist ID.
+
+    Returns:
+        The entry dict, guaranteed to have a 'failure' list.
+    """
+    if playlist_id not in api_failure:
+        api_failure[playlist_id] = {'name': _playlist_name(playlist_id), 'description': '', 'failure': []}
+
+    entry = api_failure[playlist_id]
+    entry.setdefault('failure', [])
+    return entry
 
 
 def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list[str], prog_bar: bool = True) -> None:
     """Add a list of video to a YouTube playlist.
+
+    Transient errors are retried by the retry layer; permanent errors are logged and skipped; quota errors, unknown
+    errors and exhausted retries are saved to api_failure.json for the next run.
 
     Args:
         service: A Python YouTube Client.
@@ -37,56 +80,28 @@ def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list[str
     for video_id in add_iterator:
         r_body = {'snippet': {'playlistId': playlist_id, 'resourceId': {'kind': 'youtube#video', 'videoId': video_id}}}
 
-        for attempt in range(config.MAX_RETRIES):
-            try:
-                service.playlistItems.insert(parts='snippet', body=r_body)
-                break  # Success, exit retry loop
+        try:
+            retry.call_api(
+                partial(service.playlistItems.insert, parts='snippet', body=r_body),
+                cost=QUOTA_COST_WRITE,
+                description=f'playlistItems.insert({playlist_id})',
+                video_id=video_id,
+            )
 
-            except pyt.error.PyYouTubeException as http_error:
-                try:
-                    error_reason = http_error.response.json()['error']['errors'][0]['reason']
-                except (KeyError, IndexError, TypeError):
-                    error_reason = 'unknown'
-
-                # Normalize error reason for comparison (API returns mixed formats: camelCase, SCREAMING_SNAKE_CASE)
-                error_reason_normalized = error_reason.lower().replace('_', '')
-
-                # Handle transient errors with exponential backoff + jitter
-                if error_reason_normalized in utils.TRANSIENT_ERRORS and attempt < config.MAX_RETRIES - 1:
-                    # Calculate exponential backoff with equal jitter to prevent thundering herd
-                    delay = min(config.MAX_BACKOFF, int(config.BASE_DELAY * math.exp(attempt)))
-                    wait_time = delay / 2 + random.uniform(0, delay / 2)  # noqa: S311
-                    if utils.history:
-                        utils.history.warning(
-                            'Transient error (%s) for video %s, retrying in %.2fs (attempt %s/%s)',
-                            error_reason,
-                            video_id,
-                            wait_time,
-                            attempt + 1,
-                            config.MAX_RETRIES,
-                        )
-                    time.sleep(wait_time)
-                    continue
-
-                # Handle permanent errors - log and skip, don't save for retry
-                if error_reason_normalized in utils.PERMANENT_ERRORS:
-                    if utils.history:
-                        utils.history.warning(
-                            'Permanent error (%s) for video %s - skipping: %s',
-                            error_reason,
-                            video_id,
-                            http_error.message,
-                        )
-                    break  # Don't save to api_failure.json
-
-                # Handle quota errors or failed transient retries - save for next day retry
+        except APIError as error:
+            # Permanent errors - log and skip, don't save for retry
+            if error.category is ErrorCategory.PERMANENT:
                 if utils.history:
                     utils.history.warning(
-                        'Addition Request Failure: (%s) - %s - %s', video_id, error_reason, http_error.message
+                        'Permanent error (%s) for video %s - skipping: %s', error.reason, video_id, error
                     )
-                api_failure[playlist_id]['failure'].append(video_id)
-                api_fail = True
-                break
+                continue
+
+            # Quota errors, unknown errors and exhausted transient retries - save for next run
+            if utils.history:
+                utils.history.warning('Addition Request Failure: (%s) - %s - %s', video_id, error.reason, error)
+            _failure_entry(api_failure, playlist_id)['failure'].append(video_id)
+            api_fail = True
 
     if api_fail:  # Save API failure
         file_utils.save_json(str(paths.API_FAILURE_JSON), api_failure)
@@ -123,11 +138,16 @@ def del_from_playlist(
             video_id = item['video_id']
 
         try:
-            service.playlistItems.delete(playlist_item_id=item_id)
+            retry.call_api(
+                partial(service.playlistItems.delete, playlist_item_id=item_id),
+                cost=QUOTA_COST_WRITE,
+                description=f'playlistItems.delete({playlist_id})',
+                video_id=video_id,
+            )
 
-        except pyt.error.PyYouTubeException as http_error:
+        except APIError as error:
             if utils.history:
-                utils.history.warning('Deletion Request Failure: (%s) - %s', video_id, http_error.message)
+                utils.history.warning('Deletion Request Failure: (%s) - %s', video_id, error)
 
 
 def _get_videos_to_add_count(service: pyt.Client, target_playlist: str, lmt: int) -> int:
@@ -143,16 +163,20 @@ def _get_videos_to_add_count(service: pyt.Client, target_playlist: str, lmt: int
     """
     try:
         current_count = len(
-            service.playlistItems.list(part=['snippet'], max_results=lmt, playlist_id=target_playlist).items
+            retry.call_api(
+                partial(service.playlistItems.list, part=['snippet'], max_results=lmt, playlist_id=target_playlist),
+                cost=QUOTA_COST_LIST,
+                description=f'playlistItems.list({target_playlist})',
+            ).items
         )
         return lmt - current_count
 
-    except pyt.PyYouTubeException as error:
-        if error.status_code == 403:
+    except APIError as error:
+        if error.category is ErrorCategory.QUOTA or error.status_code == 403:
             if utils.history:
                 utils.history.warning('API quota exceeded.')
         elif utils.history:
-            utils.history.warning('Unknown error: %s', error.message)
+            utils.history.warning('Unknown error: %s', error)
         return 0
 
 
@@ -225,6 +249,9 @@ def fill_release_radar(
         legacy_id: An older YouTube playlist to clear out.
         lmt: The addition threshold (uses config.RELEASE_RADAR_TARGET by default).
         prog_bar: Whether to use tqdm progress bar.
+
+    Raises:
+        APIError: If reading the source playlists fails.
     """
     if lmt is None:
         lmt = config.RELEASE_RADAR_TARGET
@@ -242,8 +269,12 @@ def fill_release_radar(
     # Fetch and format videos from both playlists
     week_ago = utils.NOW - dt.timedelta(weeks=config.RELISTENING_AGE_WEEKS)
 
-    to_re_listen_items = service.playlistItems.list(
-        part=['snippet', 'contentDetails'], playlist_id=re_listening_id, max_results=lmt
+    to_re_listen_items = retry.call_api(
+        partial(
+            service.playlistItems.list, part=['snippet', 'contentDetails'], playlist_id=re_listening_id, max_results=lmt
+        ),
+        cost=QUOTA_COST_LIST,
+        description=f'playlistItems.list({re_listening_id})',
     ).items
     to_re_listen_raw = [
         {
@@ -256,7 +287,11 @@ def fill_release_radar(
 
     to_re_listen_fil = [item for item in to_re_listen_raw if item['add_date'] < week_ago]
 
-    legacy_items = service.playlistItems.list(part=['contentDetails'], playlist_id=legacy_id, max_results=lmt).items
+    legacy_items = retry.call_api(
+        partial(service.playlistItems.list, part=['contentDetails'], playlist_id=legacy_id, max_results=lmt),
+        cost=QUOTA_COST_LIST,
+        description=f'playlistItems.list({legacy_id})',
+    ).items
     legacy_raw = [{'video_id': item.contentDetails.videoId, 'item_id': item.id} for item in legacy_items]
 
     # Pre-selection with fallback if one source is insufficient
