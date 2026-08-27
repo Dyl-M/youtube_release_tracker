@@ -280,7 +280,7 @@ class VideoRouter:
 **Locations:**
 
 - `yrt/file_utils.py:58-63` - Uses string operations for path validation
-- `yrt/main.py:144-154` - Manual file I/O in `copy_last_exe_log()`
+- ~~`yrt/main.py` - Manual file I/O in `copy_last_exe_log()`~~ ✅ now `runtime.copy_last_exe_log()` on `Path`
 
 **Status:** Pending
 
@@ -384,14 +384,16 @@ def _validate_config(config: dict) -> None:
 
 ### 10. Fix Module-Level Datetime Calculation
 
-**Location:** `yrt/youtube.py:76-77`
+**Location:** `yrt/youtube/utils.py` (formerly `yrt/youtube.py:76-77`)
 
-**Status:** Pending
+**Status:** ✅ Fixed (port plan Phase 2) - `yrt/context.py` provides `ExecutionContext(job, exe_mode, now, last_exe,
+history_path, last_exe_path)`, built once by the entry point and passed explicitly to every time-dependent function;
+the module-level `NOW` / `LAST_EXE` / `ADD_ON` were removed (no aliases, no process-wide default).
 
 **Issue:** `NOW` and `LAST_EXE` calculated at import time, making testing difficult and causing stale values in
 long-running processes.
 
-**Solution:** Use functions or context object:
+**Solution (original proposal):** Use functions or context object:
 
 ```python
 @dataclass
@@ -413,7 +415,7 @@ def get_execution_context() -> ExecutionContext:
 - `yrt/analytics.py` - Placeholder with only pandas options and print statement
 - `yrt/_sandbox.py` - Empty development scratch space
 
-**Status:** Pending
+**Status:** ✅ Fixed (port plan Phase 2) - `analytics.py` removed; `_sandbox.py` stays git-ignored
 
 **Issue:** Files serve no purpose in production codebase.
 
@@ -457,19 +459,22 @@ made.
 
 ### 13. Implement main.py Tests (20 skipped)
 
-**Location:** `_tests/test_main.py:8-141`
+**Location:** `_tests/test_main.py`
 
-**Status:** Pending
+**Status:** ✅ Fixed (port plan Phase 2) - `yrt.main` is importable without side effects, so `test_main.py` now holds
+real tests (import, entry point, execution modes, fatal-error handling, `last_exe.log` on success/failure, `run_daily`
+orchestration) with no skip left; the 6 routing placeholders were dropped in favour of `test_router.py`, configuration
+loading and `copy_last_exe_log` are tested where they now live (`test_runtime.py`).
 
-**Issue:** All 20 tests for main orchestration module are marked as "Not yet implemented". Zero test coverage on
+**Issue:** All 20 tests for main orchestration module were marked as "Not yet implemented". Zero test coverage on
 business-critical routing logic.
 
 **Priority tests to implement:**
 
-1. `dest_playlist()` routing logic (6 tests) - **Now covered by `test_router.py` (40 tests)**
-2. Configuration loading validation (3 tests)
-3. `copy_last_exe_log()` function (2 tests)
-4. Exception handling (2 tests)
+1. `dest_playlist()` routing logic (6 tests) - **covered by `test_router.py` (42 tests)**
+2. Configuration loading validation (3 tests) - ✅ `test_runtime.py::TestLoadConfig`
+3. `copy_last_exe_log()` function (2 tests) - ✅ `test_runtime.py::TestCopyLastExeLog` + `test_main.py::TestLastExeLog`
+4. Exception handling (2 tests) - ✅ `test_runtime.py::TestRunJob` + `test_main.py::TestMainEntryPoint`
 
 ### 14. Extract and Test Duration Parsing
 
@@ -690,39 +695,41 @@ def iter_channels_generator(
 - **☢️ Critical:** 1 bug ~~requiring immediate fix~~ ✅ Fixed
 - **⚠️ High Priority:** 5 structural improvements ✅ All done (Logger Factory, Split youtube.py, Domain Models,
   VideoRouter, Constants Module)
-- **🛑 Medium Priority:** 5 code quality improvements (2 fixed: retry layer, config validation; 3 pending)
-- **🧪 Test Suite:** 4 test coverage improvements (2 fixed: test logging isolation, duration parsing)
+- **🛑 Medium Priority:** 5 code quality improvements (4 fixed: retry layer, config validation, execution context,
+  unused files; 1 pending: pathlib)
+- **🧪 Test Suite:** 4 test coverage improvements (3 fixed: test logging isolation, main.py tests, duration parsing)
 - **🛃 Low Priority:** 6 nice-to-have improvements (2 fixed: exception context, error fixtures; 1 accepted: scheduler
   lag)
 - **CI/CD:** Test coverage workflow with DeepSource reporting ✅ Added
 
-**Total:** 21 improvement items (12 fixed, 1 accepted, 8 pending)
+**Total:** 21 improvement items (15 fixed, 1 accepted, 5 pending)
 **PR #141:** Merged - Phase 1-3 (partial) complete
 
-### Current Code Coverage Breakdown (69% total, measured 2026-08-27 after port plan Phase 1)
+### Current Code Coverage Breakdown (86% total, measured 2026-08-27 after port plan Phase 2)
 
 | Module                    | Coverage | Status         |
 |---------------------------|----------|----------------|
 | `yrt/__init__.py`         | 100%     | ✅ Complete    |
-| `yrt/config.py`           | 100%     | ✅ Complete    |
+| `yrt/config.py`           | 97%      | ✅ Complete    |
 | `yrt/constants.py`        | 100%     | ✅ Complete    |
+| `yrt/context.py`          | 100%     | ✅ Complete    |
 | `yrt/exceptions.py`       | 100%     | ✅ Complete    |
 | `yrt/logging_utils.py`    | 100%     | ✅ Complete    |
+| `yrt/main.py`             | 94%      | ✅ Complete    |
 | `yrt/models.py`           | 100%     | ✅ Complete    |
 | `yrt/paths.py`            | 100%     | ✅ Complete    |
-| `yrt/router.py`           | 95%      | ✅ Complete    |
+| `yrt/router.py`           | 100%     | ✅ Complete    |
+| `yrt/runtime.py`          | 100%     | ✅ Complete    |
 | `yrt/file_utils.py`       | 76%      | 🔸 Needs work  |
 | `yrt/youtube/__init__.py` | 100%     | ✅ Complete    |
 | `yrt/youtube/quota.py`    | 100%     | ✅ Complete    |
 | `yrt/youtube/retry.py`    | 99%      | ✅ Complete    |
-| `yrt/youtube/api.py`      | 91%      | ✅ Complete    |
-| `yrt/youtube/cleanup.py`  | 95%      | ✅ Complete    |
-| `yrt/youtube/playlist.py` | 69%      | 🔸 Needs work  |
-| `yrt/youtube/utils.py`    | 65%      | 🔸 Needs work  |
-| `yrt/youtube/stats.py`    | 22%      | ⚠️ Low         |
+| `yrt/youtube/cleanup.py`  | 99%      | ✅ Complete    |
+| `yrt/youtube/playlist.py` | 93%      | ✅ Complete    |
+| `yrt/youtube/utils.py`    | 92%      | ✅ Complete    |
+| `yrt/youtube/api.py`      | 82%      | 🔸 Needs work  |
+| `yrt/youtube/stats.py`    | 23%      | ⚠️ Low         |
 | `yrt/youtube/auth.py`     | 16%      | ⚠️ Low         |
-| `yrt/main.py`             | 0%       | ❌ Not covered |
-| `yrt/analytics.py`        | 0%       | 🚫 Placeholder |
 | `yrt/_sandbox.py`         | 0%       | 🚫 Dev only    |
 
 ## Files to Modify
@@ -731,15 +738,15 @@ def iter_channels_generator(
 |----------------------------|------------------------------------|
 | `yrt/file_utils.py`        | Fix logging bug, use pathlib       |
 | `yrt/youtube/` (package)   | ✅ Split into submodules           |
-| `yrt/main.py`              | Extract VideoRouter, use pathlib   |
-| `yrt/config.py`            | Add validation, use logger factory |
+| `yrt/main.py`              | ✅ Extract VideoRouter, ✅ side-effect-free entry point (port plan Phase 2); use pathlib |
+| `yrt/config.py`            | ✅ Add validation, use logger factory |
 | `yrt/paths.py`             | Keep ALLOWED_DIRS as Path objects  |
-| `yrt/exceptions.py`        | Add context attributes             |
-| `yrt/analytics.py`         | Remove or mark as placeholder      |
+| `yrt/exceptions.py`        | ✅ Add context attributes          |
+| `yrt/analytics.py`         | ✅ Removed                         |
 | `_scripts/archive_data.py` | Use specific exceptions            |
 | `_tests/conftest.py`       | ✅ Add YRT_NO_LOGGING isolation    |
-| `_tests/test_main.py`      | Implement 20 skipped tests         |
-| `_tests/test_youtube.py`   | Implement duration parsing tests   |
+| `_tests/test_main.py`      | ✅ Implemented (0 skipped)         |
+| `_tests/test_youtube.py`   | ✅ Implement duration parsing tests |
 
 ## New Files to Create
 
@@ -757,6 +764,8 @@ def iter_channels_generator(
 | `yrt/youtube/models.py`        | Dataclasses and enums    | Deferred (using yrt/models.py) |
 | `yrt/youtube/retry.py`         | Retry layer (call_api)   | ✅ Created                     |
 | `yrt/youtube/utils.py`         | Utilities                | ✅ Created                     |
+| `yrt/context.py`               | Per-job execution context | ✅ Created (port plan Phase 2) |
+| `yrt/runtime.py`               | Shared job lifecycle     | ✅ Created (port plan Phase 2) |
 | `_tests/test_router.py`        | Router unit tests        | ✅ Created                     |
 | `_tests/test_constants.py`     | Constants unit tests     | ✅ Created                     |
 | `_tests/fixtures/error_*.json` | Error response fixtures  | ✅ Created                     |
@@ -806,11 +815,11 @@ def iter_channels_generator(
 
 **🧪 Coverage target:** 75% (major push on youtube submodules)
 
-21. Implement `dest_playlist()` routing tests (6 tests)
-22. Implement configuration loading tests (3 tests)
-23. Implement `copy_last_exe_log()` tests (2 tests)
+21. ✅ `dest_playlist()` routing tests - covered by `test_router.py` (port plan Phase 2 dropped the placeholders)
+22. ✅ Configuration loading tests (`test_runtime.py`, port plan Phase 2)
+23. ✅ `copy_last_exe_log()` tests (`test_runtime.py` / `test_main.py`, port plan Phase 2)
 24. ✅ Extract and test `parse_iso8601_duration()` function (6 tests, port plan Phase 1)
-25. Add integration tests for main workflow
+25. ✅ Integration tests for the daily job (`test_main.py::TestRunDaily`, `test_smoke_flow.py`, port plan Phase 2)
 26. ✅ Add error response test fixtures (port plan Phase 1)
 27. Ensure all new code has comprehensive tests
 
@@ -819,7 +828,7 @@ def iter_channels_generator(
 **🧪 Coverage target:** 90% (final goal)
 
 28. Improve `_scripts/archive_data.py` error handling
-29. Remove/mark `yrt/analytics.py` as placeholder
+29. ✅ Remove `yrt/analytics.py` (port plan Phase 2)
 30. Add exception context attributes
 31. Update all module docstrings and imports
 32. Final test coverage audit and gap filling

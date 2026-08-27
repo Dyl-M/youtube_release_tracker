@@ -3,6 +3,7 @@
 # Standard library
 import datetime as dt
 import itertools
+from collections.abc import Collection
 from functools import partial
 from typing import Any
 
@@ -13,8 +14,9 @@ import tqdm
 # Local
 from .. import config, file_utils, paths
 from ..constants import QUOTA_COST_LIST
+from ..context import ExecutionContext
 from ..exceptions import APIError
-from ..models import PlaylistItem
+from ..models import AddOnConfig, PlaylistItem
 from . import retry, utils
 
 
@@ -44,23 +46,20 @@ def _parse_playlist_item(item: Any, date_format: str, source_channel_id: str) ->
     )
 
 
-def _handle_playlist_error(error: APIError, playlist_id: str, add_on: dict[str, Any] | None = None) -> None:
+def _handle_playlist_error(error: APIError, playlist_id: str, not_found_pass: Collection[str]) -> None:
     """Handle a playlist read failure: swallow "not found" (with a warning unless whitelisted), raise anything else.
 
     Args:
         error: The APIError raised by the retry layer.
         playlist_id: The playlist ID that caused the error.
-        add_on: Configuration dict containing playlistNotFoundPass list. Defaults to global ADD_ON.
+        not_found_pass: Channel IDs whose missing upload playlist is expected (no warning).
 
     Raises:
         APIError: For any failure other than a 404.
     """
-    if add_on is None:
-        add_on = utils.ADD_ON
-
     if error.status_code == 404:
         channel_id = f'UC{playlist_id[2:]}'
-        if channel_id not in add_on['playlistNotFoundPass'] and utils.history:
+        if channel_id not in not_found_pass and utils.history:
             utils.history.warning('Playlist not found: %s', playlist_id)
         return
 
@@ -93,17 +92,20 @@ def get_playlist_items(
     service: pyt.Client,
     playlist_id: str,
     source_channel_id: str,
+    ctx: ExecutionContext,
+    *,
     day_ago: int | None = None,
-    latest_d: dt.datetime | None = None,
+    not_found_pass: Collection[str] = (),
 ) -> list[PlaylistItem]:
-    """Get the videos in a YouTube playlist.
+    """Get the videos in a YouTube playlist released inside the run's window.
 
     Args:
         service: A Python YouTube Client.
         playlist_id: A YouTube playlist ID.
         source_channel_id: Channel ID being iterated (for artist channel handling).
-        day_ago: Day difference with a reference date, delimits items' collection field.
-        latest_d: The latest reference date. Defaults to NOW.
+        ctx: Execution context; the window is (ctx.last_exe, ctx.now), both rounded down to the hour.
+        day_ago: Replaces the lower bound with ctx.now minus that many days when given.
+        not_found_pass: Channel IDs whose missing upload playlist is expected (no warning on 404).
 
     Returns:
         Playlist items as list of PlaylistItem dataclasses.
@@ -111,14 +113,11 @@ def get_playlist_items(
     Raises:
         APIError: If the playlist request fails for a reason other than "not found".
     """
-    if latest_d is None:
-        latest_d = utils.NOW
-
     p_items: list[PlaylistItem] = []
     next_page_token = None
 
-    latest_d = latest_d.replace(minute=0, second=0, microsecond=0)
-    oldest_d = None if day_ago else utils.LAST_EXE.replace(minute=0, second=0, microsecond=0)
+    latest_d = ctx.now.replace(minute=0, second=0, microsecond=0)
+    oldest_d = None if day_ago else ctx.last_exe.replace(minute=0, second=0, microsecond=0)
 
     while True:
         try:
@@ -135,7 +134,7 @@ def get_playlist_items(
             )
 
         except APIError as error:
-            _handle_playlist_error(error, playlist_id)  # raises unless it was a 404
+            _handle_playlist_error(error, playlist_id, not_found_pass)  # raises unless it was a 404
             break
 
         # Parse items, filtering out those without release date
@@ -240,38 +239,35 @@ def check_if_live(service: pyt.Client, videos_list: list[str]) -> list[dict[str,
 def iter_channels(
     service: pyt.Client,
     channels: list[str],
+    ctx: ExecutionContext,
+    add_on: AddOnConfig,
+    *,
     day_ago: int | None = None,
-    latest_d: dt.datetime | None = None,
     prog_bar: bool = True,
 ) -> list[PlaylistItem]:
-    """Apply 'get_playlist_items' for a collection of YouTube playlists.
+    """Apply 'get_playlist_items' to the upload playlist of each channel.
 
     Args:
         service: A Python YouTube Client.
         channels: List of YouTube channel IDs.
-        day_ago: Day difference with a reference date, delimits items' collection field.
-        latest_d: The latest reference date. Defaults to NOW.
+        ctx: Execution context giving the discovery window.
+        add_on: Channel filters (to_pass channels are skipped, playlist_not_found_pass ones fail silently on 404).
+        day_ago: Replaces the window's lower bound with ctx.now minus that many days when given.
         prog_bar: Whether to use tqdm progress bar.
 
     Returns:
         PlaylistItem instances with source_channel_id set at creation (no mutation!).
     """
-    if latest_d is None:
-        latest_d = utils.NOW
-
     # Create pairs of (channel_id, playlist_id) to track source channel
-    channel_playlist_pairs = [(ch_id, f'UU{ch_id[2:]}') for ch_id in channels if ch_id not in utils.ADD_ON['toPass']]
+    channel_playlist_pairs = [(ch_id, f'UU{ch_id[2:]}') for ch_id in channels if ch_id not in add_on.to_pass]
+    pairs_it = (
+        tqdm.tqdm(channel_playlist_pairs, desc='Looking for videos to add') if prog_bar else channel_playlist_pairs
+    )
 
-    if prog_bar:
-        item_it = [
-            get_playlist_items(service, pl_id, ch_id, day_ago, latest_d)
-            for ch_id, pl_id in tqdm.tqdm(channel_playlist_pairs, desc='Looking for videos to add')
-        ]
-
-    else:
-        item_it = [
-            get_playlist_items(service, pl_id, ch_id, day_ago, latest_d) for ch_id, pl_id in channel_playlist_pairs
-        ]
+    item_it = [
+        get_playlist_items(service, pl_id, ch_id, ctx, day_ago=day_ago, not_found_pass=add_on.playlist_not_found_pass)
+        for ch_id, pl_id in pairs_it
+    ]
 
     return list(itertools.chain.from_iterable(item_it))
 

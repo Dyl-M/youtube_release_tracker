@@ -14,48 +14,31 @@ import tqdm
 # Local
 from .. import config, file_utils, paths
 from ..constants import QUOTA_COST_LIST, QUOTA_COST_WRITE
-from ..exceptions import APIError, ConfigurationError, ErrorCategory, FileAccessError
+from ..context import ExecutionContext
+from ..exceptions import APIError, ErrorCategory
 from ..models import PlaylistItemRef
 from . import retry, utils
 from .api import get_items_count
 
 
-def _playlist_name(playlist_id: str) -> str:
-    """Look up a playlist's display name in the playlists configuration.
+def _queue_entry(playlists: dict[str, Any], playlist_id: str) -> dict[str, Any]:
+    """Return the playlists.json entry holding a playlist's queues, creating it for a playlist that is not defined.
 
     Args:
+        playlists: Parsed content of playlists.json.
         playlist_id: YouTube playlist ID.
 
     Returns:
-        The configured name, or the ID itself when the playlist is unknown or the file cannot be read.
+        The entry dict, guaranteed to have 'failed' and 'pending' lists.
     """
-    try:
-        playlists = file_utils.load_json(str(paths.PLAYLISTS_JSON))
-    except (ConfigurationError, FileAccessError):
-        return playlist_id
+    defined = (data for data in playlists.values() if isinstance(data, dict) and data.get('id') == playlist_id)
+    # Unknown playlist: keyed and named by its ID
+    fallback = {'name': playlist_id, 'description': '', 'id': playlist_id}
+    found = next(defined, None)
+    entry: dict[str, Any] = found if found is not None else playlists.setdefault(playlist_id, fallback)
 
-    for entry in playlists.values():
-        if isinstance(entry, dict) and entry.get('id') == playlist_id:
-            return str(entry.get('name', playlist_id))
-
-    return playlist_id
-
-
-def _failure_entry(api_failure: dict[str, Any], playlist_id: str) -> dict[str, Any]:
-    """Return the api_failure.json entry for a playlist, creating it when the playlist is not listed yet.
-
-    Args:
-        api_failure: Parsed content of api_failure.json.
-        playlist_id: YouTube playlist ID.
-
-    Returns:
-        The entry dict, guaranteed to have a 'failure' list.
-    """
-    if playlist_id not in api_failure:
-        api_failure[playlist_id] = {'name': _playlist_name(playlist_id), 'description': '', 'failure': []}
-
-    entry: dict[str, Any] = api_failure[playlist_id]
-    entry.setdefault('failure', [])
+    entry.setdefault('failed', [])
+    entry.setdefault('pending', [])
     return entry
 
 
@@ -63,7 +46,7 @@ def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list[str
     """Add a list of video to a YouTube playlist.
 
     Transient errors are retried by the retry layer; permanent errors are logged and skipped; quota errors, unknown
-    errors and exhausted retries are saved to api_failure.json for the next run.
+    errors and exhausted retries are queued in the playlist's 'failed' list (playlists.json) for the next run.
 
     Args:
         service: A Python YouTube Client.
@@ -71,7 +54,7 @@ def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list[str
         videos_list: List of YouTube video IDs.
         prog_bar: Whether to use tqdm progress bar.
     """
-    api_failure = file_utils.load_json(str(paths.API_FAILURE_JSON))
+    playlists = file_utils.load_json(str(paths.PLAYLISTS_JSON))
     api_fail = False
 
     if prog_bar:
@@ -102,11 +85,11 @@ def add_to_playlist(service: pyt.Client, playlist_id: str, videos_list: list[str
             # Quota errors, unknown errors and exhausted transient retries - save for next run
             if utils.history:
                 utils.history.warning('Addition Request Failure: (%s) - %s - %s', video_id, error.reason, error)
-            _failure_entry(api_failure, playlist_id)['failure'].append(video_id)
+            _queue_entry(playlists, playlist_id)['failed'].append(video_id)
             api_fail = True
 
-    if api_fail:  # Save API failure
-        file_utils.save_json(str(paths.API_FAILURE_JSON), api_failure)
+    if api_fail:  # Save the failed queue
+        file_utils.save_json(str(paths.PLAYLISTS_JSON), playlists)
 
 
 def del_from_playlist(
@@ -239,6 +222,7 @@ def fill_release_radar(
     target_playlist: str,
     re_listening_id: str,
     legacy_id: str,
+    ctx: ExecutionContext,
     lmt: int | None = None,
     prog_bar: bool = True,
 ) -> None:
@@ -249,6 +233,7 @@ def fill_release_radar(
         target_playlist: YouTube playlist ID where videos need to be added.
         re_listening_id: YouTube playlist ID for music to re-listen to.
         legacy_id: An older YouTube playlist to clear out.
+        ctx: Execution context; ctx.now is the reference for the re-listening age.
         lmt: The addition threshold (uses config.RELEASE_RADAR_TARGET by default).
         prog_bar: Whether to use tqdm progress bar.
 
@@ -269,7 +254,7 @@ def fill_release_radar(
     n_add_rel, n_add_leg = _calculate_allocation(n_add, to_re_listen_count, legacy_count)
 
     # Fetch and format videos from both playlists
-    week_ago = utils.NOW - dt.timedelta(weeks=config.RELISTENING_AGE_WEEKS)
+    week_ago = ctx.now - dt.timedelta(weeks=config.RELISTENING_AGE_WEEKS)
 
     to_re_listen_items = retry.call_api(
         partial(
@@ -320,22 +305,28 @@ def add_api_fail(service: pyt.Client, prog_bar: bool = True) -> None:
         service: A Python YouTube Client.
         prog_bar: Whether to use tqdm progress bar.
     """
-    api_failure = file_utils.load_json(str(paths.API_FAILURE_JSON))
-    addition = 0
+    playlists = file_utils.load_json(str(paths.PLAYLISTS_JSON))
+    queued = {
+        key: list(info['failed'])  # Copy before clearing
+        for key, info in playlists.items()
+        if isinstance(info, dict) and info.get('failed')
+    }
+    if not queued:
+        return
 
-    for p_id, info in api_failure.items():
-        if info['failure']:
-            videos_to_retry = info['failure'].copy()  # Copy the list before clearing
-            if utils.history:
-                utils.history.info(
-                    '%s addition(s) to %s playlist from previous API failure.', len(videos_to_retry), info['name']
-                )
-            api_failure[p_id]['failure'] = []  # Clear before retry so add_to_playlist can re-add failures
-            file_utils.save_json(str(paths.API_FAILURE_JSON), api_failure)  # Save cleared state
+    # Clear every queue and save once, before any retry: add_to_playlist reloads the file and re-queues what fails
+    # again, so saving this snapshot later would overwrite those re-queued videos
+    for key in queued:
+        playlists[key]['failed'] = []
+    file_utils.save_json(str(paths.PLAYLISTS_JSON), playlists)
 
-            # Failed videos get re-added here
-            add_to_playlist(service, p_id, videos_to_retry, prog_bar=prog_bar)
-            addition += 1
+    for key, videos_to_retry in queued.items():
+        info = playlists[key]
+        if utils.history:
+            utils.history.info(
+                '%s addition(s) to %s playlist from previous API failure.', len(videos_to_retry), info.get('name', key)
+            )
+        add_to_playlist(service, info.get('id', key), videos_to_retry, prog_bar=prog_bar)  # Failed videos re-added
 
-    if addition > 0 and utils.history:
+    if utils.history:
         utils.history.info('Video recovery from previous API failure(s) complete.')

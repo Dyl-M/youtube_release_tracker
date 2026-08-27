@@ -86,6 +86,7 @@ item.
 | D7 | Adaptive schedule mechanism      | **data on `run`** (`_data/schedule.json`) + hourly cron with an early-exit gate                                      | rewriting workflow cron lines on `main` (sister behaviour) — breaks the `dev` fast-forward invariant on every change |
 | D8 | `mix_history.csv`                | **archive** to `_archive/_data/mix_history_2022-2026.csv`; `stats.csv` already tracks these videos                   | keep appending (duplicate of stats)                                                                                  |
 | D9 | Hotfix the sister repo meanwhile | **yes, minimal** (catch `JSONDecodeError` per channel, widen `main.py` except) so Mixes keep flowing during the port | let it stay down                                                                                                     |
+| D10 | Who discovers music uploads     | **frequent job only** (MUSIQUE ∪ certified): lives and mixes added at once, regular videos parked in the playlist's `pending` queue (`playlists.json`) and added by the daily job, which iterates non-music channels only | both jobs discover (double listing + the mixes double-add through the shared router); frequent job adds everything (Release Radar stops being a daily digest, ~1,100 insert units/day move to the 2,500 budget) |
 
 ---
 
@@ -119,9 +120,13 @@ silently miss uploads.
 | History log                | `_log/history.log` (unchanged)  | `_log/updates_history.log`                                                             |
 | Data commits to `run`      | as today                        | `git pull --rebase origin run` + push with 3 retries                                   |
 | `CREDS_B64` secret refresh | as today                        | same code; last writer wins (the refresh token is stable, the access token is a cache) |
+| Playlist queues            | consumes `failed` and `pending` | appends to `pending` (D10), `failed` on its own adds                                   |
 
-`ExecutionContext(now, last_exe, job)` replaces the import-time `NOW` / `LAST_EXE` in `yrt/youtube/utils.py`; the
-module-level names stay as thin aliases until every call site is migrated.
+`ExecutionContext(job, exe_mode, now, last_exe, history_path, last_exe_path)` (`yrt/context.py`, Phase 2) replaced the
+import-time `NOW` / `LAST_EXE` / `ADD_ON` of `yrt/youtube/utils.py`: the module-level names are gone, every call site
+takes the context explicitly and there is no process-wide default. `yrt/runtime.py` holds the shared lifecycle
+(`bootstrap` → job body → `finalize`, wrapped by `run_job`), the config loader and the CLI parsing; the queues live in
+`_config/playlists.json` (one `failed` and one `pending` list per playlist, `api_failure.json` is gone).
 
 ### 4.3 Quota guard (IMPROVEMENTS-2026 #8 + #17, generalised)
 
@@ -138,7 +143,7 @@ yrt/exceptions.py
 Every API call goes through `call_api()` (Phase 1 shipped a helper, not a decorator); from Phase 3 on, writes
 (insert/update/delete, 50 units) check `can_afford()` first. Work in
 each job is ordered by value — **adds → removals → sorting** — so the guard degrades gracefully: sorting is dropped
-first, then removals, and adds spill into `api_failure.json` exactly as today.
+first, then removals, and adds spill into the playlist's `failed` queue (`playlists.json`) exactly as today.
 
 ### 4.4 Lives (`yrt/youtube/lives.py`)
 
@@ -167,8 +172,14 @@ Rank key: `(concurrent_viewers desc, total_views desc, actual_start_time desc)`.
 
 Runs only when the current schedule slot has `sort: true` (D5).
 
-### 4.6 Mixes
+### 4.6 Mixes and the music-channel role split (D10)
 
+- The frequent job is the **only** discoverer for MUSIQUE ∪ certified: it lists their upload playlists on the adaptive
+  schedule, adds mixes at once, and parks every other upload as a full record in the destination playlist's `pending`
+  queue (`playlists.json`, `models.to_dict(VideoData)` + `discovered_at`). The daily job iterates the non-music channels
+  only, then consumes `pending` (stats rows + inserts) through the `_pending_videos()` merge point of `run_daily`
+  (Phase 2 hook, Phase 5 implementation). No channel is listed twice a day and the shared router can never add a mix
+  twice.
 - Router step 5: music channel + long video + music-only → **`mixes`** instead of `ROUTING_NONE`
   (`RouterConfig.mixes_id`, `create_router_from_config`).
 - `certified` channels are treated as music channels for routing (`music_channels ∪ certified`).
@@ -256,17 +267,26 @@ Acceptance: no behaviour change in the daily job; `history.log` gains one `Quota
 
 ### Phase 2 — Execution context & entry-point split (M) · `feat/execution-context`
 
-Covers IMPROVEMENTS-2026 **#10, #13** (partially), **#11**.
+**Status:** ✅ Implemented 2026-08-27 on `feat/execution-context`. The module-level names were removed rather than
+aliased (every call site takes the context), `load_config()` lives in `runtime.py` (shared with the future
+`updates.py`), the CLI uses argparse (`mode` in `{local, action}`, default `local`), and D10 + the `playlists.json`
+queue merge were decided and hooked in during this phase. `test_main.py` went from 20 skips to 0 (the 6 routing
+placeholders were already covered by `test_router.py`).
 
-| Task                                                                                                                                                                                                                                              | Files                                  |
-|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------|
-| `yrt/context.py`: `ExecutionContext(now, last_exe, job_name, last_exe_path, history_path)`; `utils.NOW` / `LAST_EXE` become aliases of a default context; `get_playlist_items` / `iter_channels` / `weekly_stats` / cleanup take `ctx` explicitly | `yrt/context.py`, `yrt/youtube/*`      |
-| `yrt/runtime.py`: `bootstrap(exe_mode, job)` (service creation, prog-bar flag, loggers), `finalize(ctx, creds_b64)` (secret refresh, `copy_last_exe_log` **per job file**) — extracted from `main.py`                                             | `yrt/runtime.py`, `yrt/main.py`        |
-| `main.py` reduced to `load_config()` + `run_daily(ctx, service)`; implement the config-loading (3), `copy_last_exe_log` (2) and exception-handling (2) tests from the skipped list                                                                | `yrt/main.py`, `_tests/test_main.py`   |
-| Remove `yrt/analytics.py` (keep `_sandbox.py` ignored)                                                                                                                                                                                            | `yrt/`                                 |
-| `paths.py`: `UPDATES_LAST_EXE_LOG`, `UPDATES_HISTORY_LOG`, `SCHEDULE_JSON`, `LIVES_STATE` if needed; `ALLOWED_DIRS` unchanged                                                                                                                     | `yrt/paths.py`, `_tests/test_paths.py` |
+Covers IMPROVEMENTS-2026 **#10, #11, #13**.
 
-Acceptance: daily job byte-identical in behaviour; `test_main.py` skips drop from 20 to ≤ 13.
+| Task                                                                                                                                                                                                                                                | Files                                                       |
+|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------|
+| `yrt/context.py`: `ExecutionContext(job, exe_mode, now, last_exe, history_path, last_exe_path)` (frozen, validated, `create()` factory), `job_log_files()`, `last_exe_date(path)`; `get_playlist_items` / `iter_channels` / `cleanup_expired_videos` / `fill_release_radar` take `ctx` explicitly, `weekly_stats` gets `ref_date = ctx.now` in UTC | `yrt/context.py`, `yrt/youtube/*`                           |
+| `yrt/runtime.py`: `parse_exe_mode`, `load_config() -> AppConfig`, `GitHubTarget`, `Session`, `bootstrap(ctx)` (loggers on the job's history file, service per mode), `finalize(ctx, session)` (token files / secret, quota summary, end marker, `copy_last_exe_log` per job file), `run_job(job, exe_mode, body) -> int` (builds the context, so a corrupt last-exe log is a logged fatal error) | `yrt/runtime.py`, `yrt/models.py`                           |
+| `main.py` reduced to `run_daily(ctx, session)` + `main(argv)`; nothing runs at import; `_pending_videos()` merge point for D10                                                                                                                     | `yrt/main.py`, `_tests/test_main.py`                        |
+| `api_failure.json` merged into `playlists.json` as per-playlist `failed` / `pending` queues (`_queue_entry`); `save_json` ends files with a newline                                                                                                  | `yrt/youtube/playlist.py`, `_config/`, `yrt/file_utils.py`  |
+| Remove `yrt/analytics.py` (keep `_sandbox.py` ignored)                                                                                                                                                                                              | `yrt/`                                                      |
+| `paths.py`: `UPDATES_LAST_EXE_LOG`, `UPDATES_HISTORY_LOG`, `SCHEDULE_JSON`; `constants.py`: job names, execution modes, log markers; `ALLOWED_DIRS` unchanged                                                                                      | `yrt/paths.py`, `yrt/constants.py`, `_tests/`               |
+
+Acceptance: daily job byte-identical on the success path (import-time failures are now logged as `Fatal error` with
+exit code 1 instead of a bare traceback; the failure replay line shows the playlist's display name); `test_main.py`
+has no skipped test left.
 
 ### Phase 3 — Lives detection & playlist update (L) · `feat/lives`
 
@@ -279,6 +299,8 @@ Acceptance: daily job byte-identical in behaviour; `test_main.py` skips drop fro
 | `updates_workflow.yml` with a fixed `0 */2 * * *` cron for now (gate arrives in Phase 6), `run`-branch checkout, rebase-retry push, failure→issue | `.github/workflows/`                |
 | Merge sister `toPass` (5 channels) after checking why they were skipped                                                                           | `_config/add-on.json`               |
 | First-run catch-up: run once from **local mode** so the initial ~50–70 inserts (2,500–3,500 units) don't collide with the daily job's budget      | operator step, documented in README |
+| `runtime.bootstrap()` installs a `QuotaTracker(config.UPDATES_JOB_BUDGET)` for `JOB_UPDATES`; `config.py` / `file_utils.py` import-time loggers still target `history.log` (make them job-aware or drop the import-time INFO line) | `yrt/runtime.py`, `yrt/config.py`   |
+| `updates_workflow.yml`: explicit `git add _log/updates_*.log` (untracked files are not picked up by `git commit -a`) or seed both files; rebase-retry rule for `playlists.json` = keep both queues | `.github/workflows/`                |
 | Tests: candidates (incl. 404 → `[]`), status filtering, cap, duplicate prevention, removal policy, position insert                                | `_tests/test_lives.py`              |
 
 Acceptance: playlist contains every current live from MUSIQUE ∪ certified (spot-check Lofi Girl: 22+ entries); frequent
@@ -300,7 +322,8 @@ Acceptance: a sort pass costs ≤ 500 units; two passes/day ≤ 1,000.
 |-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------|
 | `RouterConfig.mixes_id`; `_route_music` long + music-only → `mixes`; `certified` folded into music channels for routing; router tests updated (expect 4–6 new cases)                                  | `yrt/router.py`, `_tests/test_router.py`      |
 | `mixes.retention_days = 7`                                                                                                                                                                            | `_config/playlists.json`                      |
-| `updates.py` gains the mixes pass: `iter_channels(MUSIQUE ∪ certified − toPass, ctx=updates_ctx)` → `add_stats` → route → add only `mixes` destinations (everything else is the daily job's business) | `yrt/updates.py`                              |
+| `updates.py` gains the music pass (D10): `iter_channels(MUSIQUE ∪ certified − toPass, updates_ctx, add_on)` → `add_stats` → route → add `mixes` destinations at once, append every other routed video (with its `VideoData` + `discovered_at`) to the destination playlist's `pending` queue | `yrt/updates.py`                              |
+| Daily job consumes the queues: `_pending_videos()` reads and clears `pending` (records become stats rows and inserts); `run_daily` iterates the non-music channels only (`AppConfig.all_channels` minus `music_channels ∪ certified`) | `yrt/main.py`, `_tests/test_main.py`          |
 | Optional `feeds.py` RSS pre-filter (D4/§4.6); full pass on the day's first slot                                                                                                                       | `yrt/youtube/feeds.py`                        |
 | Archive `mix_history.csv` (D8); `archive_data.py` learns the `updates_history.log` file — and swap its broad `except Exception` for the specific yrt exceptions (IMPROVEMENTS #15) while touching it  | `_archive/_data/`, `_scripts/archive_data.py` |
 
@@ -332,7 +355,7 @@ Acceptance: gate decisions visible in the Actions summary; no workflow file chan
 
 | Line item                                          | Units/run                       | Runs/day      | Units/day                                                 |
 |----------------------------------------------------|---------------------------------|---------------|-----------------------------------------------------------|
-| Daily job (unchanged)                              | 1,000–4,000                     | 1             | 1,000–4,000                                               |
+| Daily job (non-music channels only from Phase 5)   | 1,000–4,000                     | 1             | 1,000–4,000 (−130 list units once D10 lands)              |
 | Lives detection (UULV + `videos.list`)             | ~200–370                        | ~6 (adaptive) | 1,200–2,200                                               |
 | Lives detection with `/live` pre-filter (optional) | ~15–30                          | ~6            | ~100–200                                                  |
 | Lives add/remove (~2–4 events/day)                 | —                               | —             | 100–200                                                   |
@@ -362,7 +385,8 @@ One-off: first catch-up run ≈ 2,500–3,500 units (Phase 3, run locally).
 | Playlist grows to 80–100 lives                                                 | D2 knob `lives.max_per_channel`; playlist limit is 5,000 so no hard wall                                                       |
 | GitHub scheduler lag (IMPROVEMENTS #20)                                        | gate window instead of exact-hour match; idempotent job so a double run is harmless                                            |
 | Token refresh race between jobs                                                | refresh token is stable; last secret writer wins; both jobs refresh on 401                                                     |
-| Quota exhaustion mid-run                                                       | guard ordering adds → removals → sorting; adds spill to `api_failure.json` (existing)                                          |
+| Quota exhaustion mid-run                                                       | guard ordering adds → removals → sorting; adds spill to the playlist's `failed` queue (existing)                                |
+| Both jobs rewrite `playlists.json` (queues) while it is also hand-edited        | job writes only touch the `failed` / `pending` lines; ship hand edits when the queues are empty; rebase-retry keeps both queues |
 
 ---
 

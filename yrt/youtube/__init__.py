@@ -55,16 +55,12 @@ from .stats import (  # noqa: E402
     weekly_stats,
 )
 from .utils import (  # noqa: E402
-    ADD_ON,
+    # Constants
     ISO_DATE_FORMAT,
-    LAST_EXE,
-    # Constants and state
-    NOW,
     PERMANENT_ERRORS,
     QUOTA_ERRORS,
     TRANSIENT_ERRORS,
     is_shorts,
-    last_exe_date,
     parse_iso8601_duration,
 )
 
@@ -74,14 +70,10 @@ pd.set_option('display.max_columns', None)
 # Public API
 __all__ = [
     # Utils
-    'last_exe_date',
     'parse_iso8601_duration',
     'is_shorts',
     'sort_db',
     'get_items_count',
-    'NOW',
-    'LAST_EXE',
-    'ADD_ON',
     'ISO_DATE_FORMAT',
     'TRANSIENT_ERRORS',
     'PERMANENT_ERRORS',

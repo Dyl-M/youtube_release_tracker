@@ -121,6 +121,7 @@ def save_json(file_path: str, data: dict[str, Any], indent: int = 2) -> None:
     try:
         with open(validated_path, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=indent)
+            f.write('\n')  # keep hand-edited files (playlists.json) diff-clean after a job write
 
     except OSError as e:
         logger.critical('Failed to write %s: %s', file_name, str(e))

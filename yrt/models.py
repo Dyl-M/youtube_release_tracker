@@ -6,7 +6,18 @@ from datetime import datetime
 from typing import Any
 
 # Local
-from .constants import LIVE_STATUS_NONE, STATUS_PUBLIC
+from .constants import (
+    CATEGORY_ASMR,
+    CATEGORY_ENTERTAINMENT,
+    CATEGORY_GAMING,
+    CATEGORY_LEARNING,
+    CATEGORY_MUSIC,
+    LIVE_STATUS_NONE,
+    STATUS_PUBLIC,
+)
+
+# Non-music categories, in pocket_tube.json order
+OTHER_CATEGORIES = (CATEGORY_LEARNING, CATEGORY_ENTERTAINMENT, CATEGORY_GAMING, CATEGORY_ASMR)
 
 # === Configuration Models ===
 
@@ -59,6 +70,32 @@ class AddOnConfig:
         """Validate add-on configuration."""
         if not isinstance(self.favorites, dict):
             raise ValueError('favorites must be a dict')
+
+
+@dataclass(frozen=True)
+class AppConfig:
+    """The three configuration files, loaded once per run and shared by every job.
+
+    Attributes:
+        pocket_tube: Channel IDs by category (pocket_tube.json).
+        playlists: Playlist definitions by key (playlists.json).
+        add_on: Favorites and channel filters (add-on.json).
+    """
+
+    pocket_tube: dict[str, list[str]]
+    playlists: dict[str, PlaylistConfig]
+    add_on: AddOnConfig
+
+    @property
+    def music_channels(self) -> list[str]:
+        """Channel IDs of the MUSIQUE category."""
+        return list(self.pocket_tube.get(CATEGORY_MUSIC, []))
+
+    @property
+    def all_channels(self) -> list[str]:
+        """Every tracked channel ID, without duplicates (a channel may sit in several categories)."""
+        others = [channel for category in OTHER_CATEGORIES for channel in self.pocket_tube.get(category, [])]
+        return list(set(self.music_channels + others))
 
 
 # === Video/Playlist Item Models ===

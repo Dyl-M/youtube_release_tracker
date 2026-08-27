@@ -21,15 +21,17 @@ ARCHIVE_DATA_DIR: Path = ARCHIVE_DIR / '_data'
 POCKET_TUBE_JSON: Path = CONFIG_DIR / 'pocket_tube.json'
 PLAYLISTS_JSON: Path = CONFIG_DIR / 'playlists.json'
 ADD_ON_JSON: Path = CONFIG_DIR / 'add-on.json'
-API_FAILURE_JSON: Path = CONFIG_DIR / 'api_failure.json'
 CONSTANTS_JSON: Path = CONFIG_DIR / 'constants.json'
 
 # Data files (in _data/)
 STATS_CSV: Path = DATA_DIR / 'stats.csv'
+SCHEDULE_JSON: Path = DATA_DIR / 'schedule.json'  # adaptive schedule of the frequent job (written by the daily job)
 
-# Log files
+# Log files - one history / last-exe pair per job (the frequent job must not shrink the daily look-back window)
 HISTORY_LOG: Path = LOG_DIR / 'history.log'
 LAST_EXE_LOG: Path = LOG_DIR / 'last_exe.log'
+UPDATES_HISTORY_LOG: Path = LOG_DIR / 'updates_history.log'
+UPDATES_LAST_EXE_LOG: Path = LOG_DIR / 'updates_last_exe.log'
 
 # Token files
 OAUTH_JSON: Path = TOKENS_DIR / 'oauth.json'
