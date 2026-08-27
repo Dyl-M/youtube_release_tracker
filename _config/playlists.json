@@ -2,55 +2,75 @@
   "music_lives": {
     "name": "🎧🔴 Music Lives",
     "description": "Music radios on YouTube.",
-    "id": "PLOMUdQFdS-XNaPVSol9qCUJvQvN5hO4hJ"
+    "id": "PLOMUdQFdS-XNaPVSol9qCUJvQvN5hO4hJ",
+    "failed": [],
+    "pending": []
   },
   "regular_streams": {
     "name": "🍿🔴 My streams (Private)",
     "description": "Streams of creators outside the “MUSIQUE” category.",
     "id": "PLOMUdQFdS-XPxmSrgGQjJg-AH-wEEEx-7",
-    "cleanup_on_end": true
+    "cleanup_on_end": true,
+    "failed": [],
+    "pending": []
   },
   "mixes": {
     "name": "🎧 Mixes - Podcasts - Live performances",
     "description": "Compilation of mixes, podcasts and live performances by the best DJs, musicians, labels and independent music curators.",
-    "id": "PLOMUdQFdS-XMJ4NFHJlSALYAt4l-LPgS1"
+    "id": "PLOMUdQFdS-XMJ4NFHJlSALYAt4l-LPgS1",
+    "failed": [],
+    "pending": []
   },
   "release": {
     "name": "📡 RELEASE RADAR",
     "description": "Music release radar based on my YouTube subscriptions.",
-    "id": "PLOMUdQFdS-XNpAVOwJ52c_U94kd0rannK"
+    "id": "PLOMUdQFdS-XNpAVOwJ52c_U94kd0rannK",
+    "failed": [],
+    "pending": []
   },
   "banger": {
     "name": "🚨 BANGER RADAR",
     "description": "Music release radar based on my YouTube subscriptions. Absolute. Priority.",
-    "id": "PLOMUdQFdS-XOI8OIWV_Gx-SRhlCS9PKLn"
+    "id": "PLOMUdQFdS-XOI8OIWV_Gx-SRhlCS9PKLn",
+    "failed": [],
+    "pending": []
   },
   "re_listening": {
     "name": "🔂 Re-listening (Private)",
     "description": "Let's give them another chance.",
-    "id": "PLOMUdQFdS-XP8fi89uBQ5P01DN_9tGJHu"
+    "id": "PLOMUdQFdS-XP8fi89uBQ5P01DN_9tGJHu",
+    "failed": [],
+    "pending": []
   },
   "legacy": {
     "name": "[2020] To listen to (Private)",
     "description": "List of music I didn't listen to in 2020 (5,000 max).",
-    "id": "PLOMUdQFdS-XOIs6AneCHZpASfU-9qtsW0"
+    "id": "PLOMUdQFdS-XOIs6AneCHZpASfU-9qtsW0",
+    "failed": [],
+    "pending": []
   },
   "apprentissage": {
     "name": "🧠 Educational content (Private)",
     "description": "Videos for learning, discovery, and personal development.",
     "id": "PLOMUdQFdS-XNcnepE6JblfefVMq1fpa8N",
-    "retention_days": 30
+    "retention_days": 30,
+    "failed": [],
+    "pending": []
   },
   "divertissement_gaming": {
     "name": "🍿🎮 Entertainment & Gaming (Private)",
     "description": "Entertainment content.",
     "id": "PLOMUdQFdS-XN6_25FjZJuKG6vQ6msi4W6",
-    "retention_days": 7
+    "retention_days": 7,
+    "failed": [],
+    "pending": []
   },
   "asmr": {
     "name": "💤 ASMR & Relaxation (Private)",
     "description": "Relaxation videos, background noise, and stress relief.",
     "id": "PLOMUdQFdS-XMjwIyrP2skD7RI1Xz-TbJw",
-    "retention_days": 10
+    "retention_days": 10,
+    "failed": [],
+    "pending": []
   }
 }

@@ -1,379 +1,206 @@
-"""Main process for YouTube Release Tracker."""
+"""Daily job of YouTube Release Tracker: subscriptions -> playlists, statistics and cleanups.
+
+Importing this module has no side effect; `python -m yrt.main [local|action]` runs the job through yrt.runtime.
+"""
 
 # Standard library
+import datetime as dt
 import logging
-import os
-import re
 import sys
-from typing import cast
+from collections.abc import Sequence
 
 # Third-party
-import github
 import pandas as pd
 
 # Local
-from . import config, file_utils, paths, youtube
-from .constants import LIVE_STATUS_UPCOMING
-from .exceptions import GitHubError, YouTubeTrackerError
-from .logging_utils import create_file_logger
-from .models import AddOnConfig, PlaylistConfig
+from . import config, paths, runtime, youtube
+from .constants import JOB_DAILY, LIVE_STATUS_UPCOMING
+from .context import ExecutionContext
+from .models import PlaylistConfig, VideoData, to_dict_list
 from .router import create_router_from_config, dest_playlist, set_default_router
 
-# System
+# stats.csv columns, in file order: identity, then the weekly statistics, then the display names
+STATS_COLUMNS: tuple[str, ...] = (
+    'video_id',
+    'channel_id',
+    'release_date',
+    'status',
+    'is_shorts',
+    'duration',
+    'views_w1',
+    'views_w4',
+    'views_w12',
+    'views_w24',
+    'likes_w1',
+    'likes_w4',
+    'likes_w12',
+    'likes_w24',
+    'comments_w1',
+    'comments_w4',
+    'comments_w12',
+    'comments_w24',
+    'channel_name',
+    'video_title',
+)
+STATS_WEEKLY: tuple[str, ...] = STATS_COLUMNS[6:18]  # filled by weekly_stats() over the following weeks
+STATS_KEEP: tuple[str, ...] = STATS_COLUMNS[:6] + STATS_COLUMNS[18:]  # known when a video is discovered
 
-try:
-    exe_mode = sys.argv[1]
-
-except IndexError:
-    exe_mode = 'local'
-
-# Name of the GitHub repository secret holding the base64-encoded credentials
-CREDS_ENV_NAME = 'CREDS_B64'
-
-
-def _get_env_variables() -> tuple[str, str]:
-    """Get and validate environment variables for GitHub Actions mode.
-
-    Returns:
-        Tuple of (github_repo, PAT) values.
-
-    Raises:
-        ConfigurationError: If required environment variables are missing/empty in 'action' mode.
-    """
-    from .exceptions import ConfigurationError
-
-    try:
-        repo = os.environ['GITHUB_REPOSITORY']
-        pat = os.environ['PAT']
-
-        # Validate that the values are not empty
-        if not repo or not pat:
-            raise ValueError('Environment variables are empty')
-
-        return repo, pat
-
-    except (KeyError, ValueError) as er:
-        if exe_mode == 'action':
-            missing_var = str(er).replace("'", '') if isinstance(er, KeyError) else 'GITHUB_REPOSITORY or PAT'
-            raise ConfigurationError(
-                f'Required environment variable {missing_var} not set or empty. '
-                f'Please configure GitHub repository secrets.'
-            ) from er
-        # Fall back to local mode defaults
-        return 'Dyl-M/auto_youtube_playlist', 'PAT'
-
-
-# Configuration loading helpers
-
-
-def _load_playlists_config() -> dict[str, PlaylistConfig]:
-    """Load and parse playlists configuration into PlaylistConfig instances.
-
-    Returns:
-        Dictionary mapping playlist names to PlaylistConfig instances.
-    """
-    playlists_data = file_utils.load_json(
-        str(paths.PLAYLISTS_JSON),
-        required_keys=[
-            'release',
-            'banger',
-            're_listening',
-            'legacy',
-            'apprentissage',
-            'divertissement_gaming',
-            'asmr',
-            'music_lives',
-            'regular_streams',
-        ],
-    )
-
-    return {
-        name: PlaylistConfig(
-            id=data['id'],
-            name=data['name'],
-            description=data['description'],
-            retention_days=data.get('retention_days'),
-            cleanup_on_end=data.get('cleanup_on_end'),
-        )
-        for name, data in playlists_data.items()
-    }
-
-
-def _load_addon_config() -> AddOnConfig:
-    """Load and parse add-on configuration into AddOnConfig instance.
-
-    Returns:
-        AddOnConfig instance with configuration data.
-    """
-    add_on_data = file_utils.load_json(str(paths.ADD_ON_JSON), required_keys=['favorites'])
-
-    return AddOnConfig(
-        favorites=add_on_data['favorites'],
-        playlist_not_found_pass=add_on_data.get('playlistNotFoundPass', []),
-        to_pass=add_on_data.get('toPass', []),
-        certified=add_on_data.get('certified', []),
-    )
-
-
-# Environment
-github_repo, PAT = _get_env_variables()
-
-# Load configuration files with validation
-pocket_tube = file_utils.load_json(
-    str(paths.POCKET_TUBE_JSON), required_keys=['MUSIQUE', 'APPRENTISSAGE', 'DIVERTISSEMENT', 'GAMING']
+# Playlist additions: (playlists.json key, log name), in insertion order
+PLAYLIST_ADDITIONS: tuple[tuple[str, str], ...] = (
+    ('banger', 'Banger Radar'),
+    ('release', 'Release Radar'),
+    ('apprentissage', 'Educational content'),
+    ('divertissement_gaming', 'Entertainment & Gaming'),
+    ('asmr', 'ASMR & Relaxation'),
+    ('music_lives', 'Music Lives'),
+    ('regular_streams', 'My streams'),
 )
 
-playlists = _load_playlists_config()
-add_on = _load_addon_config()
 
-# Extract configuration values
-favorites = add_on.favorites.values()
+def _load_historical_data(logger: logging.Logger) -> pd.DataFrame:
+    """Load stats.csv, or start an empty one with the right schema.
 
-# YouTube Channels list
-music = pocket_tube['MUSIQUE']
-other_raw = (
-    pocket_tube['APPRENTISSAGE'] + pocket_tube['DIVERTISSEMENT'] + pocket_tube['GAMING'] + pocket_tube.get('ASMR', [])
-)
-other = list(set(other_raw))
-all_channels = list(set(music + other))
-
-# YouTube playlists
-release: str = playlists['release'].id
-banger: str = playlists['banger'].id
-re_listening: str = playlists['re_listening'].id
-legacy: str = playlists['legacy'].id
-music_lives: str = playlists['music_lives'].id
-regular_streams: str = playlists['regular_streams'].id
-
-# Category priority order and playlist mapping (for non-music channels)
-CATEGORY_PRIORITY: list[str] = ['APPRENTISSAGE', 'DIVERTISSEMENT', 'GAMING', 'ASMR']
-
-CATEGORY_PLAYLISTS: dict[str, str] = {
-    'APPRENTISSAGE': playlists['apprentissage'].id,
-    'DIVERTISSEMENT': playlists['divertissement_gaming'].id,
-    'GAMING': playlists['divertissement_gaming'].id,
-    'ASMR': playlists['asmr'].id,
-}
-
-# Playlist addition mapping: (playlist_id, log_name)
-PLAYLIST_ADDITIONS: list[tuple[str, str]] = [
-    (banger, 'Banger Radar'),
-    (release, 'Release Radar'),
-    (playlists['apprentissage'].id, 'Educational content'),
-    (playlists['divertissement_gaming'].id, 'Entertainment & Gaming'),
-    (playlists['asmr'].id, 'ASMR & Relaxation'),
-    (music_lives, 'Music Lives'),
-    (regular_streams, 'My streams'),
-]
-
-category_channels = {
-    'APPRENTISSAGE': set(pocket_tube['APPRENTISSAGE']),
-    'DIVERTISSEMENT': set(pocket_tube['DIVERTISSEMENT']),
-    'GAMING': set(pocket_tube['GAMING']),
-    'ASMR': set(pocket_tube.get('ASMR', [])),
-}
-
-# Video router singleton
-video_router = create_router_from_config(pocket_tube, playlists, add_on)
-set_default_router(video_router)
-
-# Historical Data - create if doesn't exist
-if os.path.exists(paths.STATS_CSV):
-    histo_data = pd.read_csv(paths.STATS_CSV, encoding='utf-8')
-
-else:
-    print('INFO: stats.csv not found. Creating new empty DataFrame.')
-    # Create empty DataFrame with correct schema
-    columns = [
-        'video_id',
-        'channel_id',
-        'release_date',
-        'status',
-        'is_shorts',
-        'duration',
-        'views_w1',
-        'views_w4',
-        'views_w12',
-        'views_w24',
-        'likes_w1',
-        'likes_w4',
-        'likes_w12',
-        'likes_w24',
-        'comments_w1',
-        'comments_w4',
-        'comments_w12',
-        'comments_w24',
-        'channel_name',
-        'video_title',
-    ]
-    histo_data = pd.DataFrame(columns=columns)
-
-
-# Functions
-
-
-def copy_last_exe_log() -> None:
-    """Copy the last execution logging from the main history file."""
-    with open(paths.HISTORY_LOG, encoding='utf8') as history_file:
-        history = history_file.read()
-
-    last_exe = re.findall(r'.*?Process started\.', history)[-1]
-    last_exe_idx = history.rfind(last_exe)
-    last_exe_log = history[last_exe_idx:]
-
-    with open(paths.LAST_EXE_LOG, 'w', encoding='utf8') as last_exe_file:
-        last_exe_file.write(last_exe_log)
-
-
-def _create_logger() -> logging.Logger:
-    """Create and configure the main process logger.
+    Args:
+        logger: Job logger.
 
     Returns:
-        Configured Logger instance for history logging.
+        Historical data with video statistics.
     """
-    return create_file_logger('history_main', paths.HISTORY_LOG, respect_no_logging=False)
+    if paths.STATS_CSV.exists():
+        return pd.read_csv(paths.STATS_CSV, encoding='utf-8')
+
+    logger.info('stats.csv not found. Creating new empty DataFrame.')
+    return pd.DataFrame(columns=list(STATS_COLUMNS))
 
 
-def _update_historical_stats(service: youtube.pyt.Client, historical_data: pd.DataFrame) -> pd.DataFrame:
+def _pending_videos() -> list[VideoData]:
+    """Return the videos parked for the daily job by the frequent job.
+
+    The queue lives in the 'pending' lists of playlists.json; nothing writes it yet, so this is the merge point for
+    the port plan's Phase 5 and returns an empty list for now.
+
+    Returns:
+        Videos to add and track, as if they had just been discovered.
+    """
+    return []
+
+
+def _update_historical_stats(
+    service: youtube.pyt.Client, historical_data: pd.DataFrame, ctx: ExecutionContext
+) -> pd.DataFrame:
     """Collect weekly stats for videos in historical data.
 
     Args:
         service: YouTube API client.
         historical_data: DataFrame with video statistics.
+        ctx: Execution context; the run's start time (in UTC) is the reference date of the week deltas.
 
     Returns:
         Updated DataFrame with collected stats.
     """
+    ref_date = ctx.now.astimezone(dt.UTC)
     for week_delta in config.STATS_WEEK_DELTAS:
-        historical_data = youtube.weekly_stats(service=service, histo_data=historical_data, week_delta=week_delta)
+        historical_data = youtube.weekly_stats(
+            service=service, histo_data=historical_data, week_delta=week_delta, ref_date=ref_date
+        )
     return historical_data
 
 
+def _store_stats(historical_data: pd.DataFrame) -> None:
+    """Write the historical data back to stats.csv, sorted and de-duplicated.
+
+    Args:
+        historical_data: DataFrame with video statistics.
+    """
+    historical_data.drop_duplicates(inplace=True)
+    historical_data.sort_values(['release_date', 'video_id'], inplace=True)
+    historical_data.to_csv(paths.STATS_CSV, encoding='utf-8', index=False)
+
+
+def _store_new_videos(historical_data: pd.DataFrame, new_data: pd.DataFrame, upcoming_mask: pd.Series) -> None:
+    """Append the newly discovered videos to stats.csv with empty weekly statistics.
+
+    Args:
+        historical_data: DataFrame with video statistics.
+        new_data: Newly discovered videos with their current statistics.
+        upcoming_mask: Rows of new_data that are scheduled streams (not tracked until they go live).
+    """
+    stored = new_data[~upcoming_mask][list(STATS_KEEP)]
+    stored.loc[:, list(STATS_WEEKLY)] = [pd.NA] * len(STATS_WEEKLY)
+    stored = stored[list(STATS_COLUMNS)]
+
+    # Sort and store (drop all-NA columns before concat to avoid FutureWarning)
+    dfs_to_concat = [df.dropna(axis=1, how='all') for df in [historical_data, stored] if not df.empty]
+    stored = pd.concat(dfs_to_concat).sort_values(['release_date', 'video_id']).drop_duplicates()
+    stored.to_csv(paths.STATS_CSV, encoding='utf-8', index=False)
+
+
 def _add_videos_to_playlists(
-    service: youtube.pyt.Client, to_add: dict[str, list[str]], logger: logging.Logger, prog_bar: bool
+    service: youtube.pyt.Client,
+    playlists: dict[str, PlaylistConfig],
+    to_add: dict[str, list[str]],
+    logger: logging.Logger,
+    prog_bar: bool,
 ) -> None:
     """Add videos to their destination playlists.
 
     Args:
         service: YouTube API client.
+        playlists: Playlist definitions by key.
         to_add: Dictionary mapping playlist IDs to lists of video IDs.
-        logger: Logger instance for logging additions.
+        logger: Job logger.
         prog_bar: Whether to display progress bar.
     """
-    for playlist_id, log_name in PLAYLIST_ADDITIONS:
+    for key, log_name in PLAYLIST_ADDITIONS:
+        playlist_id = playlists[key].id
         videos = to_add.get(playlist_id, [])
         if videos:
             logger.info('Addition to "%s": %s video(s).', log_name, len(videos))
             youtube.add_to_playlist(service, playlist_id, videos, prog_bar=prog_bar)
 
 
-def update_repo_secrets(secret_name: str, new_value: str, logger: logging.Logger | None = None) -> None:
-    """Update a GitHub repository Secret value.
+def run_daily(ctx: ExecutionContext, session: runtime.Session) -> None:
+    """The daily job: replay failures, discover uploads, update statistics, route and add, fill and clean up.
 
     Args:
-        secret_name: GitHub repository Secret name.
-        new_value: New value for the selected Secret.
-        logger: Optional Logger instance for logging.
-
-    Raises:
-        GitHubError: If the secret update fails.
+        ctx: Execution context of the run.
+        session: Session opened by runtime.bootstrap().
     """
-    repo = github.Github(auth=github.Auth.Token(PAT)).get_repo(github_repo)
-    try:
-        repo.create_secret(secret_name, new_value)
-        if logger:
-            logger.info("Repository Secret '%s' updated successfully.", secret_name)
-        else:
-            print(f"Repository Secret '{secret_name}' updated successfully.")
+    cfg = runtime.load_config()
+    set_default_router(create_router_from_config(cfg.pocket_tube, cfg.playlists, cfg.add_on))
 
-    except (github.GithubException, ValueError) as error:
-        if logger:
-            logger.error("Failed to update Repository Secret '%s' : %s", secret_name, error)
-
-        else:
-            print(f'Failed to update secret {secret_name}. Error: {error}')
-
-        raise GitHubError(f"Failed to update Repository Secret '{secret_name}': {error}") from error
-
-
-def main(historical_data: pd.DataFrame) -> None:
-    """Main process execution.
-
-    Args:
-        historical_data: Historical data DataFrame with video statistics.
-    """
-    history_main = _create_logger()
-    history_main.info('Process started.')
-
-    # YouTube service creation based on execution mode
-    if exe_mode == 'local':
-        youtube_oauth, creds_b64 = youtube.create_service_local(), None
-        prog_bar = True
-    else:
-        youtube_oauth, creds_b64 = youtube.create_service_workflow()
-        prog_bar = False
+    service, logger, prog_bar = session.service, session.logger, ctx.prog_bar
+    historical_data = _load_historical_data(logger)
 
     # Add missing videos due to quota exceeded on previous run
-    youtube.add_api_fail(service=youtube_oauth, prog_bar=prog_bar)
+    youtube.add_api_fail(service=service, prog_bar=prog_bar)
 
-    # Search for new videos to add
-    history_main.info('Iterative research for %s YouTube channels.', len(all_channels))
-    new_videos = youtube.iter_channels(youtube_oauth, all_channels, prog_bar=prog_bar)
+    # Search for new videos to add, plus the ones parked by the frequent job
+    all_channels = cfg.all_channels
+    logger.info('Iterative research for %s YouTube channels.', len(all_channels))
+    new_videos = youtube.iter_channels(service, all_channels, ctx, cfg.add_on, prog_bar=prog_bar)
+    pending = _pending_videos()
 
     # Update historical stats (common to both branches)
-    historical_data = _update_historical_stats(youtube_oauth, historical_data)
+    historical_data = _update_historical_stats(service, historical_data, ctx)
 
-    if not new_videos:
-        history_main.info('No addition to perform.')
-        # Store historical data only
-        historical_data.drop_duplicates(inplace=True)
-        historical_data.sort_values(['release_date', 'video_id'], inplace=True)
-        historical_data.to_csv(paths.STATS_CSV, encoding='utf-8', index=False)
+    if not new_videos and not pending:
+        logger.info('No addition to perform.')
+        _store_stats(historical_data)
 
     else:
-        # Add statistics about the videos for selection
-        history_main.info('Add statistics for %s video(s).', len(new_videos))
-        new_data = youtube.add_stats(service=youtube_oauth, playlist_items=new_videos)
+        # Add statistics about the videos for selection (pending videos already carry theirs)
+        logger.info('Add statistics for %s video(s).', len(new_videos) + len(pending))
+        new_data = youtube.add_stats(service=service, playlist_items=new_videos) if new_videos else pd.DataFrame()
+        if pending:
+            new_data = pd.concat([new_data, pd.DataFrame(to_dict_list(pending))], ignore_index=True)
 
         # Filter out upcoming streams from stats storage (don't track stats for scheduled content)
         upcoming_mask = new_data['live_status'] == LIVE_STATUS_UPCOMING
         if upcoming_mask.any():
-            history_main.info('Filtered %d upcoming stream(s) from stats tracking.', upcoming_mask.sum())
+            logger.info('Filtered %d upcoming stream(s) from stats tracking.', upcoming_mask.sum())
 
-        # Prepare data for storing (excluding upcoming streams)
-        to_keep = [
-            'video_id',
-            'channel_id',
-            'release_date',
-            'status',
-            'is_shorts',
-            'duration',
-            'channel_name',
-            'video_title',
-        ]
-        stats_list = [
-            'views_w1',
-            'views_w4',
-            'views_w12',
-            'views_w24',
-            'likes_w1',
-            'likes_w4',
-            'likes_w12',
-            'likes_w24',
-            'comments_w1',
-            'comments_w4',
-            'comments_w12',
-            'comments_w24',
-        ]
-
-        stored = new_data[~upcoming_mask][to_keep]
-        stored.loc[:, stats_list] = [pd.NA] * len(stats_list)
-        stored = stored[to_keep[:-2] + stats_list + to_keep[-2:]]
-
-        # Sort and store (drop all-NA columns before concat to avoid FutureWarning)
-        dfs_to_concat = [df.dropna(axis=1, how='all') for df in [historical_data, stored] if not df.empty]
-        stored = pd.concat(dfs_to_concat).sort_values(['release_date', 'video_id']).drop_duplicates()
-        stored.to_csv(paths.STATS_CSV, encoding='utf-8', index=False)
+        _store_new_videos(historical_data, new_data, upcoming_mask)
 
         # Define destination playlist (use source_channel_id to handle YouTube's auto-generated artist channels)
         new_data['dest_playlist'] = new_data.apply(
@@ -381,40 +208,40 @@ def main(historical_data: pd.DataFrame) -> None:
         )
 
         # Add videos to playlists
-        # noinspection PyTypeChecker
-        to_add = cast('dict[str, list[str]]', new_data.groupby('dest_playlist')['video_id'].apply(list).to_dict())
-        _add_videos_to_playlists(youtube_oauth, to_add, history_main, prog_bar)
+        destinations = new_data['dest_playlist'].unique().tolist()  # plain strings, one list of IDs per playlist
+        to_add = {
+            destination: new_data.loc[new_data['dest_playlist'] == destination, 'video_id'].tolist()
+            for destination in destinations
+        }
+        _add_videos_to_playlists(service, cfg.playlists, to_add, logger, prog_bar)
 
     # Fill the Release Radar playlist (uses config.RELEASE_RADAR_TARGET by default)
-    youtube.fill_release_radar(youtube_oauth, release, re_listening, legacy, prog_bar=prog_bar)
+    youtube.fill_release_radar(
+        service,
+        cfg.playlists['release'].id,
+        cfg.playlists['re_listening'].id,
+        cfg.playlists['legacy'].id,
+        ctx,
+        prog_bar=prog_bar,
+    )
 
-    # Cleanup expired videos from category playlists
-    youtube.cleanup_expired_videos(youtube_oauth, playlists, prog_bar=prog_bar)
+    # Cleanup expired videos from category playlists, then ended streams from stream playlists
+    youtube.cleanup_expired_videos(service, cfg.playlists, ctx, prog_bar=prog_bar)
+    youtube.cleanup_ended_streams(service, cfg.playlists, prog_bar=prog_bar)
 
-    # Cleanup ended streams from stream playlists
-    youtube.cleanup_ended_streams(youtube_oauth, playlists, prog_bar=prog_bar)
 
-    if exe_mode == 'local':  # Credentials in base64 update - Local option
-        youtube.encode_key(json_path=str(paths.CREDENTIALS_JSON))
-        youtube.encode_key(json_path=str(paths.OAUTH_JSON))
+def main(argv: Sequence[str] | None = None) -> int:
+    """Entry point of the daily job.
 
-    elif creds_b64 is not None:
-        update_repo_secrets(secret_name=CREDS_ENV_NAME, new_value=creds_b64, logger=history_main)
+    Args:
+        argv: Command-line arguments without the program name (defaults to sys.argv[1:]).
 
-    history_main.info(youtube.quota.get_tracker().summary())  # e.g. "Quota spent: 1234 units (...)"
-    history_main.info('Process ended.')  # End
-    copy_last_exe_log()  # Copy what happened during process execution to the associated file.
+    Returns:
+        Process exit code (0 on success, 1 on a handled fatal error).
+    """
+    exe_mode = runtime.parse_exe_mode(argv, prog='python -m yrt.main')
+    return runtime.run_job(JOB_DAILY, exe_mode, run_daily)
 
 
 if __name__ == '__main__':
-    # Create a basic logger for top-level exception handling (always logs, even in standalone mode)
-    top_level_logger = create_file_logger('top_level', paths.HISTORY_LOG, respect_no_logging=False)
-
-    try:
-        main(histo_data)
-
-    except YouTubeTrackerError as e:
-        # Handle all custom exceptions (ConfigurationError, APIError, CredentialsError, etc.)
-        top_level_logger.critical('Fatal error: %s', e)
-        top_level_logger.info(youtube.quota.get_tracker().summary())  # what the failed run still spent
-        sys.exit(1)
+    sys.exit(main())

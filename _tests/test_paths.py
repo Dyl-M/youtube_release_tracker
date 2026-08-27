@@ -36,13 +36,15 @@ class TestPathDefinitions:
         assert isinstance(paths.POCKET_TUBE_JSON, Path)
         assert isinstance(paths.PLAYLISTS_JSON, Path)
         assert isinstance(paths.ADD_ON_JSON, Path)
-        assert isinstance(paths.API_FAILURE_JSON, Path)
         assert isinstance(paths.CONSTANTS_JSON, Path)
         # Data files
         assert isinstance(paths.STATS_CSV, Path)
+        assert isinstance(paths.SCHEDULE_JSON, Path)
         # Log files
         assert isinstance(paths.HISTORY_LOG, Path)
         assert isinstance(paths.LAST_EXE_LOG, Path)
+        assert isinstance(paths.UPDATES_HISTORY_LOG, Path)
+        assert isinstance(paths.UPDATES_LAST_EXE_LOG, Path)
         # Token files
         assert isinstance(paths.OAUTH_JSON, Path)
         assert isinstance(paths.CREDENTIALS_JSON, Path)
@@ -62,15 +64,22 @@ class TestPathDefinitions:
         assert paths.POCKET_TUBE_JSON.parent == paths.CONFIG_DIR
         assert paths.PLAYLISTS_JSON.parent == paths.CONFIG_DIR
         assert paths.ADD_ON_JSON.parent == paths.CONFIG_DIR
-        assert paths.API_FAILURE_JSON.parent == paths.CONFIG_DIR
         assert paths.CONSTANTS_JSON.parent == paths.CONFIG_DIR
 
         # Data files
         assert paths.STATS_CSV.parent == paths.DATA_DIR
+        assert paths.SCHEDULE_JSON.parent == paths.DATA_DIR
 
         # Log files
         assert paths.HISTORY_LOG.parent == paths.LOG_DIR
         assert paths.LAST_EXE_LOG.parent == paths.LOG_DIR
+        assert paths.UPDATES_HISTORY_LOG.parent == paths.LOG_DIR
+        assert paths.UPDATES_LAST_EXE_LOG.parent == paths.LOG_DIR
+
+    @staticmethod
+    def test_job_log_files_are_distinct():
+        """Test the daily and frequent jobs never share a history or last-exe file."""
+        assert len({paths.HISTORY_LOG, paths.LAST_EXE_LOG, paths.UPDATES_HISTORY_LOG, paths.UPDATES_LAST_EXE_LOG}) == 4
 
         # Token files
         assert paths.OAUTH_JSON.parent == paths.TOKENS_DIR

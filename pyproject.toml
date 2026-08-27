@@ -102,7 +102,6 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "_tests/**" = ["ANN", "S101"] # tests: no annotations required, assert is expected
 "_scripts/**" = ["T20"] # maintenance scripts print progress to the console
-"yrt/main.py" = ["T20"] # local mode prints progress to the console
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"

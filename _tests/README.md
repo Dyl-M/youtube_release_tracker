@@ -18,15 +18,17 @@ _tests/
 ├── test_api.py              # Tests for core API calls through the retry layer
 ├── test_cleanup.py          # Tests for retention / ended-stream cleanup
 ├── test_config.py           # Tests for centralized configuration and validation
+├── test_context.py          # Tests for the per-job execution context and last-exe date parsing
 ├── test_exceptions.py       # Tests for custom exception hierarchy and context
 ├── test_file_utils.py       # Tests for file operations and validation
 ├── test_logging_utils.py    # Tests for logger factory
-├── test_main.py             # Tests for main orchestration logic
+├── test_main.py             # Tests for the daily job: import, entry point, run_daily orchestration
 ├── test_models.py           # Tests for domain models/dataclasses
 ├── test_paths.py            # Tests for centralized path definitions
-├── test_playlist.py         # Tests for playlist writes and api_failure.json bookkeeping
+├── test_playlist.py         # Tests for playlist writes and the failed-queue bookkeeping (playlists.json)
 ├── test_quota.py            # Tests for the quota tracker
 ├── test_retry.py            # Tests for retry, error triage and quota charging
+├── test_runtime.py          # Tests for CLI parsing, config loading and the bootstrap / finalize / run_job lifecycle
 ├── test_smoke_flow.py       # Zero-quota integration flow of the daily job's steps
 ├── test_youtube.py          # Tests for YouTube API functions
 └── README.md                # This file
@@ -112,7 +114,10 @@ Common fixtures are defined in `conftest.py`:
 - `no_sleep` - Patches the retry layer's `time.sleep` (yields the mock)
 - `quota_tracker` - Installs a small deterministic `QuotaTracker` as the process-wide default
 - `history_mock` - Replaces the shared youtube logger with a `MagicMock`
+- `exec_context` - A daily, workflow-mode `ExecutionContext` (window January 2024, log files under `tmp_path`)
+- `add_on_config` - An `AddOnConfig` with empty lists
 - `_reset_quota_tracker` - Autouse: drops the process-wide tracker after each test
+- `_restore_youtube_logger` - Autouse: puts back the shared youtube logger rebound by `runtime.bootstrap()`
 
 ## Test Coverage Goals
 
@@ -141,11 +146,12 @@ Current implementation tests:
     - YRT_NO_LOGGING environment variable
     - Multiple independent loggers
 
-5. **Main Logic** (test_main.py) - 0/20 tests ⏭️
-    - Video routing (dest_playlist) - skipped
-    - Configuration loading - skipped
-    - Main orchestration - skipped
-    - Workflow modes - skipped
+5. **Main Logic** (test_main.py) ✅
+    - Importing `yrt.main` does no work; `main()` builds a daily context and hands it to `runtime.run_job`
+    - Execution modes (local default, action, invalid) and handled fatal errors (exit code 1)
+    - `last_exe.log` rewritten on success, kept on failure
+    - `run_daily` orchestration: no-video and one-video runs against patched youtube functions
+    - Video routing lives in test_router.py, configuration loading in test_runtime.py
 
 6. **Domain Models** (test_models.py) - 26 tests ✅ NEW
     - PlaylistConfig validation (5 tests)
@@ -162,12 +168,12 @@ Current implementation tests:
     - Absolute paths
     - Path validation lists
 
-8. **YouTube API** (test_youtube.py) - 14/17 tests
-    - Shorts detection (is_shorts) ✅
-    - Error categorization constants ✅
-    - Retry mechanism configuration ✅
-    - Service creation functions ✅
-    - Duration parsing - skipped (3 tests)
+8. **YouTube API** (test_youtube.py) ✅
+    - Shorts detection (is_shorts)
+    - Error categorization constants
+    - Retry mechanism configuration
+    - Service creation functions
+    - Duration parsing (`parse_iso8601_duration`)
 
 9. **Retry layer / quota** (test_retry.py, test_quota.py) ✅
     - Reason normalisation and extraction, classification, backoff bounds
@@ -176,12 +182,18 @@ Current implementation tests:
 
 10. **API, playlist, cleanup** (test_api.py, test_playlist.py, test_cleanup.py) ✅
     - 404 handling, transient retry, error re-wrapping with context
-    - `add_to_playlist` triage and `api_failure.json` bookkeeping, deletes, `add_api_fail`
+    - `add_to_playlist` triage and the `failed` queue bookkeeping in `playlists.json`, deletes, `add_api_fail`
     - Retention filtering, partial results on quota, ended-stream detection
 
 11. **Smoke flow** (test_smoke_flow.py) ✅ - the daily job's steps end to end against the mock client
 
-**Total:** 313 tests | **Passing:** 293 | **Skipped:** 20 | **Line coverage:** 69%
+12. **Execution context / runtime** (test_context.py, test_runtime.py) ✅
+    - Per-job log files, `last_exe_date` defaults and parsing, `ExecutionContext` validation and `create()`
+    - `parse_exe_mode`, `load_config` → `AppConfig`, GitHub target validation
+    - `bootstrap` per mode, `finalize` (token files / repository secret, wrap-up lines), `copy_last_exe_log`, `run_job`
+      exit codes and the untouched last-exe log on failure
+
+**Total:** 351 tests | **Passing:** 351 | **Skipped:** 0 | **Line coverage:** 86%
 
 ## Adding New Tests
 

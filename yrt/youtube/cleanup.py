@@ -12,6 +12,7 @@ import pyyoutube as pyt
 # Local
 from .. import config
 from ..constants import LIVE_STATUS_NONE, QUOTA_COST_LIST
+from ..context import ExecutionContext
 from ..exceptions import APIError, ErrorCategory
 from ..models import PlaylistConfig, PlaylistItemRef
 from . import retry, utils
@@ -164,19 +165,20 @@ def _find_ended_streams(service: pyt.Client, all_items: list[PlaylistItemRef]) -
 
 
 def cleanup_expired_videos(
-    service: pyt.Client, playlist_config: dict[str, PlaylistConfig], prog_bar: bool = True
+    service: pyt.Client, playlist_config: dict[str, PlaylistConfig], ctx: ExecutionContext, prog_bar: bool = True
 ) -> None:
     """Remove expired videos from playlists with retention rules.
 
     For each playlist with 'retention_days' configured:
         1. Fetch all items from the playlist.
-        2. Filter items where snippet.publishedAt < (NOW - retention_days).
+        2. Filter items where snippet.publishedAt < (ctx.now - retention_days).
         3. Delete expired items using del_from_playlist().
 
     Args:
         service: A Python YouTube Client.
         playlist_config: Dictionary of PlaylistConfig instances.
             Each playlist may have retention_days configured.
+        ctx: Execution context; ctx.now is the reference for the retention cutoff.
         prog_bar: Whether to use tqdm progress bar.
     """
     for playlist_cfg in playlist_config.values():
@@ -185,7 +187,7 @@ def cleanup_expired_videos(
 
         playlist_id = playlist_cfg.id
         playlist_name = playlist_cfg.name
-        cutoff_date = utils.NOW - dt.timedelta(days=playlist_cfg.retention_days)
+        cutoff_date = ctx.now - dt.timedelta(days=playlist_cfg.retention_days)
 
         if utils.history:
             utils.history.info(

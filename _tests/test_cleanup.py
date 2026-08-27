@@ -64,34 +64,34 @@ class TestCleanupExpiredVideos:
     """Test retention cleanup: expiry filtering and the partial-results behaviour on errors."""
 
     @staticmethod
-    def test_deletes_expired_items_only(mock_youtube_client, quota_tracker, retention_playlists):
+    def test_deletes_expired_items_only(mock_youtube_client, quota_tracker, retention_playlists, exec_context):
         """Test only items added before the cutoff are deleted, and playlists without retention are skipped."""
         mock_youtube_client.playlistItems.list.return_value = _page(
             [_item('old0000001', EXPIRED_AT), _item('new0000001', FRESH_AT)]
         )
 
-        cleanup_expired_videos(mock_youtube_client, retention_playlists, prog_bar=False)
+        cleanup_expired_videos(mock_youtube_client, retention_playlists, exec_context, prog_bar=False)
 
         assert mock_youtube_client.playlistItems.list.call_count == 1
         assert _deleted_item_ids(mock_youtube_client) == ['item_old0000001']
         assert quota_tracker.spent == QUOTA_COST_LIST + QUOTA_COST_WRITE
 
     @staticmethod
-    def test_paginates_and_deletes_across_pages(mock_youtube_client, quota_tracker, retention_playlists):
+    def test_paginates_and_deletes_across_pages(mock_youtube_client, quota_tracker, retention_playlists, exec_context):
         """Test expired items from every page are deleted."""
         mock_youtube_client.playlistItems.list.side_effect = [
             _page([_item('old0000001', EXPIRED_AT)], next_page='page2'),
             _page([_item('old0000002', EXPIRED_AT), _item('new0000001', FRESH_AT)]),
         ]
 
-        cleanup_expired_videos(mock_youtube_client, retention_playlists, prog_bar=False)
+        cleanup_expired_videos(mock_youtube_client, retention_playlists, exec_context, prog_bar=False)
 
         assert _deleted_item_ids(mock_youtube_client) == ['item_old0000001', 'item_old0000002']
         assert quota_tracker.spent == 2 * QUOTA_COST_LIST + 2 * QUOTA_COST_WRITE
 
     @staticmethod
     def test_quota_error_on_second_page_keeps_first_page(
-        mock_youtube_client, quota_tracker, retention_playlists, api_error, history_mock
+        mock_youtube_client, quota_tracker, retention_playlists, exec_context, api_error, history_mock
     ):
         """Test a quota rejection mid-pagination still deletes what was gathered and logs the quota warning."""
         mock_youtube_client.playlistItems.list.side_effect = [
@@ -99,7 +99,7 @@ class TestCleanupExpiredVideos:
             api_error('error_quota_exceeded.json'),
         ]
 
-        cleanup_expired_videos(mock_youtube_client, retention_playlists, prog_bar=False)
+        cleanup_expired_videos(mock_youtube_client, retention_playlists, exec_context, prog_bar=False)
 
         assert _deleted_item_ids(mock_youtube_client) == ['item_old0000001']
         message, *args = history_mock.warning.call_args.args
@@ -107,12 +107,12 @@ class TestCleanupExpiredVideos:
 
     @staticmethod
     def test_other_error_is_logged_and_nothing_is_deleted(
-        mock_youtube_client, quota_tracker, retention_playlists, api_error, no_sleep, history_mock
+        mock_youtube_client, quota_tracker, retention_playlists, exec_context, api_error, no_sleep, history_mock
     ):
         """Test a non-quota failure on the listing deletes nothing and logs the generic warning."""
         mock_youtube_client.playlistItems.list.side_effect = api_error('error_404_response.json')
 
-        cleanup_expired_videos(mock_youtube_client, retention_playlists, prog_bar=False)
+        cleanup_expired_videos(mock_youtube_client, retention_playlists, exec_context, prog_bar=False)
 
         assert mock_youtube_client.playlistItems.delete.call_count == 0
         assert 'Error fetching items from' in history_mock.warning.call_args.args[0]

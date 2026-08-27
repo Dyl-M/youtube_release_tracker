@@ -1,7 +1,6 @@
 """Tests for yrt/youtube/api.py - Core API calls through the retry layer."""
 
 # Standard library
-import datetime as dt
 from types import SimpleNamespace
 
 # Third-party
@@ -10,8 +9,8 @@ import pytest
 # Local
 from yrt.constants import QUOTA_COST_LIST
 from yrt.exceptions import APIError, ErrorCategory
-from yrt.youtube import utils
-from yrt.youtube.api import check_if_live, get_playlist_items, get_subs, get_videos
+from yrt.models import AddOnConfig
+from yrt.youtube.api import check_if_live, get_playlist_items, get_subs, get_videos, iter_channels
 
 CHANNEL_ID = 'UCchannel00000000000000'
 PLAYLIST_ID = 'UUchannel00000000000000'
@@ -39,51 +38,54 @@ def _video(video_id, live_status='none'):
     return SimpleNamespace(id=video_id, snippet=SimpleNamespace(liveBroadcastContent=live_status))
 
 
-@pytest.fixture
-def date_window(monkeypatch):
-    """Pin the look-back window to January 2024 so the fixture dates fall inside it; returns latest_d."""
-    monkeypatch.setattr(utils, 'LAST_EXE', dt.datetime(2024, 1, 1, tzinfo=dt.UTC))
-    return dt.datetime(2024, 2, 1, tzinfo=dt.UTC)
-
-
 @pytest.mark.unit
 @pytest.mark.api
 class TestGetPlaylistItems:
-    """Test get_playlist_items() parsing, filtering and error handling."""
+    """Test get_playlist_items() parsing, filtering and error handling (window: January 2024, from exec_context)."""
 
     @staticmethod
-    def test_returns_items_inside_the_window(mock_youtube_client, quota_tracker, date_window):
-        """Test items released between LAST_EXE and latest_d are returned, older ones dropped."""
+    def test_returns_items_inside_the_window(mock_youtube_client, quota_tracker, exec_context):
+        """Test items released between ctx.last_exe and ctx.now are returned, older ones dropped."""
         mock_youtube_client.playlistItems.list.return_value = _page(
             [_item('inside001'), _item('older0001', published_at='2023-12-01T12:00:00Z')]
         )
 
-        items = get_playlist_items(mock_youtube_client, PLAYLIST_ID, CHANNEL_ID, latest_d=date_window)
+        items = get_playlist_items(mock_youtube_client, PLAYLIST_ID, CHANNEL_ID, exec_context)
 
         assert [item.video_id for item in items] == ['inside001']
         assert items[0].source_channel_id == CHANNEL_ID
         assert quota_tracker.spent == QUOTA_COST_LIST
 
     @staticmethod
-    def test_scheduled_items_without_publish_date_are_dropped(mock_youtube_client, quota_tracker, date_window):
+    def test_scheduled_items_without_publish_date_are_dropped(mock_youtube_client, quota_tracker, exec_context):
         """Test premieres/scheduled videos (videoPublishedAt None) are skipped until they go live."""
         mock_youtube_client.playlistItems.list.return_value = _page(
             [_item('sched0001', published_at=None), _item('inside001')]
         )
 
-        items = get_playlist_items(mock_youtube_client, PLAYLIST_ID, CHANNEL_ID, latest_d=date_window)
+        items = get_playlist_items(mock_youtube_client, PLAYLIST_ID, CHANNEL_ID, exec_context)
 
         assert [item.video_id for item in items] == ['inside001']
 
     @staticmethod
+    def test_day_ago_replaces_the_lower_bound(mock_youtube_client, quota_tracker, exec_context):
+        """Test day_ago= keeps only the items released within that many days before ctx.now."""
+        mock_youtube_client.playlistItems.list.return_value = _page(
+            [_item('recent001', published_at='2024-01-31T12:00:00Z'), _item('inside001')]
+        )
+
+        items = get_playlist_items(mock_youtube_client, PLAYLIST_ID, CHANNEL_ID, exec_context, day_ago=2)
+
+        assert [item.video_id for item in items] == ['recent001']
+
+    @staticmethod
     def test_playlist_not_found_returns_empty_with_warning(
-        mock_youtube_client, quota_tracker, date_window, api_error, history_mock, monkeypatch
+        mock_youtube_client, quota_tracker, exec_context, api_error, history_mock
     ):
         """Test a 404 yields an empty list and one 'Playlist not found' warning."""
-        monkeypatch.setattr(utils, 'ADD_ON', {'playlistNotFoundPass': [], 'toPass': []})
         mock_youtube_client.playlistItems.list.side_effect = api_error('error_404_response.json')
 
-        items = get_playlist_items(mock_youtube_client, PLAYLIST_ID, CHANNEL_ID, latest_d=date_window)
+        items = get_playlist_items(mock_youtube_client, PLAYLIST_ID, CHANNEL_ID, exec_context)
 
         assert items == []
         assert history_mock.warning.call_count == 1
@@ -92,40 +94,73 @@ class TestGetPlaylistItems:
 
     @staticmethod
     def test_playlist_not_found_pass_is_silent(
-        mock_youtube_client, quota_tracker, date_window, api_error, history_mock, monkeypatch
+        mock_youtube_client, quota_tracker, exec_context, api_error, history_mock
     ):
-        """Test a 404 for a channel listed in playlistNotFoundPass is not logged."""
-        monkeypatch.setattr(utils, 'ADD_ON', {'playlistNotFoundPass': [CHANNEL_ID], 'toPass': []})
+        """Test a 404 for a channel listed in not_found_pass is not logged."""
         mock_youtube_client.playlistItems.list.side_effect = api_error('error_404_response.json')
 
-        assert get_playlist_items(mock_youtube_client, PLAYLIST_ID, CHANNEL_ID, latest_d=date_window) == []
+        items = get_playlist_items(
+            mock_youtube_client, PLAYLIST_ID, CHANNEL_ID, exec_context, not_found_pass=[CHANNEL_ID]
+        )
+
+        assert items == []
         assert history_mock.warning.call_count == 0
 
     @staticmethod
-    def test_other_errors_raise_api_error(mock_youtube_client, quota_tracker, date_window, api_error, no_sleep):
+    def test_other_errors_raise_api_error(mock_youtube_client, quota_tracker, exec_context, api_error, no_sleep):
         """Test a non-404 failure is re-raised as APIError with the playlist ID and status attached."""
         mock_youtube_client.playlistItems.list.side_effect = api_error('error_403_response.json')
 
         with pytest.raises(APIError, match=r'Unknown error') as exc_info:
-            get_playlist_items(mock_youtube_client, PLAYLIST_ID, CHANNEL_ID, latest_d=date_window)
+            get_playlist_items(mock_youtube_client, PLAYLIST_ID, CHANNEL_ID, exec_context)
 
         assert PLAYLIST_ID in str(exc_info.value)
         assert exc_info.value.status_code == 403
         assert exc_info.value.category is ErrorCategory.PERMANENT
 
     @staticmethod
-    def test_transient_error_is_retried(mock_youtube_client, quota_tracker, date_window, api_error, no_sleep):
+    def test_transient_error_is_retried(mock_youtube_client, quota_tracker, exec_context, api_error, no_sleep):
         """Test a transient failure on the list call is retried and the page is still returned."""
         mock_youtube_client.playlistItems.list.side_effect = [
             api_error('error_503_backend.json'),
             _page([_item('inside001')]),
         ]
 
-        items = get_playlist_items(mock_youtube_client, PLAYLIST_ID, CHANNEL_ID, latest_d=date_window)
+        items = get_playlist_items(mock_youtube_client, PLAYLIST_ID, CHANNEL_ID, exec_context)
 
         assert [item.video_id for item in items] == ['inside001']
         assert mock_youtube_client.playlistItems.list.call_count == 2
         assert quota_tracker.spent == 2 * QUOTA_COST_LIST
+
+
+@pytest.mark.unit
+@pytest.mark.api
+class TestIterChannels:
+    """Test iter_channels() applies the add-on filters and gathers every channel's items."""
+
+    @staticmethod
+    def test_skips_to_pass_channels_and_whitelists_missing_playlists(
+        mock_youtube_client, quota_tracker, exec_context, api_error, history_mock
+    ):
+        """Test to_pass channels are never listed and a playlist_not_found_pass channel fails silently."""
+        skipped, gone = 'UCskipped00000000000000', 'UCgone00000000000000000'
+
+        def playlist_items_list(**kwargs):
+            """One item for the regular channel, a 404 for the whitelisted one."""
+            if kwargs['playlist_id'] == PLAYLIST_ID:
+                return _page([_item('inside001')])
+            if kwargs['playlist_id'] == f'UU{gone[2:]}':
+                raise api_error('error_404_response.json')
+            raise AssertionError(f'unexpected playlist {kwargs["playlist_id"]}')
+
+        mock_youtube_client.playlistItems.list.side_effect = playlist_items_list
+        add_on = AddOnConfig(favorites={}, playlist_not_found_pass=[gone], to_pass=[skipped])
+
+        items = iter_channels(mock_youtube_client, [CHANNEL_ID, skipped, gone], exec_context, add_on, prog_bar=False)
+
+        assert [item.video_id for item in items] == ['inside001']
+        assert mock_youtube_client.playlistItems.list.call_count == 2
+        assert history_mock.warning.call_count == 0
 
 
 @pytest.mark.unit

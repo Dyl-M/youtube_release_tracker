@@ -45,10 +45,14 @@ still handled by that project are being brought over here (see `_docs/`).
 How it works
 -------------
 
-A GitHub Actions workflow runs the process once a day (`uv run python -m yrt.main action`); it can also run locally with
-`uv run python -m yrt.main local` using OAuth token files in `_tokens/` (git-ignored).
+A GitHub Actions workflow runs the daily job once a day (`uv run python -m yrt.main action`); it can also run locally
+with `uv run python -m yrt.main` (mode `local` is the default, `--help` lists the options) using OAuth token files in
+`_tokens/` (git-ignored). Each run gets an execution context (start time, previous run's start time, the job's log
+files) that is passed explicitly to every step; the frequent job of the port plan will reuse the same runtime with its
+own `_log/updates_*.log` files.
 
-1. Videos that failed to be added on the previous run (`_config/api_failure.json`) are retried first.
+1. Videos whose addition failed on the previous run (the `failed` queue of each playlist in `_config/playlists.json`)
+   are retried first.
 2. Every subscribed channel's upload playlist is scanned for videos published since the last execution.
 3. Each video gets its statistics (views, likes, comments, duration, live status, Shorts detection) and is routed to a
    playlist: Shorts are ignored, scheduled streams go to the stream playlists, non-music channels go to their category
@@ -60,8 +64,10 @@ A GitHub Actions workflow runs the process once a day (`uv run python -m yrt.mai
 
 Every YouTube Data API call goes through a shared retry layer: transient failures (backend errors, connection errors,
 timeouts, non-JSON 5xx pages) are retried with exponential backoff, permanent ones are logged and skipped, and quota
-rejections are saved to `_config/api_failure.json` for the next run. A quota tracker counts the units spent (1 per
-list call, 50 per insert/update/delete) and the run ends with a `Quota spent: N units (...)` line in the log.
+rejections are queued in the playlist's `failed` list for the next run. A quota tracker counts the units spent (1 per
+list call, 50 per insert/update/delete) and the run ends with a `Quota spent: N units (...)` line in the log. A run
+that stops on a handled error logs `Fatal error: ...`, exits with code 1 and keeps the previous `last_exe.log`, so the
+next run re-scans the missed window.
 
 Configuration
 -------------
@@ -71,11 +77,12 @@ All configuration lives in `_config/`:
 - `pocket_tube.json` - subscribed channel IDs grouped by category (`MUSIQUE`, `APPRENTISSAGE`, `DIVERTISSEMENT`,
   `GAMING`, `ASMR`), exported from PocketTube.
 - `playlists.json` - target playlists with their ID, name and description; category playlists carry `retention_days`,
-  stream playlists may carry `cleanup_on_end`.
+  stream playlists may carry `cleanup_on_end`. Each entry also holds two queues written by the jobs: `failed` (videos
+  whose addition failed on quota or unknown errors, replayed on the next run) and `pending` (videos discovered by the
+  frequent job and left for the daily one; unused until that job lands). Since the jobs rewrite this file on the `run`
+  branch, ship hand edits when both queues are empty (their normal state) to avoid merge conflicts.
 - `add-on.json` - `favorites` (channels routed to Banger Radar), `playlistNotFoundPass` (channels whose missing upload
   playlist is not worth a warning) and `toPass` (channels skipped entirely).
-- `api_failure.json` - videos whose addition failed on quota or unknown errors, replayed on the next run; entries are
-  created automatically for any playlist missing from the file.
 - `constants.json` (optional) - tunables with sensible defaults; values are validated at start-up and an out-of-range
   value stops the run with a clear message:
 
@@ -132,12 +139,13 @@ youtube_release_tracker/
 ├── _config       # JSON configuration: channels, playlists, favorites and constants
 ├── _data         # Historical video statistics (stats.csv)
 ├── _docs         # Project documentation and notes
-├── _log          # Execution logs (history.log, last_exe.log)
+├── _log          # Execution logs, one history / last-exe pair per job (history.log, last_exe.log, updates_*.log)
 ├── _media        # Repository illustration and media assets
 ├── _notebooks    # Reporting Jupyter notebooks and exported PDFs
 ├── _scripts      # Standalone maintenance scripts (database sort, data archiving)
 ├── _tests        # Pytest test suite, API response fixtures and shared configuration
-└── yrt           # Main application package (source code)
+└── yrt           # Main application package: main.py (daily job), runtime.py (shared job lifecycle),
+    │             # context.py (per-run execution context), router, models, config
     └── youtube   # YouTube API layer: auth, API calls, retry/quota, playlists, stats, cleanup
 ```
 
