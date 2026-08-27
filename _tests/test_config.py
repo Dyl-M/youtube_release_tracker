@@ -3,6 +3,9 @@
 # Standard library
 import json
 
+# Third-party
+import pytest
+
 
 class TestDeepMerge:
     """Tests for the _deep_merge helper function."""
@@ -28,7 +31,7 @@ class TestDeepMerge:
         overrides = {'api': {'batch_size': 100}}
         result = _deep_merge(defaults, overrides)
 
-        assert result['api']['batch_size'] == 100
+        assert result['api']['batch_size'] == 25
         assert result['api']['timeout'] == 5
 
     @staticmethod
@@ -62,7 +65,7 @@ class TestLoadConfig:
     def test_load_constants_with_valid_file(tmp_path, monkeypatch):
         """Test loading a valid config file."""
         # Create a test config file
-        config_data = {'api': {'batch_size': 100}, 'network': {'timeout_seconds': 10}}
+        config_data = {'api': {'batch_size': 25}, 'network': {'timeout_seconds': 10}}
         config_file = tmp_path / 'constants.json'
         with open(config_file, 'w') as f:
             json.dump(config_data, f)
@@ -81,7 +84,7 @@ class TestLoadConfig:
 
         # Verify merge happened correctly
         _expected = _deep_merge(DEFAULTS, config_data)
-        assert result['api']['batch_size'] == 100
+        assert result['api']['batch_size'] == 25
         assert result['network']['timeout_seconds'] == 10
         # Defaults should be preserved for missing keys
         assert result['api']['max_retries'] == DEFAULTS['api']['max_retries']
@@ -128,6 +131,117 @@ class TestLoadConfig:
         # Default values preserved
         assert result['api']['batch_size'] == DEFAULTS['api']['batch_size']
         assert result['stats']['week_deltas'] == DEFAULTS['stats']['week_deltas']
+
+    @staticmethod
+    def test_load_constants_with_invalid_value_raises(tmp_path, monkeypatch):
+        """Test that an out-of-range value in the file fails fast with ConfigurationError."""
+        config_data = {'api': {'batch_size': 500}}
+        config_file = tmp_path / 'constants.json'
+        with open(config_file, 'w') as f:
+            json.dump(config_data, f)
+
+        from yrt import file_utils, paths
+        from yrt.exceptions import ConfigurationError
+
+        monkeypatch.setattr(paths, 'CONSTANTS_JSON', config_file)
+        extended_allowed = [*file_utils.ALLOWED_DIRS, str(tmp_path)]
+        monkeypatch.setattr(file_utils, 'ALLOWED_DIRS', extended_allowed)
+
+        from yrt.config import load_constants
+
+        with pytest.raises(ConfigurationError, match=r'api.batch_size') as exc_info:
+            load_constants()
+
+        assert exc_info.value.file_path == str(config_file)
+
+    @staticmethod
+    def test_load_constants_defaults_are_a_deep_copy(tmp_path, monkeypatch):
+        """Test that the defaults fallback does not alias the DEFAULTS nested dicts."""
+        from yrt import file_utils, paths
+        from yrt.config import DEFAULTS
+
+        monkeypatch.setattr(paths, 'CONSTANTS_JSON', tmp_path / 'nonexistent.json')
+        extended_allowed = [*file_utils.ALLOWED_DIRS, str(tmp_path)]
+        monkeypatch.setattr(file_utils, 'ALLOWED_DIRS', extended_allowed)
+
+        from yrt.config import load_constants
+
+        result = load_constants()
+        result['stats']['week_deltas'].append(99)
+
+        assert 99 not in DEFAULTS['stats']['week_deltas']
+
+
+class TestValidateConfig:
+    """Tests for the _validate_config rules (run on the merged configuration)."""
+
+    @staticmethod
+    def _validate(override):
+        """Validate DEFAULTS merged with an override, returning the raised ConfigurationError or None."""
+        from yrt.config import DEFAULTS, _deep_merge, _validate_config
+        from yrt.exceptions import ConfigurationError
+
+        try:
+            _validate_config(_deep_merge(DEFAULTS, override))
+        except ConfigurationError as error:
+            return error
+        return None
+
+    def test_defaults_are_valid(self):
+        """Test that DEFAULTS pass validation unchanged."""
+        assert self._validate({}) is None
+
+    def test_batch_size_bounds(self):
+        """Test api.batch_size must be within 1..50 (YouTube maxResults limit)."""
+        assert 'api.batch_size' in str(self._validate({'api': {'batch_size': 0}}))
+        assert 'api.batch_size' in str(self._validate({'api': {'batch_size': 51}}))
+        assert self._validate({'api': {'batch_size': 50}}) is None
+
+    def test_max_retries_allows_zero(self):
+        """Test api.max_retries accepts 0 (single attempt) but not negatives."""
+        assert self._validate({'api': {'max_retries': 0}}) is None
+        assert 'api.max_retries' in str(self._validate({'api': {'max_retries': -1}}))
+
+    def test_backoff_must_not_be_below_base_delay(self):
+        """Test api.max_backoff_seconds must be at least api.base_delay_seconds."""
+        assert 'api.max_backoff_seconds' in str(
+            self._validate({'api': {'base_delay_seconds': 5, 'max_backoff_seconds': 4}})
+        )
+        assert 'api.base_delay_seconds' in str(self._validate({'api': {'base_delay_seconds': 0}}))
+
+    def test_timeout_must_be_positive(self):
+        """Test network.timeout_seconds rejects 0."""
+        assert 'network.timeout_seconds' in str(self._validate({'network': {'timeout_seconds': 0}}))
+
+    def test_quota_budgets_bounded_by_daily_quota(self):
+        """Test quota budgets must be positive and not exceed api.daily_quota."""
+        assert 'api.daily_quota' in str(self._validate({'api': {'daily_quota': 0}}))
+        assert 'quota.daily_job_budget' in str(self._validate({'quota': {'daily_job_budget': 0}}))
+        assert 'quota.daily_job_budget' in str(self._validate({'quota': {'daily_job_budget': 10001}}))
+        assert 'quota.updates_job_budget' in str(self._validate({'quota': {'updates_job_budget': 10001}}))
+
+    def test_week_deltas_shape(self):
+        """Test stats.week_deltas must be a non-empty list of positive integers."""
+        assert 'stats.week_deltas' in str(self._validate({'stats': {'week_deltas': []}}))
+        assert 'stats.week_deltas' in str(self._validate({'stats': {'week_deltas': [0]}}))
+        assert 'stats.week_deltas' in str(self._validate({'stats': {'week_deltas': ['1']}}))
+        assert 'stats.week_deltas' in str(self._validate({'stats': {'week_deltas': 4}}))
+
+    def test_booleans_are_rejected(self):
+        """Test JSON true is not accepted where an integer is expected (bool is an int subclass)."""
+        assert 'api.batch_size' in str(self._validate({'api': {'batch_size': True}}))
+        assert 'stats.week_deltas' in str(self._validate({'stats': {'week_deltas': [True]}}))
+
+    def test_missing_key_is_reported(self):
+        """Test a section stripped of a required key is reported as missing."""
+        from yrt.config import DEFAULTS, _validate_config
+        from yrt.exceptions import ConfigurationError
+
+        broken = {section: dict(values) for section, values in DEFAULTS.items()}
+        del broken['network']['timeout_seconds']
+
+        with pytest.raises(ConfigurationError, match=r'Missing configuration key: network.timeout_seconds'):
+            _validate_config(broken)
 
 
 class TestConfigConstants:
@@ -251,3 +365,40 @@ class TestDefaultValues:
         from yrt.config import DEFAULTS
 
         assert DEFAULTS['stats']['week_deltas'] == [1, 4, 12, 24]
+
+    @staticmethod
+    def test_default_daily_quota():
+        """Test default daily quota is the YouTube Data API free tier (10,000 units)."""
+        from yrt.config import DEFAULTS
+
+        assert DEFAULTS['api']['daily_quota'] == 10000
+
+    @staticmethod
+    def test_default_job_budgets():
+        """Test default per-job budgets leave headroom under the daily quota."""
+        from yrt.config import DEFAULTS
+
+        assert DEFAULTS['quota']['daily_job_budget'] == 7000
+        assert DEFAULTS['quota']['updates_job_budget'] == 2500
+        assert DEFAULTS['quota']['daily_job_budget'] + DEFAULTS['quota']['updates_job_budget'] < 10000
+
+
+class TestQuotaConstants:
+    """Tests for the module-level quota constants."""
+
+    @staticmethod
+    def test_daily_quota_is_positive_integer():
+        """Test that DAILY_QUOTA is a positive integer."""
+        from yrt.config import DAILY_QUOTA
+
+        assert isinstance(DAILY_QUOTA, int)
+        assert DAILY_QUOTA > 0
+
+    @staticmethod
+    def test_job_budgets_are_positive_integers_within_quota():
+        """Test that both job budgets are positive integers not exceeding DAILY_QUOTA."""
+        from yrt.config import DAILY_JOB_BUDGET, DAILY_QUOTA, UPDATES_JOB_BUDGET
+
+        for budget in (DAILY_JOB_BUDGET, UPDATES_JOB_BUDGET):
+            assert isinstance(budget, int)
+            assert 0 < budget <= DAILY_QUOTA

@@ -3,10 +3,15 @@
     "batch_size": 50,
     "max_retries": 3,
     "base_delay_seconds": 1,
-    "max_backoff_seconds": 32
+    "max_backoff_seconds": 32,
+    "daily_quota": 10000
   },
   "network": {
     "timeout_seconds": 5
+  },
+  "quota": {
+    "daily_job_budget": 7000,
+    "updates_job_budget": 2500
   },
   "playlists": {
     "release_radar_target_size": 40,
