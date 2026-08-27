@@ -306,23 +306,27 @@ def add_api_fail(service: pyt.Client, prog_bar: bool = True) -> None:
         prog_bar: Whether to use tqdm progress bar.
     """
     playlists = file_utils.load_json(str(paths.PLAYLISTS_JSON))
-    addition = 0
+    queued = {
+        key: list(info['failed'])  # Copy before clearing
+        for key, info in playlists.items()
+        if isinstance(info, dict) and info.get('failed')
+    }
+    if not queued:
+        return
 
-    for key, info in playlists.items():
-        videos_to_retry = list(info.get('failed', [])) if isinstance(info, dict) else []  # Copy before clearing
-        if not videos_to_retry:
-            continue
+    # Clear every queue and save once, before any retry: add_to_playlist reloads the file and re-queues what fails
+    # again, so saving this snapshot later would overwrite those re-queued videos
+    for key in queued:
+        playlists[key]['failed'] = []
+    file_utils.save_json(str(paths.PLAYLISTS_JSON), playlists)
 
+    for key, videos_to_retry in queued.items():
+        info = playlists[key]
         if utils.history:
             utils.history.info(
                 '%s addition(s) to %s playlist from previous API failure.', len(videos_to_retry), info.get('name', key)
             )
-        info['failed'] = []  # Clear before retry so add_to_playlist can re-queue what fails again
-        file_utils.save_json(str(paths.PLAYLISTS_JSON), playlists)  # Save cleared state
+        add_to_playlist(service, info.get('id', key), videos_to_retry, prog_bar=prog_bar)  # Failed videos re-added
 
-        # Failed videos get re-added here
-        add_to_playlist(service, info.get('id', key), videos_to_retry, prog_bar=prog_bar)
-        addition += 1
-
-    if addition > 0 and utils.history:
+    if utils.history:
         utils.history.info('Video recovery from previous API failure(s) complete.')

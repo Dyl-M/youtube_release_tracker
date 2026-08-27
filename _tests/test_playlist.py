@@ -315,6 +315,27 @@ class TestAddApiFail:
         assert _saved_failures(playlists_file, 'release') == []
 
     @staticmethod
+    def test_requeued_failure_survives_a_later_playlist(
+        mock_youtube_client, quota_tracker, playlists_file, api_error, no_sleep
+    ):
+        """Test a video that fails again is kept in its queue even when another playlist is replayed afterwards."""
+        playlists_file.write_text(
+            json.dumps(
+                {
+                    'release': {'name': 'Release Radar', 'id': KNOWN_PLAYLIST, 'failed': ['vid0000001']},
+                    'regular_streams': {'name': 'My streams', 'id': STREAM_PLAYLIST, 'failed': ['vid0000002']},
+                }
+            ),
+            encoding='utf-8',
+        )
+        mock_youtube_client.playlistItems.insert.side_effect = [api_error('error_quota_exceeded.json'), None]
+
+        add_api_fail(mock_youtube_client, prog_bar=False)
+
+        assert _saved_failures(playlists_file, 'release') == ['vid0000001']  # re-queued, not clobbered
+        assert _saved_failures(playlists_file, 'regular_streams') == []
+
+    @staticmethod
     def test_nothing_to_replay_makes_no_call(mock_youtube_client, quota_tracker, playlists_file):
         """Test empty or absent queues perform no API call."""
         add_api_fail(mock_youtube_client, prog_bar=False)
