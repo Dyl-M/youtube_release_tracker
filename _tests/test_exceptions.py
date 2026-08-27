@@ -111,10 +111,8 @@ class TestExceptionContext:
     @staticmethod
     def test_api_error_context_is_keyword_only():
         """Test context attributes cannot be passed positionally (guards call-site mistakes)."""
-        positional_context = ('Insert failed', 'forbidden')
-
         with pytest.raises(TypeError):
-            APIError(*positional_context)
+            APIError('Insert failed', 'forbidden')  # type: ignore[misc]  # skipcq: PYL-E1121 - wrong on purpose
 
     @staticmethod
     def test_quota_exhausted_error_is_api_error_with_quota_category():
