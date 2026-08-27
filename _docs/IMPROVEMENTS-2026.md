@@ -10,7 +10,7 @@ Pythonic implementation, and readability.
 - **Test Coverage:** Target 90% code coverage by the end of improvements (reported to DeepSource). Coverage should
   improve incrementally phase by phase.
     - **Baseline (Phase 1 complete):** 43% code coverage (177 tests passing)
-    - **Measured 2026-08-27:** 44% (177 passed, 23 skipped)
+    - **Measured 2026-08-27:** 44% (177 passed, 23 skipped); **69%** after port plan Phase 1 (293 passed, 20 skipped)
     - **Note:** This is *code line coverage*, not *test pass rate* (which is 88.5%)
 
 > **See also:** [`PORT-AUTO-YOUTUBE-PLAYLIST.md`](PORT-AUTO-YOUTUBE-PLAYLIST.md) folds items #8, #9, #10, #11, #14,
@@ -308,7 +308,8 @@ def validate_file_path(file_path: str | Path) -> Path:
 
 **Location:** `yrt/youtube.py:576-640` (`add_to_playlist` function)
 
-**Status:** Pending
+**Status:** ✅ Fixed (port plan Phase 1, `feat/api-retry-quota`) — shipped as an explicit `retry.call_api()` helper
+rather than a decorator
 
 **Issue:** Retry logic with exponential backoff embedded directly in function, making it hard to reuse.
 
@@ -359,7 +360,7 @@ def retry_with_backoff(
 
 **Location:** `yrt/config.py:75-89`
 
-**Status:** Pending
+**Status:** ✅ Fixed (port plan Phase 1, `feat/api-retry-quota`)
 
 **Issue:** No validation of configuration values. Negative numbers, zero batch sizes, or invalid values aren't caught.
 
@@ -474,7 +475,7 @@ business-critical routing logic.
 
 **Location:** `_tests/test_youtube.py:110-131` (3 skipped tests)
 
-**Status:** Pending
+**Status:** ✅ Fixed (port plan Phase 1, `feat/api-retry-quota`)
 
 **Issue:** Duration parsing logic is embedded in `get_stats()`, not exposed for testing. Three tests are skipped waiting
 for a public utility function.
@@ -554,7 +555,7 @@ def youtube_service(mode: str = 'local') -> Generator[pyt.Client, None, None]:
 
 **Location:** `yrt/exceptions.py:4-30`
 
-**Status:** Pending
+**Status:** ✅ Fixed (port plan Phase 1, `feat/api-retry-quota`)
 
 **Issue:** Exceptions don't carry context information for debugging.
 
@@ -613,7 +614,7 @@ class YouTubeService(Protocol):
 
 **Location:** `_tests/fixtures/`
 
-**Status:** Pending
+**Status:** ✅ Fixed (port plan Phase 1, `feat/api-retry-quota`)
 
 **Issue:** Missing error response samples for comprehensive error handling tests.
 
@@ -689,15 +690,16 @@ def iter_channels_generator(
 - **☢️ Critical:** 1 bug ~~requiring immediate fix~~ ✅ Fixed
 - **⚠️ High Priority:** 5 structural improvements ✅ All done (Logger Factory, Split youtube.py, Domain Models,
   VideoRouter, Constants Module)
-- **🛑 Medium Priority:** 5 code quality improvements (all pending)
-- **🧪 Test Suite:** 4 test coverage improvements (1 fixed: Test logging isolation)
-- **🛃 Low Priority:** 6 nice-to-have improvements (1 accepted as documented limitation: scheduler lag)
+- **🛑 Medium Priority:** 5 code quality improvements (2 fixed: retry layer, config validation; 3 pending)
+- **🧪 Test Suite:** 4 test coverage improvements (2 fixed: test logging isolation, duration parsing)
+- **🛃 Low Priority:** 6 nice-to-have improvements (2 fixed: exception context, error fixtures; 1 accepted: scheduler
+  lag)
 - **CI/CD:** Test coverage workflow with DeepSource reporting ✅ Added
 
-**Total:** 21 improvement items (7 fixed, 1 accepted, 13 pending)
+**Total:** 21 improvement items (12 fixed, 1 accepted, 8 pending)
 **PR #141:** Merged - Phase 1-3 (partial) complete
 
-### Current Code Coverage Breakdown (44% total, measured 2026-08-27)
+### Current Code Coverage Breakdown (69% total, measured 2026-08-27 after port plan Phase 1)
 
 | Module                    | Coverage | Status         |
 |---------------------------|----------|----------------|
@@ -711,12 +713,14 @@ def iter_channels_generator(
 | `yrt/router.py`           | 95%      | ✅ Complete    |
 | `yrt/file_utils.py`       | 76%      | 🔸 Needs work  |
 | `yrt/youtube/__init__.py` | 100%     | ✅ Complete    |
-| `yrt/youtube/utils.py`    | 61%      | 🔸 Needs work  |
-| `yrt/youtube/stats.py`    | 23%      | ⚠️ Low         |
-| `yrt/youtube/api.py`      | 22%      | ⚠️ Low         |
+| `yrt/youtube/quota.py`    | 100%     | ✅ Complete    |
+| `yrt/youtube/retry.py`    | 99%      | ✅ Complete    |
+| `yrt/youtube/api.py`      | 91%      | ✅ Complete    |
+| `yrt/youtube/cleanup.py`  | 95%      | ✅ Complete    |
+| `yrt/youtube/playlist.py` | 69%      | 🔸 Needs work  |
+| `yrt/youtube/utils.py`    | 65%      | 🔸 Needs work  |
+| `yrt/youtube/stats.py`    | 22%      | ⚠️ Low         |
 | `yrt/youtube/auth.py`     | 16%      | ⚠️ Low         |
-| `yrt/youtube/playlist.py` | 13%      | ⚠️ Low         |
-| `yrt/youtube/cleanup.py`  | 13%      | ⚠️ Low         |
 | `yrt/main.py`             | 0%       | ❌ Not covered |
 | `yrt/analytics.py`        | 0%       | 🚫 Placeholder |
 | `yrt/_sandbox.py`         | 0%       | 🚫 Dev only    |
@@ -751,11 +755,11 @@ def iter_channels_generator(
 | `yrt/youtube/playlist.py`      | Playlist operations      | ✅ Created                     |
 | `yrt/youtube/cleanup.py`       | Cleanup operations       | ✅ Created                     |
 | `yrt/youtube/models.py`        | Dataclasses and enums    | Deferred (using yrt/models.py) |
-| `yrt/youtube/retry.py`         | Retry decorator          | Pending                        |
+| `yrt/youtube/retry.py`         | Retry layer (call_api)   | ✅ Created                     |
 | `yrt/youtube/utils.py`         | Utilities                | ✅ Created                     |
 | `_tests/test_router.py`        | Router unit tests        | ✅ Created                     |
 | `_tests/test_constants.py`     | Constants unit tests     | ✅ Created                     |
-| `_tests/fixtures/error_*.json` | Error response fixtures  | Pending                        |
+| `_tests/fixtures/error_*.json` | Error response fixtures  | ✅ Created                     |
 
 ## Implementation Order
 
@@ -777,10 +781,10 @@ def iter_channels_generator(
 5. ✅ Create `yrt/youtube/` package structure
 6. ✅ Extract `yrt/models.py` with dataclasses (PlaylistItem, VideoStats, etc.) - *Note: at package level, not youtube/*
 7. ✅ Extract `yrt/youtube/auth.py` (create_service_local, create_service_workflow, encode_key)
-8. ⏸️ Extract `yrt/youtube/retry.py` with retry decorator - *Deferred to Phase 5*
+8. ✅ Extract `yrt/youtube/retry.py` - *shipped as `call_api()` helper + `quota.py` (port plan Phase 1)*
 9. ✅ Extract `yrt/youtube/utils.py` (is_shorts, last_exe_date, sort_db) — *`parse_iso8601_duration` was **not**
-    extracted; duration parsing is still inline in `stats.py` (`.seconds`, which drops the days component for ≥ 24 h
-    videos). Tracked by #14 and by the port plan's Phase 1.*
+   extracted; duration parsing is still inline in `stats.py` (`.seconds`, which drops the days component for ≥ 24 h
+   videos). Tracked by #14 and by the port plan's Phase 1.*
 10. ✅ Extract `yrt/youtube/api.py` (get_playlist_items, get_videos, get_subs, iter_channels)
 11. ✅ Extract `yrt/youtube/stats.py` (get_stats, add_stats, weekly_stats)
 12. ✅ Extract `yrt/youtube/playlist.py` (add_to_playlist, del_from_playlist, fill_release_radar)
@@ -794,7 +798,7 @@ def iter_channels_generator(
 **🧪 Coverage target:** 55% (focus on router + config validation)
 
 17. ✅ Extract `VideoRouter` class from `dest_playlist()` function - *Created `yrt/router.py`*
-18. ⏸️ Add config validation in `yrt/config.py` - *Pending*
+18. ✅ Add config validation in `yrt/config.py` - *port plan Phase 1*
 19. ⏸️ Use pathlib consistently in file operations - *Pending*
 20. ✅ Add tests for `VideoRouter` class - *40 tests in `test_router.py`*
 
@@ -805,9 +809,9 @@ def iter_channels_generator(
 21. Implement `dest_playlist()` routing tests (6 tests)
 22. Implement configuration loading tests (3 tests)
 23. Implement `copy_last_exe_log()` tests (2 tests)
-24. Extract and test `parse_iso8601_duration()` function (3 tests)
+24. ✅ Extract and test `parse_iso8601_duration()` function (6 tests, port plan Phase 1)
 25. Add integration tests for main workflow
-26. Add error response test fixtures
+26. ✅ Add error response test fixtures (port plan Phase 1)
 27. Ensure all new code has comprehensive tests
 
 ### Phase 5: Cleanup & Final Polish

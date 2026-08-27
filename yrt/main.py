@@ -401,6 +401,7 @@ def main(historical_data: pd.DataFrame) -> None:
     elif creds_b64 is not None:
         update_repo_secrets(secret_name=CREDS_ENV_NAME, new_value=creds_b64, logger=history_main)
 
+    history_main.info(youtube.quota.get_tracker().summary())  # e.g. "Quota spent: 1234 units (...)"
     history_main.info('Process ended.')  # End
     copy_last_exe_log()  # Copy what happened during process execution to the associated file.
 
@@ -415,4 +416,5 @@ if __name__ == '__main__':
     except YouTubeTrackerError as e:
         # Handle all custom exceptions (ConfigurationError, APIError, CredentialsError, etc.)
         top_level_logger.critical('Fatal error: %s', e)
+        top_level_logger.info(youtube.quota.get_tracker().summary())  # what the failed run still spent
         sys.exit(1)

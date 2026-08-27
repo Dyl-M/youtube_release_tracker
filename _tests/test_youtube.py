@@ -19,6 +19,7 @@ from yrt.youtube.utils import (
     QUOTA_ERRORS,
     TRANSIENT_ERRORS,
     is_shorts,
+    parse_iso8601_duration,
 )
 
 
@@ -27,14 +28,14 @@ from yrt.youtube.utils import (
 class TestIsShorts:
     """Test is_shorts() function for YouTube Shorts detection."""
 
-    @patch('yrt.youtube.utils.requests.head')
-    def test_is_shorts_returns_true_for_shorts(self, mock_head, sample_video_id):
+    @staticmethod
+    def test_is_shorts_returns_true_for_shorts(sample_video_id):
         """Test is_shorts() returns True for actual shorts (200 status)."""
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_head.return_value = mock_response
 
-        result = is_shorts(sample_video_id)
+        with patch('yrt.youtube.utils.requests.head', return_value=mock_response) as mock_head:
+            result = is_shorts(sample_video_id)
 
         assert result is True
         mock_head.assert_called_once()
@@ -42,36 +43,35 @@ class TestIsShorts:
         call_kwargs = mock_head.call_args.kwargs
         assert call_kwargs.get('allow_redirects') is False
 
-    @patch('yrt.youtube.utils.requests.head')
-    def test_is_shorts_returns_false_for_regular_videos(self, mock_head, sample_video_id):
+    @staticmethod
+    def test_is_shorts_returns_false_for_regular_videos(sample_video_id):
         """Test is_shorts() returns False for regular videos (3xx redirect)."""
         mock_response = Mock()
         mock_response.status_code = 301  # Redirect
-        mock_head.return_value = mock_response
 
-        result = is_shorts(sample_video_id)
+        with patch('yrt.youtube.utils.requests.head', return_value=mock_response):
+            result = is_shorts(sample_video_id)
 
         assert result is False
 
-    @patch('yrt.youtube.utils.requests.head')
-    def test_is_shorts_has_timeout(self, mock_head, sample_video_id):
+    @staticmethod
+    def test_is_shorts_has_timeout(sample_video_id):
         """Test is_shorts() uses timeout to prevent hanging."""
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_head.return_value = mock_response
 
-        is_shorts(sample_video_id)
+        with patch('yrt.youtube.utils.requests.head', return_value=mock_response) as mock_head:
+            is_shorts(sample_video_id)
 
         call_kwargs = mock_head.call_args.kwargs
         assert 'timeout' in call_kwargs
         assert call_kwargs['timeout'] > 0
 
-    @patch('yrt.youtube.utils.requests.head')
-    def test_is_shorts_handles_network_error(self, mock_head, sample_video_id):
+    @staticmethod
+    def test_is_shorts_handles_network_error(sample_video_id):
         """Test is_shorts() returns False on network errors."""
-        mock_head.side_effect = Exception('Network error')
-
-        result = is_shorts(sample_video_id)
+        with patch('yrt.youtube.utils.requests.head', side_effect=Exception('Network error')):
+            result = is_shorts(sample_video_id)
 
         # Should return False as safe default
         assert result is False
@@ -118,27 +118,39 @@ class TestErrorConstants:
 
 @pytest.mark.unit
 class TestDurationParsing:
-    """Test ISO 8601 duration parsing."""
+    """Test ISO 8601 duration parsing (parse_iso8601_duration)."""
 
     @staticmethod
-    @pytest.mark.skip('Not yet implemented')
     def test_parse_short_duration():
         """Test parsing short video duration (< 1 minute)."""
-        # PT30S = 30 seconds
-        # This test assumes a helper function exists or we test via get_stats
-        # If no helper exists, this documents expected behavior
+        assert parse_iso8601_duration('PT30S') == 30
 
     @staticmethod
-    @pytest.mark.skip('Not yet implemented')
     def test_parse_medium_duration():
         """Test parsing medium video duration (minutes)."""
-        # PT3M30S = 3 minutes 30 seconds
+        assert parse_iso8601_duration('PT3M30S') == 210
 
     @staticmethod
-    @pytest.mark.skip('Not yet implemented')
     def test_parse_long_duration():
         """Test parsing long video duration (hours)."""
-        # PT1H30M = 1 hour 30 minutes
+        assert parse_iso8601_duration('PT1H30M') == 5400
+
+    @staticmethod
+    def test_parse_duration_over_a_day_keeps_days():
+        """Test durations of a day or more keep their days (regression: timedelta.seconds dropped them)."""
+        assert parse_iso8601_duration('P1DT1H') == 90000
+
+    @staticmethod
+    def test_parse_missing_duration_is_zero():
+        """Test None and empty strings (unknown duration) map to 0 seconds."""
+        assert parse_iso8601_duration(None) == 0
+        assert parse_iso8601_duration('') == 0
+
+    @staticmethod
+    def test_parse_invalid_duration_is_zero_with_warning(history_mock):
+        """Test an unparseable duration maps to 0 seconds and is logged instead of aborting."""
+        assert parse_iso8601_duration('garbage') == 0
+        assert history_mock.warning.call_count == 1
 
 
 @pytest.mark.unit

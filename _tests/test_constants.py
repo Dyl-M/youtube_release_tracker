@@ -22,6 +22,9 @@ from yrt.constants import (
     LIVE_STATUS_UPCOMING,
     LOG_DATE_FORMAT,
     PERMANENT_ERRORS,
+    # Quota costs
+    QUOTA_COST_LIST,
+    QUOTA_COST_WRITE,
     QUOTA_ERRORS,
     ROUTING_NONE,
     # Routing
@@ -165,6 +168,29 @@ class TestErrorCategories:
             assert error == error.lower()
         for error in QUOTA_ERRORS:
             assert error == error.lower()
+
+
+@pytest.mark.unit
+class TestQuotaCosts:
+    """Test YouTube Data API quota cost constants."""
+
+    @staticmethod
+    def test_list_cost_is_one_unit():
+        """Test QUOTA_COST_LIST matches the documented cost of any *.list call."""
+        assert QUOTA_COST_LIST == 1
+
+    @staticmethod
+    def test_write_cost_is_fifty_units():
+        """Test QUOTA_COST_WRITE matches the documented cost of insert/update/delete."""
+        assert QUOTA_COST_WRITE == 50
+
+    @staticmethod
+    def test_costs_are_positive_integers():
+        """Test quota costs are plain positive integers usable for arithmetic."""
+        for cost in (QUOTA_COST_LIST, QUOTA_COST_WRITE):
+            assert isinstance(cost, int)
+            assert not isinstance(cost, bool)
+            assert cost > 0
 
 
 @pytest.mark.unit

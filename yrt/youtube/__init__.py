@@ -21,13 +21,18 @@ from . import utils  # noqa: E402
 # Set the logger in utils module
 utils.set_logger(history)
 
+# Retry / quota layer: needs utils (logger) but must exist before the API submodules that call it
+from . import quota, retry  # noqa: E402
+
 # Import all public functions from submodules
 from .api import (  # noqa: E402
     check_if_live,
+    get_items_count,
     get_playlist_items,
     get_subs,
     get_videos,
     iter_channels,
+    sort_db,
 )
 from .auth import (  # noqa: E402
     create_service_local,
@@ -58,10 +63,9 @@ from .utils import (  # noqa: E402
     PERMANENT_ERRORS,
     QUOTA_ERRORS,
     TRANSIENT_ERRORS,
-    get_items_count,
     is_shorts,
     last_exe_date,
-    sort_db,
+    parse_iso8601_duration,
 )
 
 # Pandas options
@@ -71,6 +75,7 @@ pd.set_option('display.max_columns', None)
 __all__ = [
     # Utils
     'last_exe_date',
+    'parse_iso8601_duration',
     'is_shorts',
     'sort_db',
     'get_items_count',
@@ -103,6 +108,9 @@ __all__ = [
     # Cleanup
     'cleanup_expired_videos',
     'cleanup_ended_streams',
+    # Retry / quota layer (modules)
+    'quota',
+    'retry',
     # Third-party re-exports (for type hints in main.py)
     'pyt',
 ]
