@@ -5072,3 +5072,739 @@
 2026-08-01 09:12:47+0000 [INFO] - No ended streams in "🍿🔴 My streams (Private)"
 2026-08-01 09:12:48+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
 2026-08-01 09:12:48+0000 [INFO] - Process ended.
+2026-08-02 09:13:20+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-08-02 09:13:20+0000 [INFO] - Process started.
+2026-08-02 09:13:20+0000 [INFO] - API credentials refreshed.
+2026-08-02 09:13:20+0000 [INFO] - YouTube service created successfully.
+2026-08-02 09:13:20+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-08-02 09:14:27+0000 [INFO] - Add statistics for 49 video(s).
+2026-08-02 09:15:00+0000 [INFO] - Addition to "Banger Radar": 3 video(s).
+2026-08-02 09:15:01+0000 [INFO] - Addition to "Release Radar": 14 video(s).
+2026-08-02 09:15:07+0000 [INFO] - Addition to "Educational content": 1 video(s).
+2026-08-02 09:15:07+0000 [INFO] - Addition to "Entertainment & Gaming": 4 video(s).
+2026-08-02 09:15:09+0000 [INFO] - No addition necessary for Release Radar
+2026-08-02 09:15:09+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-08-02 09:15:09+0000 [INFO] - Removing 2 expired video(s) from "🧠 Educational content (Private)"
+2026-08-02 09:15:10+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-08-02 09:15:10+0000 [INFO] - No expired videos in "🍿🎮 Entertainment & Gaming (Private)"
+2026-08-02 09:15:10+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-08-02 09:15:10+0000 [INFO] - No expired videos in "💤 ASMR & Relaxation (Private)"
+2026-08-02 09:15:10+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-08-02 09:15:10+0000 [INFO] - No ended streams in "🍿🔴 My streams (Private)"
+2026-08-02 09:15:11+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-08-02 09:15:11+0000 [INFO] - Process ended.
+2026-08-03 10:48:42+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-08-03 10:48:42+0000 [INFO] - Process started.
+2026-08-03 10:48:42+0000 [INFO] - API credentials refreshed.
+2026-08-03 10:48:42+0000 [INFO] - YouTube service created successfully.
+2026-08-03 10:48:42+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-08-03 10:50:04+0000 [INFO] - Add statistics for 42 video(s).
+2026-08-03 10:50:36+0000 [INFO] - Addition to "Banger Radar": 3 video(s).
+2026-08-03 10:50:37+0000 [INFO] - Addition to "Release Radar": 12 video(s).
+2026-08-03 10:50:45+0000 [INFO] - Addition to "Educational content": 1 video(s).
+2026-08-03 10:50:46+0000 [INFO] - Addition to "Entertainment & Gaming": 3 video(s).
+2026-08-03 10:50:47+0000 [INFO] - Addition to "ASMR & Relaxation": 2 video(s).
+2026-08-03 10:50:48+0000 [INFO] - No addition necessary for Release Radar
+2026-08-03 10:50:48+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-08-03 10:50:49+0000 [INFO] - Removing 4 expired video(s) from "🧠 Educational content (Private)"
+2026-08-03 10:50:50+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-08-03 10:50:51+0000 [INFO] - Removing 3 expired video(s) from "🍿🎮 Entertainment & Gaming (Private)"
+2026-08-03 10:50:52+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-08-03 10:50:52+0000 [INFO] - Removing 1 expired video(s) from "💤 ASMR & Relaxation (Private)"
+2026-08-03 10:50:52+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-08-03 10:50:52+0000 [INFO] - No ended streams in "🍿🔴 My streams (Private)"
+2026-08-03 10:50:54+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-08-03 10:50:54+0000 [INFO] - Process ended.
+2026-08-04 09:41:46+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-08-04 09:41:47+0000 [INFO] - Process started.
+2026-08-04 09:41:47+0000 [INFO] - API credentials refreshed.
+2026-08-04 09:41:47+0000 [INFO] - YouTube service created successfully.
+2026-08-04 09:41:47+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-08-04 09:43:06+0000 [INFO] - Add statistics for 45 video(s).
+2026-08-04 09:43:34+0000 [INFO] - Filtered 3 upcoming stream(s) from stats tracking.
+2026-08-04 09:43:34+0000 [INFO] - Addition to "Banger Radar": 4 video(s).
+2026-08-04 09:43:36+0000 [INFO] - Addition to "Release Radar": 16 video(s).
+2026-08-04 09:43:49+0000 [INFO] - Addition to "Educational content": 3 video(s).
+2026-08-04 09:43:51+0000 [INFO] - Addition to "Entertainment & Gaming": 1 video(s).
+2026-08-04 09:43:51+0000 [INFO] - Addition to "Music Lives": 1 video(s).
+2026-08-04 09:43:52+0000 [INFO] - Addition to "My streams": 2 video(s).
+2026-08-04 09:43:53+0000 [INFO] - No addition necessary for Release Radar
+2026-08-04 09:43:53+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-08-04 09:43:54+0000 [INFO] - No expired videos in "🧠 Educational content (Private)"
+2026-08-04 09:43:54+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-08-04 09:43:54+0000 [INFO] - Removing 7 expired video(s) from "🍿🎮 Entertainment & Gaming (Private)"
+2026-08-04 09:43:56+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-08-04 09:43:56+0000 [INFO] - Removing 1 expired video(s) from "💤 ASMR & Relaxation (Private)"
+2026-08-04 09:43:57+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-08-04 09:43:57+0000 [INFO] - No ended streams in "🍿🔴 My streams (Private)"
+2026-08-04 09:43:58+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-08-04 09:43:58+0000 [INFO] - Process ended.
+2026-08-05 09:40:30+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-08-05 09:40:31+0000 [INFO] - Process started.
+2026-08-05 09:40:31+0000 [INFO] - API credentials refreshed.
+2026-08-05 09:40:31+0000 [INFO] - YouTube service created successfully.
+2026-08-05 09:40:31+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-08-05 09:41:49+0000 [INFO] - Add statistics for 46 video(s).
+2026-08-05 09:42:11+0000 [INFO] - Filtered 3 upcoming stream(s) from stats tracking.
+2026-08-05 09:42:12+0000 [INFO] - Addition to "Banger Radar": 5 video(s).
+2026-08-05 09:42:15+0000 [INFO] - Addition to "Release Radar": 18 video(s).
+2026-08-05 09:42:27+0000 [INFO] - Addition to "Entertainment & Gaming": 2 video(s).
+2026-08-05 09:42:28+0000 [INFO] - Addition to "ASMR & Relaxation": 2 video(s).
+2026-08-05 09:42:29+0000 [INFO] - Addition to "Music Lives": 3 video(s).
+2026-08-05 09:42:30+0000 [INFO] - No addition necessary for Release Radar
+2026-08-05 09:42:30+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-08-05 09:42:30+0000 [INFO] - Removing 4 expired video(s) from "🧠 Educational content (Private)"
+2026-08-05 09:42:32+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-08-05 09:42:32+0000 [INFO] - No expired videos in "🍿🎮 Entertainment & Gaming (Private)"
+2026-08-05 09:42:32+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-08-05 09:42:32+0000 [INFO] - Removing 1 expired video(s) from "💤 ASMR & Relaxation (Private)"
+2026-08-05 09:42:33+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-08-05 09:42:33+0000 [INFO] - Removing 2 ended stream(s) from "🍿🔴 My streams (Private)"
+2026-08-05 09:42:35+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-08-05 09:42:35+0000 [INFO] - Process ended.
+2026-08-06 09:43:15+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-08-06 09:43:15+0000 [INFO] - Process started.
+2026-08-06 09:43:15+0000 [INFO] - API credentials refreshed.
+2026-08-06 09:43:15+0000 [INFO] - YouTube service created successfully.
+2026-08-06 09:43:15+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-08-06 09:44:33+0000 [INFO] - Add statistics for 47 video(s).
+2026-08-06 09:44:54+0000 [INFO] - Filtered 3 upcoming stream(s) from stats tracking.
+2026-08-06 09:44:55+0000 [INFO] - Addition to "Banger Radar": 10 video(s).
+2026-08-06 09:45:00+0000 [INFO] - Addition to "Release Radar": 16 video(s).
+2026-08-06 09:45:13+0000 [INFO] - Addition to "Educational content": 1 video(s).
+2026-08-06 09:45:13+0000 [INFO] - Addition to "Entertainment & Gaming": 4 video(s).
+2026-08-06 09:45:15+0000 [INFO] - Addition to "Music Lives": 1 video(s).
+2026-08-06 09:45:16+0000 [INFO] - Addition to "My streams": 2 video(s).
+2026-08-06 09:45:17+0000 [INFO] - No addition necessary for Release Radar
+2026-08-06 09:45:17+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-08-06 09:45:17+0000 [INFO] - Removing 4 expired video(s) from "🧠 Educational content (Private)"
+2026-08-06 09:45:19+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-08-06 09:45:19+0000 [INFO] - Removing 7 expired video(s) from "🍿🎮 Entertainment & Gaming (Private)"
+2026-08-06 09:45:22+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-08-06 09:45:22+0000 [INFO] - No expired videos in "💤 ASMR & Relaxation (Private)"
+2026-08-06 09:45:22+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-08-06 09:45:22+0000 [INFO] - No ended streams in "🍿🔴 My streams (Private)"
+2026-08-06 09:45:23+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-08-06 09:45:23+0000 [INFO] - Process ended.
+2026-08-07 08:18:10+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-08-07 08:18:11+0000 [INFO] - Process started.
+2026-08-07 08:18:11+0000 [INFO] - API credentials refreshed.
+2026-08-07 08:18:11+0000 [INFO] - YouTube service created successfully.
+2026-08-07 08:18:11+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-08-07 08:19:33+0000 [INFO] - Add statistics for 63 video(s).
+2026-08-07 08:19:58+0000 [INFO] - Filtered 2 upcoming stream(s) from stats tracking.
+2026-08-07 08:19:58+0000 [INFO] - Addition to "Banger Radar": 8 video(s).
+2026-08-07 08:20:02+0000 [INFO] - Addition to "Release Radar": 27 video(s).
+2026-08-07 08:20:26+0000 [INFO] - Addition to "Educational content": 2 video(s).
+2026-08-07 08:20:27+0000 [INFO] - Addition to "Entertainment & Gaming": 5 video(s).
+2026-08-07 08:20:29+0000 [INFO] - Addition to "ASMR & Relaxation": 1 video(s).
+2026-08-07 08:20:30+0000 [INFO] - Addition to "Music Lives": 2 video(s).
+2026-08-07 08:20:31+0000 [INFO] - No addition necessary for Release Radar
+2026-08-07 08:20:31+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-08-07 08:20:31+0000 [INFO] - Removing 4 expired video(s) from "🧠 Educational content (Private)"
+2026-08-07 08:20:33+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-08-07 08:20:33+0000 [INFO] - No expired videos in "🍿🎮 Entertainment & Gaming (Private)"
+2026-08-07 08:20:33+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-08-07 08:20:33+0000 [INFO] - No expired videos in "💤 ASMR & Relaxation (Private)"
+2026-08-07 08:20:33+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-08-07 08:20:33+0000 [INFO] - Removing 2 ended stream(s) from "🍿🔴 My streams (Private)"
+2026-08-07 08:20:36+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-08-07 08:20:36+0000 [INFO] - Process ended.
+2026-08-08 07:52:39+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-08-08 07:52:40+0000 [INFO] - Process started.
+2026-08-08 07:52:40+0000 [INFO] - API credentials refreshed.
+2026-08-08 07:52:40+0000 [INFO] - YouTube service created successfully.
+2026-08-08 07:52:40+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-08-08 07:53:43+0000 [INFO] - Add statistics for 64 video(s).
+2026-08-08 07:54:05+0000 [INFO] - Filtered 1 upcoming stream(s) from stats tracking.
+2026-08-08 07:54:05+0000 [INFO] - Addition to "Banger Radar": 7 video(s).
+2026-08-08 07:54:08+0000 [INFO] - Addition to "Release Radar": 35 video(s).
+2026-08-08 07:54:35+0000 [INFO] - Addition to "Educational content": 1 video(s).
+2026-08-08 07:54:36+0000 [INFO] - Addition to "Entertainment & Gaming": 3 video(s).
+2026-08-08 07:54:37+0000 [INFO] - Addition to "ASMR & Relaxation": 1 video(s).
+2026-08-08 07:54:37+0000 [INFO] - Addition to "My streams": 1 video(s).
+2026-08-08 07:54:38+0000 [INFO] - No addition necessary for Release Radar
+2026-08-08 07:54:38+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-08-08 07:54:38+0000 [INFO] - Removing 3 expired video(s) from "🧠 Educational content (Private)"
+2026-08-08 07:54:39+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-08-08 07:54:40+0000 [INFO] - Removing 2 expired video(s) from "🍿🎮 Entertainment & Gaming (Private)"
+2026-08-08 07:54:40+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-08-08 07:54:40+0000 [INFO] - Removing 2 expired video(s) from "💤 ASMR & Relaxation (Private)"
+2026-08-08 07:54:41+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-08-08 07:54:41+0000 [INFO] - No ended streams in "🍿🔴 My streams (Private)"
+2026-08-08 07:54:42+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-08-08 07:54:42+0000 [INFO] - Process ended.
+2026-08-09 07:55:54+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-08-09 07:55:55+0000 [INFO] - Process started.
+2026-08-09 07:55:55+0000 [INFO] - API credentials refreshed.
+2026-08-09 07:55:55+0000 [INFO] - YouTube service created successfully.
+2026-08-09 07:55:55+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-08-09 07:56:59+0000 [INFO] - Add statistics for 26 video(s).
+2026-08-09 07:57:08+0000 [INFO] - Addition to "Banger Radar": 3 video(s).
+2026-08-09 07:57:09+0000 [INFO] - Addition to "Release Radar": 13 video(s).
+2026-08-09 07:57:21+0000 [INFO] - Addition to "Educational content": 1 video(s).
+2026-08-09 07:57:21+0000 [INFO] - Addition to "Entertainment & Gaming": 2 video(s).
+2026-08-09 07:57:22+0000 [INFO] - Addition to "ASMR & Relaxation": 1 video(s).
+2026-08-09 07:57:22+0000 [INFO] - No addition necessary for Release Radar
+2026-08-09 07:57:22+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-08-09 07:57:23+0000 [INFO] - Removing 2 expired video(s) from "🧠 Educational content (Private)"
+2026-08-09 07:57:23+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-08-09 07:57:24+0000 [INFO] - Removing 3 expired video(s) from "🍿🎮 Entertainment & Gaming (Private)"
+2026-08-09 07:57:24+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-08-09 07:57:25+0000 [INFO] - No expired videos in "💤 ASMR & Relaxation (Private)"
+2026-08-09 07:57:25+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-08-09 07:57:25+0000 [INFO] - Removing 1 ended stream(s) from "🍿🔴 My streams (Private)"
+2026-08-09 07:57:26+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-08-09 07:57:26+0000 [INFO] - Process ended.
+2026-08-10 08:43:34+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-08-10 08:43:34+0000 [INFO] - Process started.
+2026-08-10 08:43:34+0000 [INFO] - API credentials refreshed.
+2026-08-10 08:43:34+0000 [INFO] - YouTube service created successfully.
+2026-08-10 08:43:34+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-08-10 08:44:40+0000 [INFO] - Add statistics for 32 video(s).
+2026-08-10 08:44:50+0000 [INFO] - Filtered 1 upcoming stream(s) from stats tracking.
+2026-08-10 08:44:51+0000 [INFO] - Addition to "Banger Radar": 3 video(s).
+2026-08-10 08:44:52+0000 [INFO] - Addition to "Release Radar": 11 video(s).
+2026-08-10 08:45:00+0000 [INFO] - Addition to "Educational content": 6 video(s).
+2026-08-10 08:45:01+0000 [INFO] - Addition to "Entertainment & Gaming": 3 video(s).
+2026-08-10 08:45:02+0000 [INFO] - Addition to "ASMR & Relaxation": 1 video(s).
+2026-08-10 08:45:03+0000 [INFO] - Addition to "My streams": 1 video(s).
+2026-08-10 08:45:04+0000 [INFO] - No addition necessary for Release Radar
+2026-08-10 08:45:04+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-08-10 08:45:04+0000 [INFO] - Removing 2 expired video(s) from "🧠 Educational content (Private)"
+2026-08-10 08:45:04+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-08-10 08:45:05+0000 [INFO] - Removing 4 expired video(s) from "🍿🎮 Entertainment & Gaming (Private)"
+2026-08-10 08:45:06+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-08-10 08:45:06+0000 [INFO] - No expired videos in "💤 ASMR & Relaxation (Private)"
+2026-08-10 08:45:06+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-08-10 08:45:06+0000 [INFO] - No ended streams in "🍿🔴 My streams (Private)"
+2026-08-10 08:45:07+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-08-10 08:45:07+0000 [INFO] - Process ended.
+2026-08-11 08:11:51+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-08-11 08:11:52+0000 [INFO] - Process started.
+2026-08-11 08:11:52+0000 [INFO] - API credentials refreshed.
+2026-08-11 08:11:52+0000 [INFO] - YouTube service created successfully.
+2026-08-11 08:11:52+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-08-11 08:13:08+0000 [INFO] - Add statistics for 57 video(s).
+2026-08-11 08:13:40+0000 [INFO] - Addition to "Banger Radar": 4 video(s).
+2026-08-11 08:13:42+0000 [INFO] - Addition to "Release Radar": 25 video(s).
+2026-08-11 08:14:02+0000 [INFO] - Addition to "Educational content": 4 video(s).
+2026-08-11 08:14:03+0000 [INFO] - Addition to "Entertainment & Gaming": 1 video(s).
+2026-08-11 08:14:04+0000 [INFO] - Addition to "ASMR & Relaxation": 1 video(s).
+2026-08-11 08:14:05+0000 [INFO] - No addition necessary for Release Radar
+2026-08-11 08:14:05+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-08-11 08:14:05+0000 [INFO] - Removing 1 expired video(s) from "🧠 Educational content (Private)"
+2026-08-11 08:14:05+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-08-11 08:14:05+0000 [INFO] - Removing 3 expired video(s) from "🍿🎮 Entertainment & Gaming (Private)"
+2026-08-11 08:14:06+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-08-11 08:14:07+0000 [INFO] - No expired videos in "💤 ASMR & Relaxation (Private)"
+2026-08-11 08:14:07+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-08-11 08:14:07+0000 [INFO] - Removing 1 ended stream(s) from "🍿🔴 My streams (Private)"
+2026-08-11 08:14:08+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-08-11 08:14:08+0000 [INFO] - Process ended.
+2026-08-12 08:22:42+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-08-12 08:22:42+0000 [INFO] - Process started.
+2026-08-12 08:22:42+0000 [INFO] - API credentials refreshed.
+2026-08-12 08:22:42+0000 [INFO] - YouTube service created successfully.
+2026-08-12 08:22:42+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-08-12 08:23:54+0000 [INFO] - Add statistics for 48 video(s).
+2026-08-12 08:24:21+0000 [INFO] - Addition to "Banger Radar": 7 video(s).
+2026-08-12 08:24:24+0000 [INFO] - Addition to "Release Radar": 18 video(s).
+2026-08-12 08:24:39+0000 [INFO] - Addition to "Educational content": 1 video(s).
+2026-08-12 08:24:39+0000 [INFO] - Addition to "Entertainment & Gaming": 1 video(s).
+2026-08-12 08:24:39+0000 [INFO] - Addition to "ASMR & Relaxation": 1 video(s).
+2026-08-12 08:24:40+0000 [INFO] - No addition necessary for Release Radar
+2026-08-12 08:24:40+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-08-12 08:24:40+0000 [INFO] - Removing 2 expired video(s) from "🧠 Educational content (Private)"
+2026-08-12 08:24:41+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-08-12 08:24:41+0000 [INFO] - Removing 1 expired video(s) from "🍿🎮 Entertainment & Gaming (Private)"
+2026-08-12 08:24:42+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-08-12 08:24:42+0000 [INFO] - No expired videos in "💤 ASMR & Relaxation (Private)"
+2026-08-12 08:24:42+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-08-12 08:24:42+0000 [INFO] - No ended streams in "🍿🔴 My streams (Private)"
+2026-08-12 08:24:43+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-08-12 08:24:43+0000 [INFO] - Process ended.
+2026-08-13 08:25:28+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-08-13 08:25:28+0000 [INFO] - Process started.
+2026-08-13 08:25:29+0000 [INFO] - API credentials refreshed.
+2026-08-13 08:25:29+0000 [INFO] - YouTube service created successfully.
+2026-08-13 08:25:29+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-08-13 08:26:52+0000 [INFO] - Add statistics for 58 video(s).
+2026-08-13 08:27:23+0000 [INFO] - Filtered 3 upcoming stream(s) from stats tracking.
+2026-08-13 08:27:23+0000 [INFO] - Addition to "Banger Radar": 7 video(s).
+2026-08-13 08:27:26+0000 [INFO] - Addition to "Release Radar": 21 video(s).
+2026-08-13 08:27:40+0000 [INFO] - Addition to "Entertainment & Gaming": 5 video(s).
+2026-08-13 08:27:43+0000 [INFO] - Addition to "ASMR & Relaxation": 1 video(s).
+2026-08-13 08:27:43+0000 [INFO] - Addition to "Music Lives": 1 video(s).
+2026-08-13 08:27:44+0000 [INFO] - Addition to "My streams": 2 video(s).
+2026-08-13 08:27:45+0000 [INFO] - No addition necessary for Release Radar
+2026-08-13 08:27:45+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-08-13 08:27:45+0000 [INFO] - No expired videos in "🧠 Educational content (Private)"
+2026-08-13 08:27:45+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-08-13 08:27:45+0000 [INFO] - Removing 2 expired video(s) from "🍿🎮 Entertainment & Gaming (Private)"
+2026-08-13 08:27:46+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-08-13 08:27:46+0000 [INFO] - No expired videos in "💤 ASMR & Relaxation (Private)"
+2026-08-13 08:27:46+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-08-13 08:27:46+0000 [INFO] - No ended streams in "🍿🔴 My streams (Private)"
+2026-08-13 08:27:48+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-08-13 08:27:48+0000 [INFO] - Process ended.
+2026-08-14 08:20:37+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-08-14 08:20:38+0000 [INFO] - Process started.
+2026-08-14 08:20:38+0000 [INFO] - API credentials refreshed.
+2026-08-14 08:20:38+0000 [INFO] - YouTube service created successfully.
+2026-08-14 08:20:38+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-08-14 08:21:47+0000 [INFO] - Add statistics for 66 video(s).
+2026-08-14 08:22:22+0000 [INFO] - Filtered 3 upcoming stream(s) from stats tracking.
+2026-08-14 08:22:22+0000 [INFO] - Addition to "Banger Radar": 7 video(s).
+2026-08-14 08:22:26+0000 [INFO] - Addition to "Release Radar": 21 video(s).
+2026-08-14 08:22:41+0000 [INFO] - Addition to "Educational content": 2 video(s).
+2026-08-14 08:22:41+0000 [INFO] - Addition to "Entertainment & Gaming": 7 video(s).
+2026-08-14 08:22:44+0000 [INFO] - Addition to "Music Lives": 2 video(s).
+2026-08-14 08:22:45+0000 [INFO] - Addition to "My streams": 1 video(s).
+2026-08-14 08:22:46+0000 [INFO] - No addition necessary for Release Radar
+2026-08-14 08:22:46+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-08-14 08:22:46+0000 [INFO] - Removing 2 expired video(s) from "🧠 Educational content (Private)"
+2026-08-14 08:22:47+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-08-14 08:22:47+0000 [INFO] - Removing 9 expired video(s) from "🍿🎮 Entertainment & Gaming (Private)"
+2026-08-14 08:22:50+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-08-14 08:22:50+0000 [INFO] - No expired videos in "💤 ASMR & Relaxation (Private)"
+2026-08-14 08:22:50+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-08-14 08:22:50+0000 [INFO] - Removing 1 ended stream(s) from "🍿🔴 My streams (Private)"
+2026-08-14 08:22:52+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-08-14 08:22:52+0000 [INFO] - Process ended.
+2026-08-15 07:35:33+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-08-15 07:35:33+0000 [INFO] - Process started.
+2026-08-15 07:35:33+0000 [INFO] - API credentials refreshed.
+2026-08-15 07:35:33+0000 [INFO] - YouTube service created successfully.
+2026-08-15 07:35:33+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-08-15 07:36:49+0000 [INFO] - Add statistics for 72 video(s).
+2026-08-15 07:37:24+0000 [INFO] - Addition to "Banger Radar": 6 video(s).
+2026-08-15 07:37:28+0000 [INFO] - Addition to "Release Radar": 34 video(s).
+2026-08-15 07:37:55+0000 [INFO] - Addition to "Educational content": 3 video(s).
+2026-08-15 07:37:57+0000 [INFO] - Addition to "Entertainment & Gaming": 5 video(s).
+2026-08-15 07:37:59+0000 [INFO] - Addition to "ASMR & Relaxation": 2 video(s).
+2026-08-15 07:38:00+0000 [INFO] - No addition necessary for Release Radar
+2026-08-15 07:38:00+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-08-15 07:38:01+0000 [INFO] - Removing 1 expired video(s) from "🧠 Educational content (Private)"
+2026-08-15 07:38:01+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-08-15 07:38:01+0000 [INFO] - No expired videos in "🍿🎮 Entertainment & Gaming (Private)"
+2026-08-15 07:38:01+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-08-15 07:38:02+0000 [INFO] - No expired videos in "💤 ASMR & Relaxation (Private)"
+2026-08-15 07:38:02+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-08-15 07:38:02+0000 [INFO] - Removing 1 ended stream(s) from "🍿🔴 My streams (Private)"
+2026-08-15 07:38:03+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-08-15 07:38:03+0000 [INFO] - Process ended.
+2026-08-16 07:35:52+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-08-16 07:35:53+0000 [INFO] - Process started.
+2026-08-16 07:35:53+0000 [INFO] - API credentials refreshed.
+2026-08-16 07:35:53+0000 [INFO] - YouTube service created successfully.
+2026-08-16 07:35:53+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-08-16 07:37:14+0000 [INFO] - Add statistics for 50 video(s).
+2026-08-16 07:37:36+0000 [INFO] - Addition to "Banger Radar": 11 video(s).
+2026-08-16 07:37:41+0000 [INFO] - Addition to "Release Radar": 20 video(s).
+2026-08-16 07:37:55+0000 [INFO] - Addition to "Educational content": 1 video(s).
+2026-08-16 07:37:56+0000 [INFO] - Addition to "Entertainment & Gaming": 3 video(s).
+2026-08-16 07:37:57+0000 [INFO] - No addition necessary for Release Radar
+2026-08-16 07:37:57+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-08-16 07:37:58+0000 [INFO] - Removing 3 expired video(s) from "🧠 Educational content (Private)"
+2026-08-16 07:37:59+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-08-16 07:37:59+0000 [INFO] - Removing 3 expired video(s) from "🍿🎮 Entertainment & Gaming (Private)"
+2026-08-16 07:38:00+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-08-16 07:38:00+0000 [INFO] - Removing 2 expired video(s) from "💤 ASMR & Relaxation (Private)"
+2026-08-16 07:38:01+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-08-16 07:38:01+0000 [INFO] - No ended streams in "🍿🔴 My streams (Private)"
+2026-08-16 07:38:02+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-08-16 07:38:02+0000 [INFO] - Process ended.
+2026-08-17 07:55:33+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-08-17 07:55:34+0000 [INFO] - Process started.
+2026-08-17 07:55:34+0000 [INFO] - API credentials refreshed.
+2026-08-17 07:55:34+0000 [INFO] - YouTube service created successfully.
+2026-08-17 07:55:34+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-08-17 07:56:45+0000 [INFO] - Add statistics for 38 video(s).
+2026-08-17 07:57:01+0000 [INFO] - Filtered 1 upcoming stream(s) from stats tracking.
+2026-08-17 07:57:01+0000 [INFO] - Addition to "Banger Radar": 3 video(s).
+2026-08-17 07:57:02+0000 [INFO] - Addition to "Release Radar": 17 video(s).
+2026-08-17 07:57:13+0000 [INFO] - Addition to "Educational content": 1 video(s).
+2026-08-17 07:57:14+0000 [INFO] - Addition to "Entertainment & Gaming": 4 video(s).
+2026-08-17 07:57:16+0000 [INFO] - Addition to "ASMR & Relaxation": 2 video(s).
+2026-08-17 07:57:16+0000 [INFO] - Addition to "My streams": 1 video(s).
+2026-08-17 07:57:17+0000 [INFO] - No addition necessary for Release Radar
+2026-08-17 07:57:17+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-08-17 07:57:17+0000 [INFO] - Removing 3 expired video(s) from "🧠 Educational content (Private)"
+2026-08-17 07:57:18+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-08-17 07:57:18+0000 [INFO] - Removing 2 expired video(s) from "🍿🎮 Entertainment & Gaming (Private)"
+2026-08-17 07:57:19+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-08-17 07:57:19+0000 [INFO] - No expired videos in "💤 ASMR & Relaxation (Private)"
+2026-08-17 07:57:19+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-08-17 07:57:19+0000 [INFO] - No ended streams in "🍿🔴 My streams (Private)"
+2026-08-17 07:57:20+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-08-17 07:57:20+0000 [INFO] - Process ended.
+2026-08-18 07:43:04+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-08-18 07:43:05+0000 [INFO] - Process started.
+2026-08-18 07:43:05+0000 [INFO] - API credentials refreshed.
+2026-08-18 07:43:05+0000 [INFO] - YouTube service created successfully.
+2026-08-18 07:43:05+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-08-18 07:44:21+0000 [INFO] - Add statistics for 45 video(s).
+2026-08-18 07:44:46+0000 [INFO] - Addition to "Banger Radar": 6 video(s).
+2026-08-18 07:44:49+0000 [INFO] - Addition to "Release Radar": 14 video(s).
+2026-08-18 07:44:59+0000 [INFO] - Addition to "Educational content": 4 video(s).
+2026-08-18 07:45:01+0000 [INFO] - Addition to "Entertainment & Gaming": 3 video(s).
+2026-08-18 07:45:03+0000 [INFO] - No addition necessary for Release Radar
+2026-08-18 07:45:03+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-08-18 07:45:03+0000 [INFO] - Removing 3 expired video(s) from "🧠 Educational content (Private)"
+2026-08-18 07:45:04+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-08-18 07:45:05+0000 [INFO] - Removing 3 expired video(s) from "🍿🎮 Entertainment & Gaming (Private)"
+2026-08-18 07:45:06+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-08-18 07:45:06+0000 [INFO] - Removing 1 expired video(s) from "💤 ASMR & Relaxation (Private)"
+2026-08-18 07:45:06+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-08-18 07:45:06+0000 [INFO] - Removing 1 ended stream(s) from "🍿🔴 My streams (Private)"
+2026-08-18 07:45:08+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-08-18 07:45:08+0000 [INFO] - Process ended.
+2026-08-19 07:43:21+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-08-19 07:43:22+0000 [INFO] - Process started.
+2026-08-19 07:43:22+0000 [INFO] - API credentials refreshed.
+2026-08-19 07:43:22+0000 [INFO] - YouTube service created successfully.
+2026-08-19 07:43:22+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-08-19 07:44:30+0000 [INFO] - Add statistics for 49 video(s).
+2026-08-19 07:44:50+0000 [INFO] - Filtered 1 upcoming stream(s) from stats tracking.
+2026-08-19 07:44:50+0000 [INFO] - Addition to "Banger Radar": 6 video(s).
+2026-08-19 07:44:53+0000 [INFO] - Addition to "Release Radar": 20 video(s).
+2026-08-19 07:45:05+0000 [INFO] - Addition to "Educational content": 3 video(s).
+2026-08-19 07:45:06+0000 [INFO] - Addition to "Entertainment & Gaming": 1 video(s).
+2026-08-19 07:45:06+0000 [INFO] - Addition to "ASMR & Relaxation": 2 video(s).
+2026-08-19 07:45:07+0000 [INFO] - Addition to "Music Lives": 1 video(s).
+2026-08-19 07:45:08+0000 [INFO] - No addition necessary for Release Radar
+2026-08-19 07:45:08+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-08-19 07:45:09+0000 [INFO] - Removing 2 expired video(s) from "🧠 Educational content (Private)"
+2026-08-19 07:45:09+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-08-19 07:45:09+0000 [INFO] - Removing 1 expired video(s) from "🍿🎮 Entertainment & Gaming (Private)"
+2026-08-19 07:45:10+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-08-19 07:45:10+0000 [INFO] - Removing 1 expired video(s) from "💤 ASMR & Relaxation (Private)"
+2026-08-19 07:45:10+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-08-19 07:45:10+0000 [INFO] - No ended streams in "🍿🔴 My streams (Private)"
+2026-08-19 07:45:11+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-08-19 07:45:11+0000 [INFO] - Process ended.
+2026-08-20 07:46:42+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-08-20 07:46:42+0000 [INFO] - Process started.
+2026-08-20 07:46:42+0000 [INFO] - API credentials refreshed.
+2026-08-20 07:46:42+0000 [INFO] - YouTube service created successfully.
+2026-08-20 07:46:42+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-08-20 07:47:56+0000 [INFO] - Add statistics for 63 video(s).
+2026-08-20 07:48:38+0000 [INFO] - Filtered 2 upcoming stream(s) from stats tracking.
+2026-08-20 07:48:39+0000 [INFO] - Addition to "Banger Radar": 7 video(s).
+2026-08-20 07:48:42+0000 [INFO] - Addition to "Release Radar": 19 video(s).
+2026-08-20 07:49:00+0000 [INFO] - Addition to "Educational content": 1 video(s).
+2026-08-20 07:49:00+0000 [INFO] - Addition to "Entertainment & Gaming": 3 video(s).
+2026-08-20 07:49:01+0000 [INFO] - Addition to "Music Lives": 1 video(s).
+2026-08-20 07:49:02+0000 [INFO] - Addition to "My streams": 1 video(s).
+2026-08-20 07:49:03+0000 [INFO] - No addition necessary for Release Radar
+2026-08-20 07:49:03+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-08-20 07:49:03+0000 [INFO] - Removing 2 expired video(s) from "🧠 Educational content (Private)"
+2026-08-20 07:49:04+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-08-20 07:49:04+0000 [INFO] - Removing 1 expired video(s) from "🍿🎮 Entertainment & Gaming (Private)"
+2026-08-20 07:49:04+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-08-20 07:49:04+0000 [INFO] - Removing 1 expired video(s) from "💤 ASMR & Relaxation (Private)"
+2026-08-20 07:49:05+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-08-20 07:49:05+0000 [INFO] - No ended streams in "🍿🔴 My streams (Private)"
+2026-08-20 07:49:06+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-08-20 07:49:06+0000 [INFO] - Process ended.
+2026-08-21 07:48:27+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-08-21 07:48:28+0000 [INFO] - Process started.
+2026-08-21 07:48:28+0000 [INFO] - API credentials refreshed.
+2026-08-21 07:48:28+0000 [INFO] - YouTube service created successfully.
+2026-08-21 07:48:28+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-08-21 07:49:38+0000 [INFO] - Add statistics for 60 video(s).
+2026-08-21 07:50:06+0000 [INFO] - Filtered 1 upcoming stream(s) from stats tracking.
+2026-08-21 07:50:07+0000 [INFO] - Addition to "Banger Radar": 7 video(s).
+2026-08-21 07:50:10+0000 [INFO] - Addition to "Release Radar": 23 video(s).
+2026-08-21 07:50:29+0000 [INFO] - Addition to "Educational content": 1 video(s).
+2026-08-21 07:50:29+0000 [INFO] - Addition to "Entertainment & Gaming": 2 video(s).
+2026-08-21 07:50:30+0000 [INFO] - Addition to "ASMR & Relaxation": 1 video(s).
+2026-08-21 07:50:30+0000 [INFO] - Addition to "Music Lives": 1 video(s).
+2026-08-21 07:50:31+0000 [INFO] - No addition necessary for Release Radar
+2026-08-21 07:50:31+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-08-21 07:50:32+0000 [INFO] - Removing 2 expired video(s) from "🧠 Educational content (Private)"
+2026-08-21 07:50:32+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-08-21 07:50:33+0000 [INFO] - Removing 5 expired video(s) from "🍿🎮 Entertainment & Gaming (Private)"
+2026-08-21 07:50:34+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-08-21 07:50:34+0000 [INFO] - Removing 1 expired video(s) from "💤 ASMR & Relaxation (Private)"
+2026-08-21 07:50:35+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-08-21 07:50:35+0000 [INFO] - No ended streams in "🍿🔴 My streams (Private)"
+2026-08-21 07:50:36+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-08-21 07:50:36+0000 [INFO] - Process ended.
+2026-08-22 07:36:07+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-08-22 07:36:07+0000 [INFO] - Process started.
+2026-08-22 07:36:07+0000 [INFO] - API credentials refreshed.
+2026-08-22 07:36:07+0000 [INFO] - YouTube service created successfully.
+2026-08-22 07:36:07+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-08-22 07:37:24+0000 [INFO] - Add statistics for 87 video(s).
+2026-08-22 07:37:55+0000 [INFO] - Addition to "Banger Radar": 11 video(s).
+2026-08-22 07:37:59+0000 [INFO] - Addition to "Release Radar": 52 video(s).
+2026-08-22 07:38:33+0000 [INFO] - Addition to "Entertainment & Gaming": 2 video(s).
+2026-08-22 07:38:33+0000 [INFO] - Addition to "ASMR & Relaxation": 1 video(s).
+2026-08-22 07:38:34+0000 [INFO] - No addition necessary for Release Radar
+2026-08-22 07:38:34+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-08-22 07:38:34+0000 [INFO] - Removing 2 expired video(s) from "🧠 Educational content (Private)"
+2026-08-22 07:38:35+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-08-22 07:38:35+0000 [INFO] - Removing 7 expired video(s) from "🍿🎮 Entertainment & Gaming (Private)"
+2026-08-22 07:38:38+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-08-22 07:38:38+0000 [INFO] - Removing 1 expired video(s) from "💤 ASMR & Relaxation (Private)"
+2026-08-22 07:38:38+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-08-22 07:38:39+0000 [INFO] - No ended streams in "🍿🔴 My streams (Private)"
+2026-08-22 07:38:40+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-08-22 07:38:40+0000 [INFO] - Process ended.
+2026-08-23 07:37:55+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-08-23 07:37:56+0000 [INFO] - Process started.
+2026-08-23 07:37:56+0000 [INFO] - API credentials refreshed.
+2026-08-23 07:37:56+0000 [INFO] - YouTube service created successfully.
+2026-08-23 07:37:56+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-08-23 07:39:00+0000 [INFO] - Add statistics for 51 video(s).
+2026-08-23 07:39:33+0000 [INFO] - Addition to "Banger Radar": 3 video(s).
+2026-08-23 07:39:35+0000 [INFO] - Addition to "Release Radar": 17 video(s).
+2026-08-23 07:39:47+0000 [INFO] - Addition to "Entertainment & Gaming": 1 video(s).
+2026-08-23 07:39:47+0000 [INFO] - Addition to "ASMR & Relaxation": 1 video(s).
+2026-08-23 07:39:48+0000 [INFO] - No addition necessary for Release Radar
+2026-08-23 07:39:48+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-08-23 07:39:48+0000 [INFO] - Removing 2 expired video(s) from "🧠 Educational content (Private)"
+2026-08-23 07:39:49+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-08-23 07:39:49+0000 [INFO] - Removing 5 expired video(s) from "🍿🎮 Entertainment & Gaming (Private)"
+2026-08-23 07:39:50+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-08-23 07:39:50+0000 [INFO] - Removing 1 expired video(s) from "💤 ASMR & Relaxation (Private)"
+2026-08-23 07:39:51+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-08-23 07:39:51+0000 [INFO] - No ended streams in "🍿🔴 My streams (Private)"
+2026-08-23 07:39:52+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-08-23 07:39:52+0000 [INFO] - Process ended.
+2026-08-24 08:00:10+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-08-24 08:00:10+0000 [INFO] - Process started.
+2026-08-24 08:00:11+0000 [INFO] - API credentials refreshed.
+2026-08-24 08:00:11+0000 [INFO] - YouTube service created successfully.
+2026-08-24 08:00:11+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-08-24 08:01:45+0000 [INFO] - Add statistics for 47 video(s).
+2026-08-24 08:02:14+0000 [INFO] - Filtered 1 upcoming stream(s) from stats tracking.
+2026-08-24 08:02:14+0000 [INFO] - Addition to "Banger Radar": 4 video(s).
+2026-08-24 08:02:16+0000 [INFO] - Addition to "Release Radar": 16 video(s).
+2026-08-24 08:02:31+0000 [INFO] - Addition to "Educational content": 1 video(s).
+2026-08-24 08:02:31+0000 [INFO] - Addition to "Entertainment & Gaming": 2 video(s).
+2026-08-24 08:02:32+0000 [INFO] - Addition to "ASMR & Relaxation": 1 video(s).
+2026-08-24 08:02:33+0000 [INFO] - Addition to "My streams": 1 video(s).
+2026-08-24 08:02:33+0000 [INFO] - No addition necessary for Release Radar
+2026-08-24 08:02:33+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-08-24 08:02:34+0000 [INFO] - No expired videos in "🧠 Educational content (Private)"
+2026-08-24 08:02:34+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-08-24 08:02:34+0000 [INFO] - Removing 7 expired video(s) from "🍿🎮 Entertainment & Gaming (Private)"
+2026-08-24 08:02:37+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-08-24 08:02:37+0000 [INFO] - Removing 1 expired video(s) from "💤 ASMR & Relaxation (Private)"
+2026-08-24 08:02:37+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-08-24 08:02:37+0000 [INFO] - No ended streams in "🍿🔴 My streams (Private)"
+2026-08-24 08:02:39+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-08-24 08:02:39+0000 [INFO] - Process ended.
+2026-08-25 07:49:20+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-08-25 07:49:20+0000 [INFO] - Process started.
+2026-08-25 07:49:20+0000 [INFO] - API credentials refreshed.
+2026-08-25 07:49:20+0000 [INFO] - YouTube service created successfully.
+2026-08-25 07:49:20+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-08-25 07:50:36+0000 [INFO] - Add statistics for 49 video(s).
+2026-08-25 07:51:05+0000 [INFO] - Addition to "Banger Radar": 5 video(s).
+2026-08-25 07:51:06+0000 [INFO] - Addition to "Release Radar": 18 video(s).
+2026-08-25 07:51:20+0000 [INFO] - Addition to "Educational content": 4 video(s).
+2026-08-25 07:51:21+0000 [INFO] - Addition to "Entertainment & Gaming": 2 video(s).
+2026-08-25 07:51:22+0000 [INFO] - Addition to "ASMR & Relaxation": 1 video(s).
+2026-08-25 07:51:22+0000 [INFO] - No addition necessary for Release Radar
+2026-08-25 07:51:22+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-08-25 07:51:23+0000 [INFO] - No expired videos in "🧠 Educational content (Private)"
+2026-08-25 07:51:23+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-08-25 07:51:23+0000 [INFO] - Removing 3 expired video(s) from "🍿🎮 Entertainment & Gaming (Private)"
+2026-08-25 07:51:23+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-08-25 07:51:23+0000 [INFO] - Removing 2 expired video(s) from "💤 ASMR & Relaxation (Private)"
+2026-08-25 07:51:24+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-08-25 07:51:24+0000 [INFO] - Removing 1 ended stream(s) from "🍿🔴 My streams (Private)"
+2026-08-25 07:51:25+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-08-25 07:51:25+0000 [INFO] - Process ended.
+2026-08-26 07:51:13+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-08-26 07:51:13+0000 [INFO] - Process started.
+2026-08-26 07:51:13+0000 [INFO] - API credentials refreshed.
+2026-08-26 07:51:13+0000 [INFO] - YouTube service created successfully.
+2026-08-26 07:51:13+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-08-26 07:52:33+0000 [INFO] - Add statistics for 57 video(s).
+2026-08-26 07:53:08+0000 [INFO] - Filtered 1 upcoming stream(s) from stats tracking.
+2026-08-26 07:53:08+0000 [INFO] - Addition to "Banger Radar": 14 video(s).
+2026-08-26 07:53:15+0000 [INFO] - Addition to "Release Radar": 17 video(s).
+2026-08-26 07:53:31+0000 [INFO] - Addition to "Educational content": 2 video(s).
+2026-08-26 07:53:32+0000 [INFO] - Addition to "Entertainment & Gaming": 2 video(s).
+2026-08-26 07:53:32+0000 [INFO] - Addition to "ASMR & Relaxation": 1 video(s).
+2026-08-26 07:53:33+0000 [INFO] - Addition to "Music Lives": 1 video(s).
+2026-08-26 07:53:34+0000 [INFO] - No addition necessary for Release Radar
+2026-08-26 07:53:34+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-08-26 07:53:34+0000 [INFO] - No expired videos in "🧠 Educational content (Private)"
+2026-08-26 07:53:34+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-08-26 07:53:34+0000 [INFO] - Removing 1 expired video(s) from "🍿🎮 Entertainment & Gaming (Private)"
+2026-08-26 07:53:35+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-08-26 07:53:35+0000 [INFO] - No expired videos in "💤 ASMR & Relaxation (Private)"
+2026-08-26 07:53:35+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-08-26 07:53:35+0000 [INFO] - No ended streams in "🍿🔴 My streams (Private)"
+2026-08-26 07:53:36+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-08-26 07:53:36+0000 [INFO] - Process ended.
+2026-08-27 14:00:21+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-08-27 14:00:21+0000 [INFO] - Process started.
+2026-08-27 14:00:21+0000 [INFO] - API credentials refreshed.
+2026-08-27 14:00:21+0000 [INFO] - YouTube service created successfully.
+2026-08-27 14:00:21+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-08-27 14:02:00+0000 [INFO] - Add statistics for 78 video(s).
+2026-08-27 14:03:04+0000 [INFO] - Filtered 3 upcoming stream(s) from stats tracking.
+2026-08-27 14:03:04+0000 [INFO] - Addition to "Banger Radar": 5 video(s).
+2026-08-27 14:03:07+0000 [INFO] - Addition to "Release Radar": 23 video(s).
+2026-08-27 14:03:34+0000 [INFO] - Addition to "Educational content": 2 video(s).
+2026-08-27 14:03:35+0000 [INFO] - Addition to "Entertainment & Gaming": 2 video(s).
+2026-08-27 14:03:36+0000 [INFO] - Addition to "ASMR & Relaxation": 1 video(s).
+2026-08-27 14:03:37+0000 [INFO] - Addition to "Music Lives": 3 video(s).
+2026-08-27 14:03:39+0000 [INFO] - No addition necessary for Release Radar
+2026-08-27 14:03:39+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-08-27 14:03:39+0000 [INFO] - Removing 3 expired video(s) from "🧠 Educational content (Private)"
+2026-08-27 14:03:40+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-08-27 14:03:40+0000 [INFO] - Removing 3 expired video(s) from "🍿🎮 Entertainment & Gaming (Private)"
+2026-08-27 14:03:41+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-08-27 14:03:41+0000 [INFO] - Removing 1 expired video(s) from "💤 ASMR & Relaxation (Private)"
+2026-08-27 14:03:42+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-08-27 14:03:42+0000 [INFO] - No ended streams in "🍿🔴 My streams (Private)"
+2026-08-27 14:03:43+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-08-27 14:03:43+0000 [INFO] - Process ended.
+2026-08-27 18:11:00+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-08-27 18:11:00+0000 [INFO] - Process started.
+2026-08-27 18:11:00+0000 [INFO] - API credentials refreshed.
+2026-08-27 18:11:00+0000 [INFO] - YouTube service created successfully.
+2026-08-27 18:11:00+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-08-27 18:12:28+0000 [INFO] - No change to apply on historical data for following delta: 1 week(s)
+2026-08-27 18:12:28+0000 [INFO] - No change to apply on historical data for following delta: 4 week(s)
+2026-08-27 18:12:28+0000 [INFO] - Add statistics for 26 video(s).
+2026-08-27 18:12:42+0000 [INFO] - Filtered 1 upcoming stream(s) from stats tracking.
+2026-08-27 18:12:42+0000 [INFO] - Addition to "Banger Radar": 4 video(s).
+2026-08-27 18:12:43+0000 [INFO] - Addition to "Release Radar": 10 video(s).
+2026-08-27 18:12:51+0000 [INFO] - Addition to "Educational content": 2 video(s).
+2026-08-27 18:12:51+0000 [INFO] - Addition to "Entertainment & Gaming": 2 video(s).
+2026-08-27 18:12:52+0000 [INFO] - Addition to "Music Lives": 1 video(s).
+2026-08-27 18:12:53+0000 [INFO] - No addition necessary for Release Radar
+2026-08-27 18:12:53+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-08-27 18:12:53+0000 [INFO] - No expired videos in "🧠 Educational content (Private)"
+2026-08-27 18:12:53+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-08-27 18:12:53+0000 [INFO] - No expired videos in "🍿🎮 Entertainment & Gaming (Private)"
+2026-08-27 18:12:53+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-08-27 18:12:53+0000 [INFO] - No expired videos in "💤 ASMR & Relaxation (Private)"
+2026-08-27 18:12:53+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-08-27 18:12:53+0000 [INFO] - No ended streams in "🍿🔴 My streams (Private)"
+2026-08-27 18:12:55+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-08-27 18:12:55+0000 [INFO] - Process ended.
+2026-08-28 19:21:14+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-08-28 19:21:14+0000 [INFO] - Process started.
+2026-08-28 19:21:15+0000 [INFO] - API credentials refreshed.
+2026-08-28 19:21:15+0000 [INFO] - YouTube service created successfully.
+2026-08-28 19:21:15+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-08-28 19:22:44+0000 [INFO] - Add statistics for 81 video(s).
+2026-08-28 19:23:34+0000 [INFO] - Addition to "Banger Radar": 7 video(s).
+2026-08-28 19:23:38+0000 [INFO] - Addition to "Release Radar": 43 video(s).
+2026-08-28 19:24:21+0000 [INFO] - Addition to "Entertainment & Gaming": 5 video(s).
+2026-08-28 19:24:24+0000 [INFO] - No addition necessary for Release Radar
+2026-08-28 19:24:24+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-08-28 19:24:24+0000 [INFO] - No expired videos in "🧠 Educational content (Private)"
+2026-08-28 19:24:24+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-08-28 19:24:25+0000 [INFO] - Removing 6 expired video(s) from "🍿🎮 Entertainment & Gaming (Private)"
+2026-08-28 19:24:26+0000 [WARNING] - Deletion Request Failure: (MEcihFY2rgM) - Playlist item not found.
+2026-08-28 19:24:27+0000 [WARNING] - Deletion Request Failure: (MEcihFY2rgM) - Playlist item not found.
+2026-08-28 19:24:27+0000 [WARNING] - Deletion Request Failure: (MMrkoMr7W44) - Playlist item not found.
+2026-08-28 19:24:27+0000 [WARNING] - Deletion Request Failure: (MEcihFY2rgM) - Playlist item not found.
+2026-08-28 19:24:27+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-08-28 19:24:27+0000 [INFO] - No expired videos in "💤 ASMR & Relaxation (Private)"
+2026-08-28 19:24:27+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-08-28 19:24:27+0000 [INFO] - No ended streams in "🍿🔴 My streams (Private)"
+2026-08-28 19:24:28+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-08-28 19:24:28+0000 [INFO] - Process ended.
+2026-08-29 13:05:35+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-08-29 13:05:36+0000 [INFO] - Process started.
+2026-08-29 13:05:36+0000 [INFO] - API credentials refreshed.
+2026-08-29 13:05:36+0000 [INFO] - YouTube service created successfully.
+2026-08-29 13:05:36+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-08-29 13:06:52+0000 [INFO] - Add statistics for 23 video(s).
+2026-08-29 13:07:06+0000 [INFO] - Filtered 1 upcoming stream(s) from stats tracking.
+2026-08-29 13:07:06+0000 [INFO] - Addition to "Release Radar": 8 video(s).
+2026-08-29 13:07:13+0000 [INFO] - Addition to "Entertainment & Gaming": 2 video(s).
+2026-08-29 13:07:13+0000 [INFO] - Addition to "ASMR & Relaxation": 2 video(s).
+2026-08-29 13:07:15+0000 [INFO] - Addition to "My streams": 1 video(s).
+2026-08-29 13:07:16+0000 [INFO] - No addition necessary for Release Radar
+2026-08-29 13:07:16+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-08-29 13:07:16+0000 [INFO] - Removing 1 expired video(s) from "🧠 Educational content (Private)"
+2026-08-29 13:07:16+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-08-29 13:07:17+0000 [INFO] - Removing 2 expired video(s) from "🍿🎮 Entertainment & Gaming (Private)"
+2026-08-29 13:07:17+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-08-29 13:07:17+0000 [INFO] - Removing 1 expired video(s) from "💤 ASMR & Relaxation (Private)"
+2026-08-29 13:07:18+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-08-29 13:07:18+0000 [INFO] - No ended streams in "🍿🔴 My streams (Private)"
+2026-08-29 13:07:19+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-08-29 13:07:19+0000 [INFO] - Process ended.
+2026-08-30 12:42:18+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-08-30 12:42:19+0000 [INFO] - Process started.
+2026-08-30 12:42:19+0000 [INFO] - API credentials refreshed.
+2026-08-30 12:42:19+0000 [INFO] - YouTube service created successfully.
+2026-08-30 12:42:19+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-08-30 12:43:31+0000 [INFO] - Add statistics for 42 video(s).
+2026-08-30 12:44:01+0000 [INFO] - Addition to "Banger Radar": 4 video(s).
+2026-08-30 12:44:03+0000 [INFO] - Addition to "Release Radar": 14 video(s).
+2026-08-30 12:44:14+0000 [INFO] - Addition to "Educational content": 1 video(s).
+2026-08-30 12:44:15+0000 [INFO] - Addition to "Entertainment & Gaming": 3 video(s).
+2026-08-30 12:44:17+0000 [INFO] - No addition necessary for Release Radar
+2026-08-30 12:44:17+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-08-30 12:44:17+0000 [INFO] - Removing 1 expired video(s) from "🧠 Educational content (Private)"
+2026-08-30 12:44:17+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-08-30 12:44:17+0000 [INFO] - Removing 1 expired video(s) from "🍿🎮 Entertainment & Gaming (Private)"
+2026-08-30 12:44:17+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-08-30 12:44:18+0000 [INFO] - No expired videos in "💤 ASMR & Relaxation (Private)"
+2026-08-30 12:44:18+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-08-30 12:44:18+0000 [INFO] - No ended streams in "🍿🔴 My streams (Private)"
+2026-08-30 12:44:19+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-08-30 12:44:19+0000 [INFO] - Process ended.
+2026-08-31 14:58:22+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-08-31 14:58:22+0000 [INFO] - Process started.
+2026-08-31 14:58:22+0000 [INFO] - API credentials refreshed.
+2026-08-31 14:58:22+0000 [INFO] - YouTube service created successfully.
+2026-08-31 14:58:22+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-08-31 14:59:41+0000 [INFO] - Add statistics for 46 video(s).
+2026-08-31 15:00:09+0000 [INFO] - Filtered 1 upcoming stream(s) from stats tracking.
+2026-08-31 15:00:09+0000 [INFO] - Addition to "Banger Radar": 3 video(s).
+2026-08-31 15:00:10+0000 [INFO] - Addition to "Release Radar": 17 video(s).
+2026-08-31 15:00:25+0000 [INFO] - Addition to "Educational content": 3 video(s).
+2026-08-31 15:00:26+0000 [INFO] - Addition to "Entertainment & Gaming": 4 video(s).
+2026-08-31 15:00:28+0000 [INFO] - Addition to "ASMR & Relaxation": 2 video(s).
+2026-08-31 15:00:30+0000 [INFO] - Addition to "Music Lives": 1 video(s).
+2026-08-31 15:00:30+0000 [INFO] - No addition necessary for Release Radar
+2026-08-31 15:00:30+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-08-31 15:00:31+0000 [INFO] - Removing 4 expired video(s) from "🧠 Educational content (Private)"
+2026-08-31 15:00:32+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-08-31 15:00:32+0000 [INFO] - Removing 2 expired video(s) from "🍿🎮 Entertainment & Gaming (Private)"
+2026-08-31 15:00:33+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-08-31 15:00:33+0000 [INFO] - Removing 1 expired video(s) from "💤 ASMR & Relaxation (Private)"
+2026-08-31 15:00:33+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-08-31 15:00:34+0000 [INFO] - Removing 1 ended stream(s) from "🍿🔴 My streams (Private)"
+2026-08-31 15:00:35+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-08-31 15:00:35+0000 [INFO] - Process ended.
+2026-09-01 12:29:14+0000 [INFO] - Loaded configuration from /home/runner/work/youtube_release_tracker/youtube_release_tracker/_config/constants.json
+2026-09-01 12:29:15+0000 [INFO] - Process started.
+2026-09-01 12:29:15+0000 [INFO] - API credentials refreshed.
+2026-09-01 12:29:15+0000 [INFO] - YouTube service created successfully.
+2026-09-01 12:29:15+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-09-01 12:30:45+0000 [INFO] - Add statistics for 50 video(s).
+2026-09-01 12:31:18+0000 [INFO] - Filtered 1 upcoming stream(s) from stats tracking.
+2026-09-01 12:31:18+0000 [INFO] - Addition to "Banger Radar": 5 video(s).
+2026-09-01 12:31:21+0000 [INFO] - Addition to "Release Radar": 17 video(s).
+2026-09-01 12:31:36+0000 [INFO] - Addition to "Educational content": 2 video(s).
+2026-09-01 12:31:37+0000 [INFO] - Addition to "Entertainment & Gaming": 3 video(s).
+2026-09-01 12:31:39+0000 [INFO] - Addition to "ASMR & Relaxation": 1 video(s).
+2026-09-01 12:31:39+0000 [INFO] - Addition to "Music Lives": 1 video(s).
+2026-09-01 12:31:40+0000 [INFO] - No addition necessary for Release Radar
+2026-09-01 12:31:40+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-09-01 12:31:41+0000 [INFO] - Removing 1 expired video(s) from "🧠 Educational content (Private)"
+2026-09-01 12:31:41+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-09-01 12:31:41+0000 [INFO] - Removing 2 expired video(s) from "🍿🎮 Entertainment & Gaming (Private)"
+2026-09-01 12:31:42+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-09-01 12:31:42+0000 [INFO] - No expired videos in "💤 ASMR & Relaxation (Private)"
+2026-09-01 12:31:42+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-09-01 12:31:42+0000 [INFO] - No ended streams in "🍿🔴 My streams (Private)"
+2026-09-01 12:31:44+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-09-01 12:31:44+0000 [INFO] - Process ended.
