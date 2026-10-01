@@ -40,11 +40,11 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "mypy==2.3.1",
-    "pandas-stubs==3.0.5.260730",
+    "pandas-stubs==3.0.5.260914",
     "pytest==9.1.1",
     "pytest-cov==7.1.0",
-    "ruff==0.16.5",
-    "types-requests==2.33.0.20260712",
+    "ruff==0.16.9",
+    "types-requests==2.33.0.20260906",
 ]
 # Future analytics features (currently unused)
 analytics = [
@@ -52,9 +52,9 @@ analytics = [
     "ipykernel==7.3.0",
     "jupyter==1.1.1",
     "nbformat==5.11.1",
-    "numpy==2.5.2",
-    "plotly==7.0.0",
-    "scikit-learn==1.9.0",
+    "numpy==2.5.3",
+    "plotly==7.1.0",
+    "scikit-learn==1.9.1",
 ]
 
 [project.urls]
