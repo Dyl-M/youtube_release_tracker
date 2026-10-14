@@ -24,7 +24,8 @@ playlists based on channel categories.
 
 **Stream Playlists (with automatic cleanup when stream ends):**
 
-- [🎧🔴 Music Lives](https://www.youtube.com/playlist?list=PLOMUdQFdS-XNaPVSol9qCUJvQvN5hO4hJ): Music radios on YouTube.
+- [🎧🔴 Music Lives](https://www.youtube.com/playlist?list=PLOMUdQFdS-XNaPVSol9qCUJvQvN5hO4hJ): live and upcoming
+  streams (radios included) of the music and certified channels, best ranked first.
 - [🍿🔴 My streams](https://www.youtube.com/playlist?list=PLOMUdQFdS-XPxmSrgGQjJg-AH-wEEEx-7) (Private): Streams of
   creators outside the “MUSIQUE” category.
 
@@ -34,10 +35,125 @@ playlists based on channel categories.
   and personal development videos. - 30 days retention
 - [🍿🎮 Entertainment & Gaming](https://www.youtube.com/playlist?list=PLOMUdQFdS-XN6_25FjZJuKG6vQ6msi4W6) (Private):
   entertainment and gaming content. - 7 days retention
+- [💤 ASMR & Relaxation](https://www.youtube.com/playlist?list=PLOMUdQFdS-XMjwIyrP2skD7RI1Xz-TbJw) (Private):
+  relaxation videos, background noise and stress relief. - 10 days retention
 
 This project follows up the developments made in
 the [Automated YouTube Playlist](https://github.com/Dyl-M/auto_youtube_playlist)
-project, evolving on a smaller panel of YouTube channels with fewer fluctuations.
+project, evolving on a smaller panel of YouTube channels with fewer fluctuations. The livestream and mixes playlists
+still handled by that project are being brought over here (see `_docs/`).
+
+How it works
+-------------
+
+A GitHub Actions workflow runs the daily job once a day (`uv run python -m yrt.main action`); it can also run locally
+with `uv run python -m yrt.main` (mode `local` is the default, `--help` lists the options) using OAuth token files in
+`_tokens/` (git-ignored). Each run gets an execution context (start time, previous run's start time, the job's log
+files) that is passed explicitly to every step. A second, frequent job (`uv run python -m yrt.updates`) shares the same
+runtime with its own `_log/updates_*.log` files (see *Music lives* below).
+
+1. Videos whose addition failed on the previous run (the `failed` queue of each playlist in `_config/playlists.json`)
+   are retried first.
+2. Every subscribed channel's upload playlist is scanned for videos published since the last execution.
+3. Each video gets its statistics (views, likes, comments, duration, live status, Shorts detection) and is routed to a
+   playlist: Shorts are ignored, scheduled streams go to the stream playlists, non-music channels go to their category
+   playlist, music channels go to Banger Radar (favorites) or Release Radar - long uploads from music-only channels are
+   skipped.
+4. Release Radar is topped up from the re-listening and legacy playlists, expired videos are removed from the category
+   playlists, and ended streams from the stream playlists.
+5. Statistics are stored in `_data/stats.csv` and refreshed 1, 4, 12 and 24 weeks after each release.
+
+Every YouTube Data API call goes through a shared retry layer: transient failures (backend errors, connection errors,
+timeouts, non-JSON 5xx pages) are retried with exponential backoff, permanent ones are logged and skipped, and quota
+rejections are queued in the playlist's `failed` list for the next run. A quota tracker counts the units spent (1 per
+list call, 50 per insert/update/delete) and the run ends with a `Quota spent: N units (...)` line in the log. A run
+that stops on a handled error logs `Fatal error: ...`, exits with code 1 and keeps the previous `last_exe.log`, so the
+next run re-scans the missed window.
+
+### Music lives (frequent job)
+
+A second workflow runs `uv run python -m yrt.updates action`. It is manual-only for now: the
+[Automated YouTube Playlist](https://github.com/Dyl-M/auto_youtube_playlist) project still manages Music Lives, and both
+switch over together once the port is complete. Each run:
+
+1. Each music and certified channel's "Live" tab is listed (1 unit per channel), then the live status, viewers and
+   schedule of every candidate are read (1 unit per 50 videos).
+2. Music Lives keeps live and upcoming streams: lives first by concurrent viewers, then upcoming streams soonest first.
+   New streams are inserted at their rank, never twice; ended, private and deleted ones are removed, and so is an
+   upcoming stream still not started `upcoming_grace_hours` (24) after its scheduled time.
+3. Writes stop at the job's quota budget (inserts first, then removals); whatever is left waits for the next slot.
+
+The daily job still adds premieres and scheduled streams it discovers to Music Lives, skipping videos already there.
+
+**Cutover:** the first pass needs a large batch of inserts (~50-70, 2,500-3,500 units). At the switch-over, disable
+the other project's schedules first, then run the job once locally (`uv run python -m yrt.updates`) so that catch-up
+does not compete with the daily job's quota, and only then schedule the workflow.
+
+Configuration
+-------------
+
+All configuration lives in `_config/`:
+
+- `pocket_tube.json` - subscribed channel IDs grouped by category (`MUSIQUE`, `APPRENTISSAGE`, `DIVERTISSEMENT`,
+  `GAMING`, `ASMR`), exported from PocketTube.
+- `playlists.json` - target playlists with their ID, name and description; category playlists carry `retention_days`,
+  stream playlists may carry `cleanup_on_end`. Each entry also holds two queues written by the jobs: `failed` (videos
+  whose addition failed on quota or unknown errors, replayed on the next run) and `pending` (videos discovered by the
+  frequent job and left for the daily one; unused until that job lands). Since the jobs rewrite this file on the `run`
+  branch, ship hand edits when both queues are empty (their normal state) to avoid merge conflicts.
+- `add-on.json` - `favorites` (channels routed to Banger Radar), `certified` (channels also scanned for lives),
+  `playlistNotFoundPass` (channels whose missing upload playlist is not worth a warning) and `toPass` (channels skipped
+  entirely).
+- `constants.json` (optional) - tunables with sensible defaults; values are validated at start-up and an out-of-range
+  value stops the run with a clear message:
+
+```json
+{
+  "api": {
+    "batch_size": 50,
+    "max_retries": 3,
+    "base_delay_seconds": 1,
+    "max_backoff_seconds": 32,
+    "daily_quota": 10000
+  },
+  "network": {
+    "timeout_seconds": 5
+  },
+  "quota": {
+    "daily_job_budget": 7000,
+    "updates_job_budget": 2500
+  },
+  "playlists": {
+    "release_radar_target_size": 40,
+    "relistening_age_weeks": 1
+  },
+  "video": {
+    "long_video_threshold_minutes": 10
+  },
+  "lives": {
+    "max_per_channel": 0,
+    "upcoming_grace_hours": 24
+  },
+  "stats": {
+    "week_deltas": [1, 4, 12, 24]
+  }
+}
+```
+
+Development
+-------------
+
+The project uses [uv](https://github.com/astral-sh/uv) and Python 3.12+.
+
+```bash
+uv sync --extra dev                                   # install with dev dependencies
+uv run pytest _tests/ -v                              # test suite (no network, no quota)
+uv run pytest _tests/ --cov=yrt --cov-report=term      # with coverage
+uv run ruff check . && uv run ruff format --check .   # lint and formatting
+uv run mypy yrt/                                      # type checking
+uv run python _scripts/sort_db.py                     # sort the channel database
+uv run python _scripts/archive_data.py                # archive old stats and previous years' job logs
+```
 
 Repository structure
 -------------
@@ -48,12 +164,14 @@ youtube_release_tracker/
 ├── _config       # JSON configuration: channels, playlists, favorites and constants
 ├── _data         # Historical video statistics (stats.csv)
 ├── _docs         # Project documentation and notes
-├── _log          # Execution logs (history.log, last_exe.log)
+├── _log          # Execution logs, one history / last-exe pair per job (history.log, last_exe.log, updates_*.log)
 ├── _media        # Repository illustration and media assets
 ├── _notebooks    # Reporting Jupyter notebooks and exported PDFs
 ├── _scripts      # Standalone maintenance scripts (database sort, data archiving)
-├── _tests        # Pytest test suite, fixtures and shared configuration
-└── yrt           # Main application package (source code)
+├── _tests        # Pytest test suite, API response fixtures and shared configuration
+└── yrt           # Main application package: main.py (daily job), updates.py (frequent job), runtime.py (shared
+    │             # job lifecycle), context.py (per-run execution context), router, models, config
+    └── youtube   # YouTube API layer: auth, API calls, retry/quota, playlists, stats, cleanup, lives
 ```
 
 Branches
@@ -61,7 +179,7 @@ Branches
 
 - `main`: clean code reference (this branch). Receives code changes and a single squashed execution-log commit per
   month.
-- `run`: execution branch where the daily automated process runs and commits its logs and statistics.
+- `run`: execution branch where the automated jobs run and commit their logs and statistics.
 - `dev`: integration branch for ongoing development.
 
 External information

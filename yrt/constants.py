@@ -33,13 +33,30 @@ PERMANENT_ERRORS = frozenset(
 )
 QUOTA_ERRORS = frozenset({'quotaexceeded'})
 
+# === YouTube Data API quota costs (units per call) ===
+QUOTA_COST_LIST = 1  # any *.list call, regardless of page size
+QUOTA_COST_WRITE = 50  # playlistItems.insert / update / delete
+
 # === Date/Time Formats ===
 ISO_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S%z'
 LOG_DATE_FORMAT = '%Y-%m-%d %H:%M:%S%z'
 
+# === Jobs and execution modes ===
+JOB_DAILY = 'daily'  # python -m yrt.main: subscriptions, stats, cleanups
+JOB_UPDATES = 'updates'  # python -m yrt.updates: lives and mixes on the adaptive schedule
+JOBS = (JOB_DAILY, JOB_UPDATES)
+EXE_MODE_LOCAL = 'local'  # token files, progress bars
+EXE_MODE_ACTION = 'action'  # GitHub Actions: base64 credentials from the environment, no progress bars
+EXE_MODES = (EXE_MODE_LOCAL, EXE_MODE_ACTION)
+
+# === Log markers (the start marker anchors last_exe.log extraction and the last-exe date parsing) ===
+PROCESS_START_MARKER = 'Process started.'
+PROCESS_END_MARKER = 'Process ended.'
+
 # === YouTube Channel/Playlist ID Prefixes ===
 CHANNEL_PREFIX = 'UC'
 UPLOAD_PLAYLIST_PREFIX = 'UU'
+LIVE_TAB_PLAYLIST_PREFIX = 'UULV'  # the channel's "Live" tab as a playlist (undocumented, newest first)
 
 # === Channel Category Keys (from pocket_tube.json) ===
 CATEGORY_MUSIC = 'MUSIQUE'

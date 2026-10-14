@@ -21,13 +21,18 @@ from . import utils  # noqa: E402
 # Set the logger in utils module
 utils.set_logger(history)
 
+# Retry / quota layer: needs utils (logger) but must exist before the API submodules that call it
+from . import quota, retry  # noqa: E402
+
 # Import all public functions from submodules
 from .api import (  # noqa: E402
     check_if_live,
+    get_items_count,
     get_playlist_items,
     get_subs,
     get_videos,
     iter_channels,
+    sort_db,
 )
 from .auth import (  # noqa: E402
     create_service_local,
@@ -37,6 +42,13 @@ from .auth import (  # noqa: E402
 from .cleanup import (  # noqa: E402
     cleanup_ended_streams,
     cleanup_expired_videos,
+)
+from .lives import (  # noqa: E402
+    fetch_playlist_refs,
+    find_live_streams,
+    get_live_candidates,
+    get_live_details,
+    update_lives_playlist,
 )
 from .playlist import (  # noqa: E402
     add_api_fail,
@@ -50,18 +62,13 @@ from .stats import (  # noqa: E402
     weekly_stats,
 )
 from .utils import (  # noqa: E402
-    ADD_ON,
+    # Constants
     ISO_DATE_FORMAT,
-    LAST_EXE,
-    # Constants and state
-    NOW,
     PERMANENT_ERRORS,
     QUOTA_ERRORS,
     TRANSIENT_ERRORS,
-    get_items_count,
     is_shorts,
-    last_exe_date,
-    sort_db,
+    parse_iso8601_duration,
 )
 
 # Pandas options
@@ -70,13 +77,10 @@ pd.set_option('display.max_columns', None)
 # Public API
 __all__ = [
     # Utils
-    'last_exe_date',
+    'parse_iso8601_duration',
     'is_shorts',
     'sort_db',
     'get_items_count',
-    'NOW',
-    'LAST_EXE',
-    'ADD_ON',
     'ISO_DATE_FORMAT',
     'TRANSIENT_ERRORS',
     'PERMANENT_ERRORS',
@@ -103,6 +107,15 @@ __all__ = [
     # Cleanup
     'cleanup_expired_videos',
     'cleanup_ended_streams',
+    # Lives
+    'fetch_playlist_refs',
+    'find_live_streams',
+    'get_live_candidates',
+    'get_live_details',
+    'update_lives_playlist',
+    # Retry / quota layer (modules)
+    'quota',
+    'retry',
     # Third-party re-exports (for type hints in main.py)
     'pyt',
 ]

@@ -1,4 +1,4 @@
-"""Archive utility script for stats.csv and history.log.
+"""Archive utility script for stats.csv and the job history logs (history.log, updates_history.log).
 
 Moves entries strictly older than 6 months to yearly archive files in _archive/_data/.
 Also sorts the PocketTube database alphabetically.
@@ -132,7 +132,8 @@ def archive_stats(cutoff: datetime) -> tuple[int, int]:
     archived_count = 0
     skipped_count = 0
 
-    for year, year_df in to_archive.groupby('year'):
+    for year in sorted(to_archive['year'].unique().tolist()):  # plain ints, one archive file per year
+        year_df = to_archive[to_archive['year'] == year]
         year_dir = paths.ARCHIVE_DATA_DIR / str(year)
         year_dir.mkdir(parents=True, exist_ok=True)
 
@@ -199,17 +200,20 @@ def parse_log_timestamp(line: str) -> datetime | None:
         return None
 
 
-def archive_logs() -> int:
-    """Archive history.log lines from previous years.
+def archive_logs(log_path: Path, archive_name: str) -> int:
+    """Archive a history log's lines from previous years.
 
     Keeps only current year logs in the source file, archiving all previous years.
+
+    Args:
+        log_path: The job's history log.
+        archive_name: Base name of the yearly archive files ({archive_name}_{year}.log).
 
     Returns:
         Number of lines archived.
     """
     from yrt import paths
 
-    log_path = paths.HISTORY_LOG
     current_year = datetime.now(UTC).year
 
     if not log_path.exists():
@@ -258,7 +262,7 @@ def archive_logs() -> int:
         year_dir = paths.ARCHIVE_DATA_DIR / str(year)
         year_dir.mkdir(parents=True, exist_ok=True)
 
-        archive_file = year_dir / f'history_{year}.log'
+        archive_file = year_dir / f'{archive_name}_{year}.log'
 
         # Append to archive
         with open(archive_file, 'a', encoding='utf-8') as f:
@@ -276,6 +280,7 @@ def archive_logs() -> int:
 
 def main() -> None:
     """Main function to run the archiving process."""
+    from yrt import paths
     from yrt.youtube import create_service_local, sort_db
 
     cutoff = get_cutoff_date()
@@ -293,10 +298,12 @@ def main() -> None:
     stats_archived, stats_skipped = archive_stats(cutoff)
     print()
 
-    # Archive logs
-    print('Archiving history.log...')
-    logs_archived = archive_logs()
-    print()
+    # Archive the history log of each job
+    logs_archived = 0
+    for log_path, archive_name in ((paths.HISTORY_LOG, 'history'), (paths.UPDATES_HISTORY_LOG, 'updates_history')):
+        print(f'Archiving {log_path.name}...')
+        logs_archived += archive_logs(log_path, archive_name)
+        print()
 
     # Sort PocketTube database
     print('Sorting PocketTube database...')

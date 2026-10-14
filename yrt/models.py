@@ -6,7 +6,21 @@ from datetime import datetime
 from typing import Any
 
 # Local
-from .constants import LIVE_STATUS_NONE, STATUS_PUBLIC
+from .constants import (
+    CATEGORY_ASMR,
+    CATEGORY_ENTERTAINMENT,
+    CATEGORY_GAMING,
+    CATEGORY_LEARNING,
+    CATEGORY_MUSIC,
+    LIVE_STATUS_LIVE,
+    LIVE_STATUS_NONE,
+    LIVE_STATUS_UPCOMING,
+    STATUS_PRIVATE,
+    STATUS_PUBLIC,
+)
+
+# Non-music categories, in pocket_tube.json order
+OTHER_CATEGORIES = (CATEGORY_LEARNING, CATEGORY_ENTERTAINMENT, CATEGORY_GAMING, CATEGORY_ASMR)
 
 # === Configuration Models ===
 
@@ -47,7 +61,7 @@ class AddOnConfig:
         favorites: Mapping of channel names to IDs for favorite channels.
         playlist_not_found_pass: Channel IDs to ignore if playlist returns 404.
         to_pass: Channel IDs to skip entirely during iteration.
-        certified: List of certified channel IDs (legacy field).
+        certified: Certified channel IDs, scanned for lives by the frequent job alongside MUSIQUE.
     """
 
     favorites: dict[str, str]
@@ -59,6 +73,37 @@ class AddOnConfig:
         """Validate add-on configuration."""
         if not isinstance(self.favorites, dict):
             raise ValueError('favorites must be a dict')
+
+
+@dataclass(frozen=True)
+class AppConfig:
+    """The three configuration files, loaded once per run and shared by every job.
+
+    Attributes:
+        pocket_tube: Channel IDs by category (pocket_tube.json).
+        playlists: Playlist definitions by key (playlists.json).
+        add_on: Favorites and channel filters (add-on.json).
+    """
+
+    pocket_tube: dict[str, list[str]]
+    playlists: dict[str, PlaylistConfig]
+    add_on: AddOnConfig
+
+    @property
+    def music_channels(self) -> list[str]:
+        """Channel IDs of the MUSIQUE category."""
+        return list(self.pocket_tube.get(CATEGORY_MUSIC, []))
+
+    @property
+    def all_channels(self) -> list[str]:
+        """Every tracked channel ID, without duplicates (a channel may sit in several categories)."""
+        others = [channel for category in OTHER_CATEGORIES for channel in self.pocket_tube.get(category, [])]
+        return list(set(self.music_channels + others))
+
+    @property
+    def updates_channels(self) -> list[str]:
+        """Channel IDs watched by the frequent job: MUSIQUE then certified, without duplicates, in order."""
+        return list(dict.fromkeys(self.music_channels + self.add_on.certified))
 
 
 # === Video/Playlist Item Models ===
@@ -218,6 +263,71 @@ class PlaylistItemRef:
             raise ValueError('item_id cannot be empty')
         if not self.video_id:
             raise ValueError('video_id cannot be empty')
+
+
+@dataclass(frozen=True)
+class LiveStream:
+    """A live or scheduled stream, as returned by videos.list with liveStreamingDetails.
+
+    Attributes:
+        video_id: YouTube video ID.
+        channel_id: Owner channel ID.
+        title: Video title.
+        status: Live broadcast status (live, upcoming, none).
+        privacy_status: Privacy status (public, unlisted, private).
+        concurrent_viewers: Current viewers (live streams only).
+        total_views: View count.
+        actual_start_time: When the stream went live.
+        scheduled_start_time: When the stream is scheduled to start.
+    """
+
+    video_id: str
+    channel_id: str
+    title: str
+    status: str
+    privacy_status: str = STATUS_PUBLIC
+    concurrent_viewers: int | None = None
+    total_views: int | None = None
+    actual_start_time: datetime | None = None
+    scheduled_start_time: datetime | None = None
+
+    def __post_init__(self) -> None:
+        """Validate video ID."""
+        if not self.video_id:
+            raise ValueError('video_id cannot be empty')
+
+    @property
+    def is_active(self) -> bool:
+        """Whether the stream belongs in the lives playlist (live or upcoming, and not private)."""
+        return self.status in (LIVE_STATUS_LIVE, LIVE_STATUS_UPCOMING) and self.privacy_status != STATUS_PRIVATE
+
+    def is_current(self, stale_before: datetime) -> bool:
+        """Whether the stream is active and not a stale upcoming one.
+
+        A scheduled stream that never started keeps the upcoming status until its owner deletes it.
+
+        Args:
+            stale_before: Upcoming streams scheduled before this time are stale.
+
+        Returns:
+            True if the stream belongs in the lives playlist.
+        """
+        stale = (
+            self.status == LIVE_STATUS_UPCOMING
+            and self.scheduled_start_time is not None
+            and self.scheduled_start_time < stale_before
+        )
+        return self.is_active and not stale
+
+    @property
+    def rank_key(self) -> tuple[int, float, float, float]:
+        """Sort key, ascending: lives first by viewers, views, then most recent start; upcoming by soonest start."""
+        if self.status == LIVE_STATUS_LIVE:
+            started = self.actual_start_time.timestamp() if self.actual_start_time else 0.0
+            return 0, -(self.concurrent_viewers or 0), -(self.total_views or 0), -started
+
+        scheduled = self.scheduled_start_time.timestamp() if self.scheduled_start_time else float('inf')
+        return 1, scheduled, 0.0, 0.0
 
 
 # === Helper Functions ===

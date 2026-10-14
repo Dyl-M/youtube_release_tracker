@@ -1,71 +1,36 @@
-"""Utility functions and shared state for YouTube operations."""
+"""Utility functions and the shared logger for YouTube operations."""
 
 # Standard library
 import datetime as dt
 import itertools
-import re
 from collections.abc import Sequence
 from typing import Any
 
 # Third-party
-import pyyoutube as pyt
+import isodate
 import requests
-import tzlocal
 
 # Local
-from .. import config, file_utils, paths
+from .. import config
 from ..constants import (
     ISO_DATE_FORMAT,
-    LOG_DATE_FORMAT,
     PERMANENT_ERRORS,
     QUOTA_ERRORS,
     TRANSIENT_ERRORS,
 )
-from ..exceptions import APIError
 
 # Re-export for backward compatibility
 __all__ = [
     # Functions
-    'last_exe_date',
+    'parse_iso8601_duration',
     'is_shorts',
-    'sort_db',
-    'get_items_count',
-    # Module-level state
-    'NOW',
-    'LAST_EXE',
-    'ADD_ON',
+    'chunked',
     # Constants (re-exported from yrt.constants)
     'TRANSIENT_ERRORS',
     'PERMANENT_ERRORS',
     'QUOTA_ERRORS',
     'ISO_DATE_FORMAT',
 ]
-
-
-def last_exe_date() -> dt.datetime:
-    """Get the last execution datetime from a log file.
-
-    Returns:
-        Last execution date, or 24 hours ago if log is missing/empty.
-    """
-    try:
-        with open(paths.LAST_EXE_LOG, encoding='utf8') as log_file:
-            lines = log_file.readlines()
-            if not lines:
-                # Empty file - default to 24 hours ago (daily workflow)
-                return dt.datetime.now(tz=tzlocal.get_localzone()) - dt.timedelta(days=1)
-            first_log = lines[0]
-
-        match = re.search(r'(\d{4}(-\d{2}){2})\s(\d{2}:?){3}.[\d:]+', first_log)
-        if match is None:
-            raise ValueError(f'Could not parse date from log line: {first_log}')
-
-        d_str = match.group()
-        return dt.datetime.strptime(d_str, LOG_DATE_FORMAT)
-
-    except (FileNotFoundError, IndexError):
-        # On first run or corrupted file, default to 24 hours ago (daily workflow)
-        return dt.datetime.now(tz=tzlocal.get_localzone()) - dt.timedelta(days=1)
 
 
 def chunked[T](sequence: Sequence[T], size: int) -> list[list[T]]:
@@ -81,12 +46,36 @@ def chunked[T](sequence: Sequence[T], size: int) -> list[list[T]]:
     return [list(batch) for batch in itertools.batched(sequence, size)]
 
 
-# Module-level state (calculated at import time)
-ADD_ON = file_utils.load_json(str(paths.ADD_ON_JSON))
-NOW = dt.datetime.now(tz=tzlocal.get_localzone())
-LAST_EXE = last_exe_date()
+def parse_iso8601_duration(duration_str: str | None) -> int:
+    """Convert an ISO 8601 duration (e.g. 'PT1H30M') to whole seconds.
 
-# Logger placeholder - will be set by __init__.py
+    Unlike timedelta.seconds, the result keeps the days component, so a 30-hour stream is 108000 and not 21600.
+
+    Args:
+        duration_str: Duration as returned by the API in contentDetails.duration; None or empty means unknown.
+
+    Returns:
+        Duration in seconds; 0 when unknown or unparseable (logged as a warning).
+    """
+    if not duration_str:
+        return 0
+
+    try:
+        parsed = isodate.parse_duration(duration_str)
+    except (TypeError, ValueError):  # isodate.ISO8601Error is a ValueError
+        if history:
+            history.warning('Could not parse video duration %r, defaulting to 0 seconds.', duration_str)
+        return 0
+
+    if not isinstance(parsed, dt.timedelta):  # isodate.Duration (years/months) is never emitted by YouTube
+        if history:
+            history.warning('Unsupported duration %r (years/months), defaulting to 0 seconds.', duration_str)
+        return 0
+
+    return int(parsed.total_seconds())
+
+
+# Logger placeholder - set by __init__.py at import and rebound by runtime.bootstrap() to the job's history file
 history: Any = None
 
 
@@ -119,73 +108,3 @@ def is_shorts(video_id: str) -> bool:
         if history:
             history.warning('Failed to check shorts status for video %s: %s', video_id, str(error))
         return False  # Default to non-short on error
-
-
-def get_items_count(service: pyt.Client, playlist_ids: list) -> tuple:
-    """Get the number of videos in YouTube Playlists.
-
-    Args:
-        service: A Python YouTube Client.
-        playlist_ids: List of YouTube playlist IDs.
-
-    Returns:
-        Number of videos by playlist (ordered).
-    """
-    playlists = service.playlists.list(part=['contentDetails'], playlist_id=playlist_ids).items
-    return tuple(pl.contentDetails.itemCount for pl in playlists)
-
-
-def sort_db(service: pyt.Client, log: bool = True) -> None:
-    """Sort and save the PocketTube database file.
-
-    Args:
-        service: A Python YouTube Client.
-        log: Whether to apply logging or not.
-    """
-
-    def get_channels(_service: pyt.Client, _channel_list: list[str]) -> list[str]:
-        """Get YouTube channels basic information.
-
-        Args:
-            _service: A YouTube service build with 'googleapiclient.discovery'.
-            _channel_list: List of YouTube channel IDs.
-
-        Returns:
-            A list of channel IDs sorted alphabetically by channel name.
-
-        Raises:
-            APIError: If API error occurs while sorting database.
-        """
-        information = []
-
-        # Split task in chunks to request on a maximum of API_BATCH_SIZE channels at each iteration.
-        for chunk in chunked(_channel_list, config.API_BATCH_SIZE):
-            try:
-                # Request channels
-                request = _service.channels.list(
-                    part=['snippet'], channel_id=chunk, max_results=config.API_BATCH_SIZE
-                ).items
-
-                # Extract upload playlists, channel names and their ID.
-                information += [{'title': an_item.snippet.title, 'id': an_item.id} for an_item in request]
-
-            except pyt.error.PyYouTubeException as api_error:
-                if log and history:
-                    history.error(api_error.message)
-                raise APIError(f'API error while sorting database: {api_error.message}') from api_error
-
-        # Sort channels' name by alphabetical order
-        information = sorted(information, key=lambda dic: dic['title'].lower())
-        return [info['id'] for info in information]  # Get channel IDs only
-
-    channels_db = file_utils.load_json(str(paths.POCKET_TUBE_JSON))
-
-    categories = [db_keys for db_keys in channels_db if 'ysc' not in db_keys]  # Get PT categories
-    db_sorted = {
-        category: get_channels(_service=service, _channel_list=channels_db[category]) for category in categories
-    }
-
-    for category in categories:  # Rewrite categories in the dict object associated with the PT JSON file
-        channels_db[category] = db_sorted[category]
-
-    file_utils.save_json(str(paths.POCKET_TUBE_JSON), channels_db)
