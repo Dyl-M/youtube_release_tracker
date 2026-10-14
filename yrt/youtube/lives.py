@@ -359,16 +359,64 @@ def update_lives_playlist(
         QuotaExhaustedError: If the API rejected a call for quota reasons.
         APIError: If the playlist or its items' status cannot be read.
     """
-    streams = {stream.video_id: stream for stream in lives}
     current = fetch_playlist_refs(service, playlist_id)
-    streams.update(get_live_details(service, (ref.video_id for ref in current if ref.video_id not in streams)))
-
-    wanted = cap_per_channel(
-        (stream for stream in streams.values() if stream.is_current(stale_before)), max_per_channel
-    )
+    wanted = _wanted_streams(service, current, lives, stale_before, max_per_channel)
     ranks = {stream.video_id: rank for rank, stream in enumerate(wanted)}
+    to_add, to_remove = _plan_changes(current, wanted, ranks)
 
-    # Ended, stale, private, deleted, over the cap, or a second copy of the same video
+    # Adds run first: positions are computed against the playlist as it is, items about to be removed included
+    order = [ref.video_id for ref in current]
+    added = _add_streams(service, playlist_id, _affordable(to_add, 'insertion'), order, ranks, prog_bar)
+    removed = _remove_items(service, playlist_id, _affordable(to_remove, 'removal'), prog_bar)
+
+    if utils.history:
+        utils.history.info('Lives playlist: %s added, %s removed.', len(added), len(removed))
+
+    return added, removed
+
+
+def _wanted_streams(
+    service: pyt.Client,
+    current: list[PlaylistItemRef],
+    lives: Iterable[LiveStream],
+    stale_before: dt.datetime,
+    max_per_channel: int,
+) -> list[LiveStream]:
+    """Streams the playlist should hold: the detected ones plus its own items still current, ranked and capped.
+
+    Args:
+        service: A Python YouTube Client.
+        current: The playlist's items.
+        lives: Current streams found by find_live_streams().
+        stale_before: Upcoming streams scheduled before this time never started.
+        max_per_channel: Streams kept per channel, 0 for no cap.
+
+    Returns:
+        The wanted streams, best ranked first.
+
+    Raises:
+        APIError: If the status of the playlist's items cannot be read.
+    """
+    streams = {stream.video_id: stream for stream in lives}
+    streams.update(get_live_details(service, (ref.video_id for ref in current if ref.video_id not in streams)))
+    return cap_per_channel((stream for stream in streams.values() if stream.is_current(stale_before)), max_per_channel)
+
+
+def _plan_changes(
+    current: list[PlaylistItemRef], wanted: list[LiveStream], ranks: dict[str, int]
+) -> tuple[list[str], list[PlaylistItemRef]]:
+    """Split the work: wanted streams missing from the playlist, and items that must go.
+
+    An item goes when it is ended, stale, private, deleted, over the cap, or a second copy of the same video.
+
+    Args:
+        current: The playlist's items, in playlist order.
+        wanted: The wanted streams, best ranked first.
+        ranks: Rank of every wanted stream.
+
+    Returns:
+        The video IDs to insert (best ranked first) and the items to remove (in playlist order).
+    """
     seen: set[str] = set()
     to_remove = []
     for ref in current:
@@ -376,33 +424,73 @@ def update_lives_playlist(
             to_remove.append(ref)
         seen.add(ref.video_id)
 
-    to_add = [stream.video_id for stream in wanted if stream.video_id not in seen]
-    order = [ref.video_id for ref in current]
-    tracker = quota.get_tracker()
+    return [stream.video_id for stream in wanted if stream.video_id not in seen], to_remove
 
-    affordable = tracker.remaining // QUOTA_COST_WRITE
-    if len(to_add) > affordable and utils.history:
-        utils.history.warning('Quota budget reached: %s live insertion(s) postponed.', len(to_add) - affordable)
 
+def _affordable[T](items: list[T], kind: str) -> list[T]:
+    """Keep the writes the job's quota budget can still pay for, and log the postponed ones.
+
+    Args:
+        items: Writes to make, in priority order.
+        kind: Kind of write, for the log ('insertion' or 'removal').
+
+    Returns:
+        The leading writes that fit in the budget.
+    """
+    affordable = quota.get_tracker().remaining // QUOTA_COST_WRITE
+    if len(items) > affordable and utils.history:
+        utils.history.warning('Quota budget reached: %s live %s(s) postponed.', len(items) - affordable, kind)
+    return items[:affordable]
+
+
+def _add_streams(
+    service: pyt.Client,
+    playlist_id: str,
+    to_add: list[str],
+    order: list[str],
+    ranks: dict[str, int],
+    prog_bar: bool,
+) -> list[str]:
+    """Insert streams at their rank, keeping order in step with the playlist.
+
+    Args:
+        service: A Python YouTube Client.
+        playlist_id: YouTube playlist ID.
+        to_add: Video IDs to insert, best ranked first.
+        order: Video IDs currently in the playlist, updated after every insert.
+        ranks: Rank of every wanted stream.
+        prog_bar: Whether to use tqdm progress bar.
+
+    Returns:
+        The inserted video IDs.
+
+    Raises:
+        QuotaExhaustedError: If the API rejected a call for quota reasons.
+    """
     added = []
-    add_it = tqdm.tqdm(to_add[:affordable], desc=f'Adding lives ({playlist_id})') if prog_bar else to_add[:affordable]
+    add_it = tqdm.tqdm(to_add, desc=f'Adding lives ({playlist_id})') if prog_bar else to_add
     for video_id in add_it:
         position = _insert_position(order, ranks, video_id)
         if _insert_at(service, playlist_id, video_id, position):
             order.insert(position, video_id)
             added.append(video_id)
+    return added
 
-    affordable = tracker.remaining // QUOTA_COST_WRITE
-    if len(to_remove) > affordable and utils.history:
-        utils.history.warning('Quota budget reached: %s live removal(s) postponed.', len(to_remove) - affordable)
 
-    removed = []
-    remove_it = tqdm.tqdm(to_remove[:affordable], desc='Deleting from playlist') if prog_bar else to_remove[:affordable]
-    for ref in remove_it:
-        if _delete_item(service, playlist_id, ref):
-            removed.append(ref.video_id)
+def _remove_items(service: pyt.Client, playlist_id: str, to_remove: list[PlaylistItemRef], prog_bar: bool) -> list[str]:
+    """Delete playlist items.
 
-    if utils.history:
-        utils.history.info('Lives playlist: %s added, %s removed.', len(added), len(removed))
+    Args:
+        service: A Python YouTube Client.
+        playlist_id: YouTube playlist ID.
+        to_remove: Items to delete.
+        prog_bar: Whether to use tqdm progress bar.
 
-    return added, removed
+    Returns:
+        The video IDs of the deleted items.
+
+    Raises:
+        QuotaExhaustedError: If the API rejected a call for quota reasons.
+    """
+    remove_it = tqdm.tqdm(to_remove, desc='Deleting from playlist') if prog_bar else to_remove
+    return [ref.video_id for ref in remove_it if _delete_item(service, playlist_id, ref)]

@@ -453,7 +453,8 @@ class TestUpdateLivesPlaylist:
         # 2 list units leave 149: both adds fit (100), the 49 left pay for no removal
         assert added == ['n1', 'n2']
         assert removed == []
-        assert 'removal(s) postponed' in history_mock.warning.call_args.args[0]
+        message, *params = history_mock.warning.call_args.args
+        assert message % tuple(params) == 'Quota budget reached: 2 live removal(s) postponed.'
 
     @staticmethod
     def test_failed_insert_is_skipped(mock_youtube_client, quota_tracker, api_error, history_mock):
