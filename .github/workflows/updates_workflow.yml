@@ -1,0 +1,105 @@
+name: YTB Tracker - Updates
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    # Every 4 h, clear of the daily job (07:00/08:00 UTC) and the monthly consolidation (19:00/20:00 UTC)
+    - cron: "0 2-22/4 * * *"
+
+concurrency:
+  group: updates-job
+  cancel-in-progress: false
+
+jobs:
+  build-linux:
+    name: youtube-updates
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      id-token: write
+      issues: write
+
+    env:
+      CREDS_B64: '${{ secrets.CREDS_B64 }}'
+      GITHUB_REPOSITORY: '${{ github.GITHUB_REPOSITORY }}'
+      PAT: '${{ secrets.PAT }}'
+
+    steps:
+      - id: git-checkout
+        name: Checkout run branch
+        uses: actions/checkout@v7
+        with:
+          ref: run
+          fetch-depth: 0
+
+      - id: sync-code
+        name: Sync code from main
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "github-actions"
+          git fetch origin main
+          git merge origin/main --no-edit || {
+            git checkout --ours -- _data/ _log/
+            git add -A
+            git commit --no-edit
+          }
+
+      - id: uv-setup
+        name: Set up uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - id: python-setup
+        name: Set up Python 3.12
+        run: uv python install 3.12
+
+      - id: dependencies
+        name: Install dependencies
+        run: uv sync
+
+      - id: updates
+        name: Updates process execution
+        run: uv run python -m yrt.updates action
+
+      - id: commit
+        name: Commit changes (Logs)
+        run: |
+          git add _log/updates_history.log _log/updates_last_exe.log
+          git commit -m "log: Latest updates report." -a || echo "No changes to commit"
+
+      # On rejection the two logs are replayed on the latest run branch instead of merging it: a merge after the
+      # monthly reset of run would bring the whole month back. This job is their only writer (concurrency group),
+      # so the local copies already hold everything run has.
+      - id: push
+        name: Push changes to run branch
+        run: |
+          logs="_log/updates_history.log _log/updates_last_exe.log"
+          for attempt in 1 2 3; do
+            git push origin HEAD:run && exit 0
+            echo "Push rejected (attempt $attempt), replaying the updates logs on the latest run branch"
+            cp $logs "$RUNNER_TEMP/"
+            git fetch origin run
+            git reset --hard origin/run
+            for log in $logs; do cp "$RUNNER_TEMP/$(basename "$log")" "$log"; done
+            git add $logs
+            git commit -m "log: Latest updates report." || exit 0
+          done
+          exit 1
+
+      - id: notify-failure
+        name: Create issue on workflow failure
+        if: failure()
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Workflow failed: ${context.workflow}`,
+              body: `The workflow **${context.workflow}** has failed.\n\n**Run details:** ${runUrl}\n\n**Triggered by:** ${context.eventName}\n**Date:** ${new Date().toISOString()}`,
+              labels: ['🐛 bug', '⚠️ workflow-failure']
+            });

@@ -77,7 +77,13 @@ jobs:
 
       - id: push
         name: Push changes to run branch
-        run: git push origin HEAD:run
+        run: |
+          for attempt in 1 2 3; do
+            git push origin HEAD:run && exit 0
+            echo "Push rejected (attempt $attempt), merging the latest run branch"
+            git pull --no-rebase --no-edit origin run || { git merge --abort; exit 1; }
+          done
+          exit 1
 
       - id: notify-failure
         name: Create issue on workflow failure
