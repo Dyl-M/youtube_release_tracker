@@ -17,7 +17,7 @@ import github
 import pyyoutube as pyt
 
 # Local
-from . import file_utils, paths, youtube
+from . import config, file_utils, paths, youtube
 from .constants import (
     CATEGORY_ENTERTAINMENT,
     CATEGORY_GAMING,
@@ -26,6 +26,8 @@ from .constants import (
     EXE_MODE_ACTION,
     EXE_MODE_LOCAL,
     EXE_MODES,
+    JOB_DAILY,
+    JOB_UPDATES,
     PROCESS_END_MARKER,
     PROCESS_START_MARKER,
 )
@@ -216,6 +218,19 @@ class Session:
 JobBody = Callable[[ExecutionContext, Session], None]
 
 
+def job_budget(job: str) -> int:
+    """Return the quota budget of a job, read from config at call time.
+
+    Args:
+        job: Job name, one of JOBS.
+
+    Returns:
+        The units the job is expected to stay under.
+    """
+    budgets = {JOB_DAILY: config.DAILY_JOB_BUDGET, JOB_UPDATES: config.UPDATES_JOB_BUDGET}
+    return budgets[job]
+
+
 def bootstrap(ctx: ExecutionContext) -> Session:
     """Open the job's loggers and create the YouTube service.
 
@@ -223,7 +238,8 @@ def bootstrap(ctx: ExecutionContext) -> Session:
         ctx: Execution context of the run.
 
     Returns:
-        The session; its first log line is the process start marker.
+        The session; its first log line is the process start marker. A fresh quota tracker with the job's budget is
+        installed as the process-wide default.
 
     Raises:
         ConfigurationError: If workflow mode lacks the GitHub environment variables.
@@ -232,6 +248,7 @@ def bootstrap(ctx: ExecutionContext) -> Session:
     """
     logger = create_file_logger('history_main', ctx.history_path, respect_no_logging=False)
     utils.set_logger(create_file_logger('history', ctx.history_path))  # the youtube package logs to the job's file
+    youtube.quota.set_tracker(youtube.quota.QuotaTracker(job_budget(ctx.job)))
     logger.info(PROCESS_START_MARKER)
 
     if ctx.exe_mode == EXE_MODE_ACTION:

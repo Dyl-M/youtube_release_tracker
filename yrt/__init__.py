@@ -14,5 +14,6 @@ __all__ = [
     'paths',
     'router',
     'runtime',
+    'updates',
     'youtube',
 ]
