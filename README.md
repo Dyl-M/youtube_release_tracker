@@ -72,8 +72,9 @@ next run re-scans the missed window.
 
 ### Music lives (frequent job)
 
-A second workflow runs `uv run python -m yrt.updates action` every 4 hours (02:00 to 22:00 UTC, clear of the daily job
-and the monthly consolidation):
+A second workflow runs `uv run python -m yrt.updates action`. It is manual-only for now: the
+[Automated YouTube Playlist](https://github.com/Dyl-M/auto_youtube_playlist) project still manages Music Lives, and both
+switch over together once the port is complete. Each run:
 
 1. Each music and certified channel's "Live" tab is listed (1 unit per channel), then the live status, viewers and
    schedule of every candidate are read (1 unit per 50 videos).
@@ -84,9 +85,9 @@ and the monthly consolidation):
 
 The daily job still adds premieres and scheduled streams it discovers to Music Lives, skipping videos already there.
 
-**First run:** an empty or stale Music Lives needs a large batch of inserts on the first pass (~50-70, 2,500-3,500
-units). Run the job once locally (`uv run python -m yrt.updates`) before shipping the workflow, so that catch-up does
-not compete with the daily job's quota.
+**Cutover:** the first pass needs a large batch of inserts (~50-70, 2,500-3,500 units). At the switch-over, disable
+the other project's schedules first, then run the job once locally (`uv run python -m yrt.updates`) so that catch-up
+does not compete with the daily job's quota, and only then schedule the workflow.
 
 Configuration
 -------------

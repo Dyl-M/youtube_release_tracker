@@ -1,11 +1,10 @@
 name: YTB Tracker - Updates
 
+# Manual only until the cutover (port plan Phase 7): auto_youtube_playlist still manages the same Music Lives playlist
+# and would delete the upcoming streams this job adds. Interim schedule if needed before Phase 6's gate: "0 2-22/4 * * *"
+# (every 4 h, clear of the daily job at 07:00/08:00 UTC and the monthly consolidation at 19:00/20:00 UTC).
 on:
   workflow_dispatch:
-
-  schedule:
-    # Every 4 h, clear of the daily job (07:00/08:00 UTC) and the monthly consolidation (19:00/20:00 UTC)
-    - cron: "0 2-22/4 * * *"
 
 concurrency:
   group: updates-job

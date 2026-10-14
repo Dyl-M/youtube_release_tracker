@@ -301,7 +301,9 @@ updates workflow replays its two logs on the latest `run` instead (a merge after
 back); the cron is every 4 h at 02–22 UTC (not 2 h: ~200–370 units/run, and it stays clear of the daily job at 07/08 UTC
 and the monthly consolidation at 19/20 UTC); the daily job skips videos already in `music_lives` (premieres still come
 from it, a copy of a detected stream would cost an insert and a delete); `config.py` no longer logs at import;
-`lives.max_per_channel = 0` means no cap. The workflow only schedules once shipped to `main`.
+`lives.max_per_channel = 0` means no cap. The workflow is **manual-only** until the Phase 7 cutover (decided
+2026-10-14): the sister still manages the same playlist and deletes every non-`live` item, so both switch over
+together, with the catch-up run, once the port is complete.
 
 | Task                                                                                                                                                                                                                               | Files                               |
 |------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------|
@@ -309,9 +311,9 @@ from it, a copy of a detected stream would cost an insert and a delete); `config
 | `lives.py`: `get_live_candidates`, `find_live_streams`, `update_lives_playlist` (D1 policy, D2 cap, duplicate-safe insert at rank)                                                                                                 | `yrt/youtube/lives.py`              |
 | `music_lives` gets `"cleanup_on_end": true` so the daily job's `cleanup_ended_streams` also covers it (belt and braces with the frequent job)                                                                                      | `_config/playlists.json`            |
 | `yrt/updates.py`: entry point `python -m yrt.updates {local\|action}` running **lives only** at this phase (mixes come in Phase 5)                                                                                                 | new                                 |
-| `updates_workflow.yml` with a fixed `0 2-22/4 * * *` cron for now (gate arrives in Phase 6), `run`-branch checkout, log-replay push retry, failure→issue                                                                           | `.github/workflows/`                |
+| `updates_workflow.yml`, **manual-only** until the Phase 7 cutover (interim cron `0 2-22/4 * * *` noted in the file), `run`-branch checkout, log-replay push retry, failure→issue                                                   | `.github/workflows/`                |
 | ~~Merge sister `toPass`~~ dropped (2026-10-13): it only kept non-electronic channels out of Mixes; Rousseau now in scope                                                                                                           | `_config/add-on.json`               |
-| First-run catch-up: run once from **local mode** so the initial ~50–70 inserts (2,500–3,500 units) don't collide with the daily job's budget                                                                                       | operator step, documented in README |
+| ~~First-run catch-up~~ moved to the Phase 7 cutover (2026-10-14): the sister still manages the same playlist                                                                                                                       | Phase 7                             |
 | `runtime.bootstrap()` installs a `QuotaTracker(config.UPDATES_JOB_BUDGET)` for `JOB_UPDATES`; `config.py` / `file_utils.py` import-time loggers still target `history.log` (make them job-aware or drop the import-time INFO line) | `yrt/runtime.py`, `yrt/config.py`   |
 | `updates_workflow.yml`: explicit `git add _log/updates_*.log` (untracked files are not picked up by `git commit -a`) or seed both files; rebase-retry rule for `playlists.json` = keep both queues                                 | `.github/workflows/`                |
 | Tests: candidates (incl. 404 → `[]`), status filtering, cap, duplicate prevention, removal policy, position insert                                                                                                                 | `_tests/test_lives.py`              |
@@ -358,6 +360,7 @@ Acceptance: gate decisions visible in the Actions summary; no workflow file chan
 
 | Task                                                                                                                                                      | Where                        |
 |-----------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------|
+| Cutover: disable the sister schedules first, run the lives catch-up locally (~50–70 inserts, 2,500–3,500 units), then schedule `updates_workflow.yml`     | both repos, operator step    |
 | Disable the sister's `Playlists updates` and `Adjust updates schedule` schedules (keep `workflow_dispatch`); archive the repository after two clean weeks | sister repo                  |
 | CLAUDE.md: new modules, two-job model, state split, quota guard, schedule data; README: playlists list, operator steps                                    | this repo                    |
 | Mark IMPROVEMENTS-2026 items #8 #9 #10 #11 #14 #15 #17 #19 as done, with PR numbers                                                                       | `_docs/IMPROVEMENTS-2026.md` |
@@ -382,7 +385,7 @@ Acceptance: gate decisions visible in the Actions summary; no workflow file chan
 Budgets (D6): daily job 7,000, frequent job 2,500 aggregated — the guard drops sorting first. If the guard trips more
 than a few times a month, file the quota-extension form before considering a second project.
 
-One-off: first catch-up run ≈ 2,500–3,500 units (Phase 3, run locally).
+One-off: first catch-up run ≈ 2,500–3,500 units (at the Phase 7 cutover, run locally).
 
 ---
 
