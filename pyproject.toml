@@ -61,6 +61,15 @@ analytics = [
 Repository = "https://github.com/Dyl-M/youtube_release_tracker"
 Issues = "https://github.com/Dyl-M/youtube_release_tracker/issues"
 
+# Security floors for transitive dependencies
+[tool.uv]
+constraint-dependencies = [
+    "cryptography>=50.0.0",  # CVE-2026-69247 (PKCS#7 Bleichenbacher oracle)
+    "oauthlib>=4.0.0",  # CVE-2026-49264, CVE-2026-49265 (JSONP callback, PKCE timing)
+    "pyasn1>=0.6.4",  # CVE-2026-59884, CVE-2026-59885, CVE-2026-59886 (decoder denial of service)
+    "urllib3>=2.8.0",  # CVE-2026-97687, CVE-2026-97688, CVE-2026-97689 (proxy TLS, chunked streaming)
+]
+
 # CLI entry point (requires wrapper function - see main.py)
 # [project.scripts]
 # yrt = "yrt.main:cli"
