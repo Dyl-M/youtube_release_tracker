@@ -20,6 +20,10 @@
   "video": {
     "long_video_threshold_minutes": 10
   },
+  "lives": {
+    "max_per_channel": 0,
+    "upcoming_grace_hours": 24
+  },
   "stats": {
     "week_deltas": [1, 4, 12, 24]
   }

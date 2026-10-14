@@ -25,6 +25,7 @@ DEFAULTS: dict[str, Any] = {
     'quota': {'daily_job_budget': 7000, 'updates_job_budget': 2500},
     'playlists': {'release_radar_target_size': 40, 'relistening_age_weeks': 1},
     'video': {'long_video_threshold_minutes': 10},
+    'lives': {'max_per_channel': 0, 'upcoming_grace_hours': 24},
     'stats': {'week_deltas': [1, 4, 12, 24]},
 }
 
@@ -113,6 +114,9 @@ def _validate_config(config: dict) -> None:
 
     _require_int(config, 'video', 'long_video_threshold_minutes', minimum=1)
 
+    _require_int(config, 'lives', 'max_per_channel', minimum=0)
+    _require_int(config, 'lives', 'upcoming_grace_hours', minimum=1)
+
     week_deltas = config.get('stats', {}).get('week_deltas')
     valid_deltas = (
         isinstance(week_deltas, list)
@@ -147,7 +151,6 @@ def load_constants() -> dict:
         merged = copy.deepcopy(DEFAULTS)
 
     else:
-        logger.info('Loaded configuration from %s', paths.CONSTANTS_JSON)
         merged = _deep_merge(DEFAULTS, user_config)
 
     _validate_config(merged)
@@ -177,6 +180,10 @@ RELISTENING_AGE_WEEKS: int = _config['playlists']['relistening_age_weeks']
 
 # Video configuration
 LONG_VIDEO_THRESHOLD_MINUTES: int = _config['video']['long_video_threshold_minutes']
+
+# Lives configuration (0 = no per-channel cap; an upcoming stream this late is treated as never starting)
+LIVES_MAX_PER_CHANNEL: int = _config['lives']['max_per_channel']
+LIVES_UPCOMING_GRACE_HOURS: int = _config['lives']['upcoming_grace_hours']
 
 # Statistics configuration
 STATS_WEEK_DELTAS: list[int] = _config['stats']['week_deltas']
