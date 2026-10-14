@@ -10,11 +10,18 @@ import github
 import pytest
 
 # Local
-from yrt import paths, runtime
-from yrt.constants import EXE_MODE_ACTION, EXE_MODE_LOCAL, JOB_DAILY, PROCESS_END_MARKER, PROCESS_START_MARKER
+from yrt import config, paths, runtime
+from yrt.constants import (
+    EXE_MODE_ACTION,
+    EXE_MODE_LOCAL,
+    JOB_DAILY,
+    JOB_UPDATES,
+    PROCESS_END_MARKER,
+    PROCESS_START_MARKER,
+)
 from yrt.exceptions import APIError, ConfigurationError, GitHubError
 from yrt.models import AddOnConfig, AppConfig, PlaylistConfig
-from yrt.youtube import utils
+from yrt.youtube import quota, utils
 
 PLAYLIST_KEYS = runtime.REQUIRED_PLAYLISTS
 
@@ -203,6 +210,26 @@ class TestBootstrap:
         assert session.creds_b64 is None
         assert session.github is None
         assert log_lines(local_context.history_path) == [PROCESS_START_MARKER]
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        ('job', 'budget_name'), [(JOB_DAILY, 'DAILY_JOB_BUDGET'), (JOB_UPDATES, 'UPDATES_JOB_BUDGET')]
+    )
+    def test_installs_a_fresh_tracker_with_the_job_budget(exec_context, quota_tracker, job, budget_name):
+        """Test each job starts from zero spent, under its own budget."""
+        quota_tracker.charge(10)
+        job_context = runtime.ExecutionContext(**{**vars(exec_context), 'job': job})
+
+        with (
+            patch('yrt.runtime.youtube.create_service_workflow', return_value=(MagicMock(), 'b64')),
+            patch.dict('os.environ', {'GITHUB_REPOSITORY': 'owner/repo', 'PAT': 'token'}),
+        ):
+            runtime.bootstrap(job_context)
+
+        tracker = quota.get_tracker()
+        assert tracker is not quota_tracker
+        assert tracker.spent == 0
+        assert tracker.budget == getattr(config, budget_name)
 
     @staticmethod
     def test_action_mode_without_secrets_fails_before_any_service(exec_context, monkeypatch):

@@ -237,6 +237,19 @@ class TestValidateConfig:
         assert 'quota.updates_job_budget' in str(validate({'quota': {'updates_job_budget': 10001}}))
 
     @staticmethod
+    def test_lives_cap_allows_zero(validate):
+        """Test lives.max_per_channel accepts 0 (no cap) but not negatives."""
+        assert validate({'lives': {'max_per_channel': 0}}) is None
+        assert validate({'lives': {'max_per_channel': 3}}) is None
+        assert 'lives.max_per_channel' in str(validate({'lives': {'max_per_channel': -1}}))
+
+    @staticmethod
+    def test_lives_upcoming_grace_must_be_positive(validate):
+        """Test lives.upcoming_grace_hours rejects 0."""
+        assert validate({'lives': {'upcoming_grace_hours': 24}}) is None
+        assert 'lives.upcoming_grace_hours' in str(validate({'lives': {'upcoming_grace_hours': 0}}))
+
+    @staticmethod
     def test_week_deltas_shape(validate):
         """Test stats.week_deltas must be a non-empty list of positive integers."""
         assert 'stats.week_deltas' in str(validate({'stats': {'week_deltas': []}}))

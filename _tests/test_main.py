@@ -15,7 +15,7 @@ import pytest
 from yrt import main, paths, router, runtime
 from yrt.constants import EXE_MODE_ACTION, EXE_MODE_LOCAL, JOB_DAILY, PROCESS_END_MARKER, PROCESS_START_MARKER
 from yrt.exceptions import APIError, CredentialsError
-from yrt.models import AddOnConfig, AppConfig, PlaylistConfig, PlaylistItem
+from yrt.models import AddOnConfig, AppConfig, PlaylistConfig, PlaylistItem, PlaylistItemRef
 
 MUSIC_CHANNEL = 'UCmusic0000000000000000'
 YOUTUBE_FUNCTIONS = (
@@ -24,6 +24,7 @@ YOUTUBE_FUNCTIONS = (
     'weekly_stats',
     'add_stats',
     'add_to_playlist',
+    'fetch_playlist_refs',
     'fill_release_radar',
     'cleanup_expired_videos',
     'cleanup_ended_streams',
@@ -245,3 +246,50 @@ class TestRunDaily:
         )
         stored = pd.read_csv(paths.STATS_CSV)
         assert stored['video_id'].tolist() == ['vid0000001']
+
+
+@pytest.mark.unit
+class TestSharedPlaylists:
+    """Test videos already in a playlist the frequent job also fills are not added again."""
+
+    @staticmethod
+    def _add(session, cfg, playlist_key, videos):
+        """Run _add_videos_to_playlists() for one destination playlist."""
+        to_add = {cfg.playlists[playlist_key].id: videos}
+        main._add_videos_to_playlists(session.service, cfg.playlists, to_add, session.logger, prog_bar=False)
+
+    def test_music_lives_skips_videos_already_present(
+        self, exec_context, session, daily_config, youtube_mocks, log_lines
+    ):
+        """Test only the videos missing from Music Lives are added, and the log counts them."""
+        youtube_mocks['fetch_playlist_refs'].return_value = [PlaylistItemRef(item_id='item_old', video_id='old')]
+
+        self._add(session, daily_config, 'music_lives', ['old', 'new'])
+
+        lives_id = daily_config.playlists['music_lives'].id
+        youtube_mocks['add_to_playlist'].assert_called_once_with(session.service, lives_id, ['new'], prog_bar=False)
+        assert 'Addition to "Music Lives": 1 video(s).' in log_lines(exec_context.history_path)
+
+    def test_nothing_added_when_all_present(self, session, daily_config, youtube_mocks):
+        """Test no insert happens when every video is already in Music Lives."""
+        youtube_mocks['fetch_playlist_refs'].return_value = [PlaylistItemRef(item_id='item_old', video_id='old')]
+
+        self._add(session, daily_config, 'music_lives', ['old'])
+
+        youtube_mocks['add_to_playlist'].assert_not_called()
+
+    def test_unreadable_playlist_adds_everything(self, exec_context, session, daily_config, youtube_mocks, log_lines):
+        """Test a failed read falls back to adding every video, with a warning."""
+        youtube_mocks['fetch_playlist_refs'].side_effect = APIError('broken')
+
+        self._add(session, daily_config, 'music_lives', ['a', 'b'])
+
+        assert youtube_mocks['add_to_playlist'].call_args.args[2] == ['a', 'b']
+        assert any('adding without duplicate check' in line for line in log_lines(exec_context.history_path))
+
+    def test_other_playlists_are_not_read(self, session, daily_config, youtube_mocks):
+        """Test playlists only the daily job fills skip the check (no extra API call)."""
+        self._add(session, daily_config, 'regular_streams', ['a'])
+
+        youtube_mocks['fetch_playlist_refs'].assert_not_called()
+        youtube_mocks['add_to_playlist'].assert_called_once()

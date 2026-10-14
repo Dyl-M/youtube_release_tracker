@@ -24,7 +24,8 @@ playlists based on channel categories.
 
 **Stream Playlists (with automatic cleanup when stream ends):**
 
-- [🎧🔴 Music Lives](https://www.youtube.com/playlist?list=PLOMUdQFdS-XNaPVSol9qCUJvQvN5hO4hJ): Music radios on YouTube.
+- [🎧🔴 Music Lives](https://www.youtube.com/playlist?list=PLOMUdQFdS-XNaPVSol9qCUJvQvN5hO4hJ): live and upcoming
+  streams (radios included) of the music and certified channels, best ranked first.
 - [🍿🔴 My streams](https://www.youtube.com/playlist?list=PLOMUdQFdS-XPxmSrgGQjJg-AH-wEEEx-7) (Private): Streams of
   creators outside the “MUSIQUE” category.
 
@@ -48,8 +49,8 @@ How it works
 A GitHub Actions workflow runs the daily job once a day (`uv run python -m yrt.main action`); it can also run locally
 with `uv run python -m yrt.main` (mode `local` is the default, `--help` lists the options) using OAuth token files in
 `_tokens/` (git-ignored). Each run gets an execution context (start time, previous run's start time, the job's log
-files) that is passed explicitly to every step; the frequent job of the port plan will reuse the same runtime with its
-own `_log/updates_*.log` files.
+files) that is passed explicitly to every step. A second, frequent job (`uv run python -m yrt.updates`) shares the same
+runtime with its own `_log/updates_*.log` files (see *Music lives* below).
 
 1. Videos whose addition failed on the previous run (the `failed` queue of each playlist in `_config/playlists.json`)
    are retried first.
@@ -69,6 +70,25 @@ list call, 50 per insert/update/delete) and the run ends with a `Quota spent: N 
 that stops on a handled error logs `Fatal error: ...`, exits with code 1 and keeps the previous `last_exe.log`, so the
 next run re-scans the missed window.
 
+### Music lives (frequent job)
+
+A second workflow runs `uv run python -m yrt.updates action`. It is manual-only for now: the
+[Automated YouTube Playlist](https://github.com/Dyl-M/auto_youtube_playlist) project still manages Music Lives, and both
+switch over together once the port is complete. Each run:
+
+1. Each music and certified channel's "Live" tab is listed (1 unit per channel), then the live status, viewers and
+   schedule of every candidate are read (1 unit per 50 videos).
+2. Music Lives keeps live and upcoming streams: lives first by concurrent viewers, then upcoming streams soonest first.
+   New streams are inserted at their rank, never twice; ended, private and deleted ones are removed, and so is an
+   upcoming stream still not started `upcoming_grace_hours` (24) after its scheduled time.
+3. Writes stop at the job's quota budget (inserts first, then removals); whatever is left waits for the next slot.
+
+The daily job still adds premieres and scheduled streams it discovers to Music Lives, skipping videos already there.
+
+**Cutover:** the first pass needs a large batch of inserts (~50-70, 2,500-3,500 units). At the switch-over, disable
+the other project's schedules first, then run the job once locally (`uv run python -m yrt.updates`) so that catch-up
+does not compete with the daily job's quota, and only then schedule the workflow.
+
 Configuration
 -------------
 
@@ -81,8 +101,9 @@ All configuration lives in `_config/`:
   whose addition failed on quota or unknown errors, replayed on the next run) and `pending` (videos discovered by the
   frequent job and left for the daily one; unused until that job lands). Since the jobs rewrite this file on the `run`
   branch, ship hand edits when both queues are empty (their normal state) to avoid merge conflicts.
-- `add-on.json` - `favorites` (channels routed to Banger Radar), `playlistNotFoundPass` (channels whose missing upload
-  playlist is not worth a warning) and `toPass` (channels skipped entirely).
+- `add-on.json` - `favorites` (channels routed to Banger Radar), `certified` (channels also scanned for lives),
+  `playlistNotFoundPass` (channels whose missing upload playlist is not worth a warning) and `toPass` (channels skipped
+  entirely).
 - `constants.json` (optional) - tunables with sensible defaults; values are validated at start-up and an out-of-range
   value stops the run with a clear message:
 
@@ -109,6 +130,10 @@ All configuration lives in `_config/`:
   "video": {
     "long_video_threshold_minutes": 10
   },
+  "lives": {
+    "max_per_channel": 0,
+    "upcoming_grace_hours": 24
+  },
   "stats": {
     "week_deltas": [1, 4, 12, 24]
   }
@@ -127,7 +152,7 @@ uv run pytest _tests/ --cov=yrt --cov-report=term      # with coverage
 uv run ruff check . && uv run ruff format --check .   # lint and formatting
 uv run mypy yrt/                                      # type checking
 uv run python _scripts/sort_db.py                     # sort the channel database
-uv run python _scripts/archive_data.py                # archive data older than 6 months
+uv run python _scripts/archive_data.py                # archive old stats and previous years' job logs
 ```
 
 Repository structure
@@ -144,9 +169,9 @@ youtube_release_tracker/
 ├── _notebooks    # Reporting Jupyter notebooks and exported PDFs
 ├── _scripts      # Standalone maintenance scripts (database sort, data archiving)
 ├── _tests        # Pytest test suite, API response fixtures and shared configuration
-└── yrt           # Main application package: main.py (daily job), runtime.py (shared job lifecycle),
-    │             # context.py (per-run execution context), router, models, config
-    └── youtube   # YouTube API layer: auth, API calls, retry/quota, playlists, stats, cleanup
+└── yrt           # Main application package: main.py (daily job), updates.py (frequent job), runtime.py (shared
+    │             # job lifecycle), context.py (per-run execution context), router, models, config
+    └── youtube   # YouTube API layer: auth, API calls, retry/quota, playlists, stats, cleanup, lives
 ```
 
 Branches
@@ -154,7 +179,7 @@ Branches
 
 - `main`: clean code reference (this branch). Receives code changes and a single squashed execution-log commit per
   month.
-- `run`: execution branch where the daily automated process runs and commits its logs and statistics.
+- `run`: execution branch where the automated jobs run and commit their logs and statistics.
 - `dev`: integration branch for ongoing development.
 
 External information

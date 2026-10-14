@@ -3,6 +3,7 @@
     "name": "🎧🔴 Music Lives",
     "description": "Music radios on YouTube.",
     "id": "PLOMUdQFdS-XNaPVSol9qCUJvQvN5hO4hJ",
+    "cleanup_on_end": true,
     "failed": [],
     "pending": []
   },

@@ -16,6 +16,7 @@ import pandas as pd
 from . import config, paths, runtime, youtube
 from .constants import JOB_DAILY, LIVE_STATUS_UPCOMING
 from .context import ExecutionContext
+from .exceptions import APIError
 from .models import PlaylistConfig, VideoData, to_dict_list
 from .router import create_router_from_config, dest_playlist, set_default_router
 
@@ -55,6 +56,9 @@ PLAYLIST_ADDITIONS: tuple[tuple[str, str], ...] = (
     ('music_lives', 'Music Lives'),
     ('regular_streams', 'My streams'),
 )
+
+# Playlists the frequent job also fills: videos already there are not added again (a copy costs an insert and a delete)
+SHARED_PLAYLISTS: frozenset[str] = frozenset({'music_lives'})
 
 
 def _load_historical_data(logger: logging.Logger) -> pd.DataFrame:
@@ -135,6 +139,29 @@ def _store_new_videos(historical_data: pd.DataFrame, new_data: pd.DataFrame, upc
     stored.to_csv(paths.STATS_CSV, encoding='utf-8', index=False)
 
 
+def _drop_already_present(
+    service: youtube.pyt.Client, playlist_id: str, videos: list[str], logger: logging.Logger
+) -> list[str]:
+    """Remove the videos a playlist already holds.
+
+    Args:
+        service: YouTube API client.
+        playlist_id: YouTube playlist ID.
+        videos: Video IDs about to be added.
+        logger: Job logger.
+
+    Returns:
+        The videos not in the playlist yet (all of them if the playlist cannot be read).
+    """
+    try:
+        present = {ref.video_id for ref in youtube.fetch_playlist_refs(service, playlist_id)}
+    except APIError as error:
+        logger.warning('Could not read playlist %s, adding without duplicate check: %s', playlist_id, error)
+        return videos
+
+    return [video_id for video_id in videos if video_id not in present]
+
+
 def _add_videos_to_playlists(
     service: youtube.pyt.Client,
     playlists: dict[str, PlaylistConfig],
@@ -154,6 +181,8 @@ def _add_videos_to_playlists(
     for key, log_name in PLAYLIST_ADDITIONS:
         playlist_id = playlists[key].id
         videos = to_add.get(playlist_id, [])
+        if videos and key in SHARED_PLAYLISTS:
+            videos = _drop_already_present(service, playlist_id, videos, logger)
         if videos:
             logger.info('Addition to "%s": %s video(s).', log_name, len(videos))
             youtube.add_to_playlist(service, playlist_id, videos, prog_bar=prog_bar)

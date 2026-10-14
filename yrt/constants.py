@@ -56,6 +56,7 @@ PROCESS_END_MARKER = 'Process ended.'
 # === YouTube Channel/Playlist ID Prefixes ===
 CHANNEL_PREFIX = 'UC'
 UPLOAD_PLAYLIST_PREFIX = 'UU'
+LIVE_TAB_PLAYLIST_PREFIX = 'UULV'  # the channel's "Live" tab as a playlist (undocumented, newest first)
 
 # === Channel Category Keys (from pocket_tube.json) ===
 CATEGORY_MUSIC = 'MUSIQUE'

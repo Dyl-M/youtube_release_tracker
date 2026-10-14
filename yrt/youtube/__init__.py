@@ -43,6 +43,13 @@ from .cleanup import (  # noqa: E402
     cleanup_ended_streams,
     cleanup_expired_videos,
 )
+from .lives import (  # noqa: E402
+    fetch_playlist_refs,
+    find_live_streams,
+    get_live_candidates,
+    get_live_details,
+    update_lives_playlist,
+)
 from .playlist import (  # noqa: E402
     add_api_fail,
     add_to_playlist,
@@ -100,6 +107,12 @@ __all__ = [
     # Cleanup
     'cleanup_expired_videos',
     'cleanup_ended_streams',
+    # Lives
+    'fetch_playlist_refs',
+    'find_live_streams',
+    'get_live_candidates',
+    'get_live_details',
+    'update_lives_playlist',
     # Retry / quota layer (modules)
     'quota',
     'retry',
