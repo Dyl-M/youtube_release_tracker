@@ -39,20 +39,20 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "mypy==2.3.1",
+    "mypy==2.4.0",
     "pandas-stubs==3.0.5.260914",
     "pytest==9.1.1",
     "pytest-cov==7.1.0",
-    "ruff==0.16.9",
-    "types-requests==2.33.0.20260906",
+    "ruff==0.17.0",
+    "types-requests==2.33.0.20261006",
 ]
 # Future analytics features (currently unused)
 analytics = [
     "beautifulsoup4==4.15.0",
-    "ipykernel==7.3.0",
+    "ipykernel==7.4.0",
     "jupyter==1.1.1",
     "nbformat==5.11.1",
-    "numpy==2.5.3",
+    "numpy==2.5.4",
     "plotly==7.1.0",
     "scikit-learn==1.9.1",
 ]
