@@ -707,68 +707,68 @@ def iter_channels_generator(
 
 ### Current Code Coverage Breakdown (86% total, measured 2026-08-27 after port plan Phase 2)
 
-| Module                    | Coverage | Status         |
-|---------------------------|----------|----------------|
-| `yrt/__init__.py`         | 100%     | ✅ Complete    |
-| `yrt/config.py`           | 97%      | ✅ Complete    |
-| `yrt/constants.py`        | 100%     | ✅ Complete    |
-| `yrt/context.py`          | 100%     | ✅ Complete    |
-| `yrt/exceptions.py`       | 100%     | ✅ Complete    |
-| `yrt/logging_utils.py`    | 100%     | ✅ Complete    |
-| `yrt/main.py`             | 94%      | ✅ Complete    |
-| `yrt/models.py`           | 100%     | ✅ Complete    |
-| `yrt/paths.py`            | 100%     | ✅ Complete    |
-| `yrt/router.py`           | 100%     | ✅ Complete    |
-| `yrt/runtime.py`          | 100%     | ✅ Complete    |
-| `yrt/file_utils.py`       | 76%      | 🔸 Needs work  |
-| `yrt/youtube/__init__.py` | 100%     | ✅ Complete    |
-| `yrt/youtube/quota.py`    | 100%     | ✅ Complete    |
-| `yrt/youtube/retry.py`    | 99%      | ✅ Complete    |
-| `yrt/youtube/cleanup.py`  | 99%      | ✅ Complete    |
-| `yrt/youtube/playlist.py` | 93%      | ✅ Complete    |
-| `yrt/youtube/utils.py`    | 92%      | ✅ Complete    |
-| `yrt/youtube/api.py`      | 82%      | 🔸 Needs work  |
-| `yrt/youtube/stats.py`    | 23%      | ⚠️ Low         |
-| `yrt/youtube/auth.py`     | 16%      | ⚠️ Low         |
-| `yrt/_sandbox.py`         | 0%       | 🚫 Dev only    |
+| Module                    | Coverage | Status        |
+|---------------------------|----------|---------------|
+| `yrt/__init__.py`         | 100%     | ✅ Complete   |
+| `yrt/config.py`           | 97%      | ✅ Complete   |
+| `yrt/constants.py`        | 100%     | ✅ Complete   |
+| `yrt/context.py`          | 100%     | ✅ Complete   |
+| `yrt/exceptions.py`       | 100%     | ✅ Complete   |
+| `yrt/logging_utils.py`    | 100%     | ✅ Complete   |
+| `yrt/main.py`             | 94%      | ✅ Complete   |
+| `yrt/models.py`           | 100%     | ✅ Complete   |
+| `yrt/paths.py`            | 100%     | ✅ Complete   |
+| `yrt/router.py`           | 100%     | ✅ Complete   |
+| `yrt/runtime.py`          | 100%     | ✅ Complete   |
+| `yrt/file_utils.py`       | 76%      | 🔸 Needs work |
+| `yrt/youtube/__init__.py` | 100%     | ✅ Complete   |
+| `yrt/youtube/quota.py`    | 100%     | ✅ Complete   |
+| `yrt/youtube/retry.py`    | 99%      | ✅ Complete   |
+| `yrt/youtube/cleanup.py`  | 99%      | ✅ Complete   |
+| `yrt/youtube/playlist.py` | 93%      | ✅ Complete   |
+| `yrt/youtube/utils.py`    | 92%      | ✅ Complete   |
+| `yrt/youtube/api.py`      | 82%      | 🔸 Needs work |
+| `yrt/youtube/stats.py`    | 23%      | ⚠️ Low        |
+| `yrt/youtube/auth.py`     | 16%      | ⚠️ Low        |
+| `yrt/_sandbox.py`         | 0%       | 🚫 Dev only   |
 
 ## Files to Modify
 
-| File                       | Changes                            |
-|----------------------------|------------------------------------|
-| `yrt/file_utils.py`        | Fix logging bug, use pathlib       |
-| `yrt/youtube/` (package)   | ✅ Split into submodules           |
+| File                       | Changes                                                                                  |
+|----------------------------|------------------------------------------------------------------------------------------|
+| `yrt/file_utils.py`        | Fix logging bug, use pathlib                                                             |
+| `yrt/youtube/` (package)   | ✅ Split into submodules                                                                 |
 | `yrt/main.py`              | ✅ Extract VideoRouter, ✅ side-effect-free entry point (port plan Phase 2); use pathlib |
-| `yrt/config.py`            | ✅ Add validation, use logger factory |
-| `yrt/paths.py`             | Keep ALLOWED_DIRS as Path objects  |
-| `yrt/exceptions.py`        | ✅ Add context attributes          |
-| `yrt/analytics.py`         | ✅ Removed                         |
-| `_scripts/archive_data.py` | Use specific exceptions            |
-| `_tests/conftest.py`       | ✅ Add YRT_NO_LOGGING isolation    |
-| `_tests/test_main.py`      | ✅ Implemented (0 skipped)         |
-| `_tests/test_youtube.py`   | ✅ Implement duration parsing tests |
+| `yrt/config.py`            | ✅ Add validation, use logger factory                                                    |
+| `yrt/paths.py`             | Keep ALLOWED_DIRS as Path objects                                                        |
+| `yrt/exceptions.py`        | ✅ Add context attributes                                                                |
+| `yrt/analytics.py`         | ✅ Removed                                                                               |
+| `_scripts/archive_data.py` | Use specific exceptions                                                                  |
+| `_tests/conftest.py`       | ✅ Add YRT_NO_LOGGING isolation                                                          |
+| `_tests/test_main.py`      | ✅ Implemented (0 skipped)                                                               |
+| `_tests/test_youtube.py`   | ✅ Implement duration parsing tests                                                      |
 
 ## New Files to Create
 
-| File                           | Purpose                  | Status                         |
-|--------------------------------|--------------------------|--------------------------------|
-| `yrt/logging_utils.py`         | Shared logger factory    | ✅ Created                     |
-| `yrt/router.py`                | Video routing logic      | ✅ Created                     |
-| `yrt/constants.py`             | Magic strings/numbers    | ✅ Created                     |
-| `yrt/youtube/__init__.py`      | Package exports          | ✅ Created                     |
-| `yrt/youtube/auth.py`          | Authentication functions | ✅ Created                     |
-| `yrt/youtube/api.py`           | Core API calls           | ✅ Created                     |
-| `yrt/youtube/stats.py`         | Statistics management    | ✅ Created                     |
-| `yrt/youtube/playlist.py`      | Playlist operations      | ✅ Created                     |
-| `yrt/youtube/cleanup.py`       | Cleanup operations       | ✅ Created                     |
-| `yrt/youtube/models.py`        | Dataclasses and enums    | Deferred (using yrt/models.py) |
-| `yrt/youtube/retry.py`         | Retry layer (call_api)   | ✅ Created                     |
-| `yrt/youtube/utils.py`         | Utilities                | ✅ Created                     |
+| File                           | Purpose                   | Status                         |
+|--------------------------------|---------------------------|--------------------------------|
+| `yrt/logging_utils.py`         | Shared logger factory     | ✅ Created                     |
+| `yrt/router.py`                | Video routing logic       | ✅ Created                     |
+| `yrt/constants.py`             | Magic strings/numbers     | ✅ Created                     |
+| `yrt/youtube/__init__.py`      | Package exports           | ✅ Created                     |
+| `yrt/youtube/auth.py`          | Authentication functions  | ✅ Created                     |
+| `yrt/youtube/api.py`           | Core API calls            | ✅ Created                     |
+| `yrt/youtube/stats.py`         | Statistics management     | ✅ Created                     |
+| `yrt/youtube/playlist.py`      | Playlist operations       | ✅ Created                     |
+| `yrt/youtube/cleanup.py`       | Cleanup operations        | ✅ Created                     |
+| `yrt/youtube/models.py`        | Dataclasses and enums     | Deferred (using yrt/models.py) |
+| `yrt/youtube/retry.py`         | Retry layer (call_api)    | ✅ Created                     |
+| `yrt/youtube/utils.py`         | Utilities                 | ✅ Created                     |
 | `yrt/context.py`               | Per-job execution context | ✅ Created (port plan Phase 2) |
-| `yrt/runtime.py`               | Shared job lifecycle     | ✅ Created (port plan Phase 2) |
-| `_tests/test_router.py`        | Router unit tests        | ✅ Created                     |
-| `_tests/test_constants.py`     | Constants unit tests     | ✅ Created                     |
-| `_tests/fixtures/error_*.json` | Error response fixtures  | ✅ Created                     |
+| `yrt/runtime.py`               | Shared job lifecycle      | ✅ Created (port plan Phase 2) |
+| `_tests/test_router.py`        | Router unit tests         | ✅ Created                     |
+| `_tests/test_constants.py`     | Constants unit tests      | ✅ Created                     |
+| `_tests/fixtures/error_*.json` | Error response fixtures   | ✅ Created                     |
 
 ## Implementation Order
 
