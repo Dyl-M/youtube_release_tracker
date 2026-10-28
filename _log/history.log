@@ -7139,3 +7139,27 @@
 2026-10-27 13:07:33+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
 2026-10-27 13:07:33+0000 [INFO] - Quota spent: 2350 units (292 API call(s), budget 7000, daily quota 10000).
 2026-10-27 13:07:33+0000 [INFO] - Process ended.
+2026-10-28 13:55:15+0000 [INFO] - Process started.
+2026-10-28 13:55:15+0000 [INFO] - API credentials refreshed.
+2026-10-28 13:55:15+0000 [INFO] - YouTube service created successfully.
+2026-10-28 13:55:15+0000 [INFO] - Iterative research for 233 YouTube channels.
+2026-10-28 13:56:37+0000 [INFO] - Add statistics for 55 video(s).
+2026-10-28 13:57:15+0000 [INFO] - Addition to "Banger Radar": 7 video(s).
+2026-10-28 13:57:19+0000 [INFO] - Addition to "Release Radar": 18 video(s).
+2026-10-28 13:57:34+0000 [INFO] - Addition to "Educational content": 2 video(s).
+2026-10-28 13:57:35+0000 [INFO] - Addition to "Entertainment & Gaming": 1 video(s).
+2026-10-28 13:57:35+0000 [INFO] - Addition to "ASMR & Relaxation": 2 video(s).
+2026-10-28 13:57:36+0000 [INFO] - No addition necessary for Release Radar
+2026-10-28 13:57:36+0000 [INFO] - Checking retention for playlist "🧠 Educational content (Private)" (retention: 30 days)
+2026-10-28 13:57:36+0000 [INFO] - No expired videos in "🧠 Educational content (Private)"
+2026-10-28 13:57:36+0000 [INFO] - Checking retention for playlist "🍿🎮 Entertainment & Gaming (Private)" (retention: 7 days)
+2026-10-28 13:57:36+0000 [INFO] - Removing 2 expired video(s) from "🍿🎮 Entertainment & Gaming (Private)"
+2026-10-28 13:57:37+0000 [INFO] - Checking retention for playlist "💤 ASMR & Relaxation (Private)" (retention: 10 days)
+2026-10-28 13:57:37+0000 [INFO] - Removing 1 expired video(s) from "💤 ASMR & Relaxation (Private)"
+2026-10-28 13:57:38+0000 [INFO] - Checking ended streams for playlist "🎧🔴 Music Lives"
+2026-10-28 13:57:38+0000 [INFO] - No ended streams in "🎧🔴 Music Lives"
+2026-10-28 13:57:38+0000 [INFO] - Checking ended streams for playlist "🍿🔴 My streams (Private)"
+2026-10-28 13:57:38+0000 [INFO] - No ended streams in "🍿🔴 My streams (Private)"
+2026-10-28 13:57:40+0000 [INFO] - Repository Secret 'CREDS_B64' updated successfully.
+2026-10-28 13:57:40+0000 [INFO] - Quota spent: 1900 units (283 API call(s), budget 7000, daily quota 10000).
+2026-10-28 13:57:40+0000 [INFO] - Process ended.
