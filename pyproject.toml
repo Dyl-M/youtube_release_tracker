@@ -30,7 +30,7 @@ dependencies = [
     "isodate>=0.7.2,<1",
     "pandas>=3.0.6,<4",
     "pygithub>=2.10.0,<3",
-    "python-dateutil>=2.9.0.post0,<3",
+    "python-dateutil>=2.9.0.post0,<4",
     "python-youtube>=0.9.9,<1",
     "requests>=2.34.2,<3",
     "tqdm>=4.70.1,<5",
@@ -39,11 +39,11 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "mypy==2.4.0",
+    "mypy==2.4.1",
     "pandas-stubs==3.0.5.260914",
-    "pytest==9.1.1",
+    "pytest==9.2.0",
     "pytest-cov==7.1.0",
-    "ruff==0.17.0",
+    "ruff==0.17.3",
     "types-requests==2.33.0.20261006",
 ]
 # Future analytics features (currently unused)
